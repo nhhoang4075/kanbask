@@ -2,8 +2,6 @@
 
 import { useSearchParams } from "next/navigation";
 import { ScrollArea } from "./ui/scroll-area";
-import users from "@/data/users";
-import messages from "@/data/messages";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";

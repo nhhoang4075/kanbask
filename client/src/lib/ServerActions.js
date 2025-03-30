@@ -13,10 +13,28 @@ export async function validateUser(username, password) {
         console.error('Error validating user:', res.statusText);
         return null; // Handle error response
     }
+    const newUser = await res.json();
+    return newUser;
+}
+export async function registerUser(fullname, username, email, password) {
+    const res = await fetch(`http://localhost:3000/api/users`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ fullname, username, email, password }),
+    });
+    if (res.status === 409) {
+        console.error('Username already exists:', res.statusText);
+        return "Username already exists"; // Handle conflict response
+    }
+    if (!res.ok) {
+        console.error('Error registering user:', res.statusText);
+        return null; // Handle error response
+    }
     const user = await res.json();
     return user;
 }
-
 export async function getConversations() {
     // Fetch conversations from the api
     const res = await fetch("http://localhost:3000/api/conversations", {

@@ -14,3 +14,22 @@ export async function GET() {
         return Response.json({ error: 'Failed to fetch users' }, { status: 500 });
     }
 }
+export async function POST(request) {
+    try {
+        const userGet = await request.json();
+        const data = await fsPromises.readFile(usersFilePath, 'utf-8');
+        const users = JSON.parse(data);
+        // Check if the username already exists
+        const userExists = users.some(user => user.username === userGet.username);
+        if (userExists) {
+            return Response.json({ error: 'Username already exists' }, { status: 409 });
+        }
+        const newId = users.length + 1
+        const newUser = { ...userGet, id: newId.toString(), role: "user", avatar_url: ""};
+        users.push(newUser);
+        await fsPromises.writeFile(usersFilePath, JSON.stringify(users, null, 2));
+        return Response.json(newUser, { status: 201 });
+    } catch (error) {
+        return Response.json({ error: 'Failed to create user' }, { status: 500 });
+    }
+}

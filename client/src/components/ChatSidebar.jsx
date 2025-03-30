@@ -1,3 +1,13 @@
+/**
+ * ChatSidebar component renders a sidebar for displaying conversations and messages.
+ *
+ * @param {Object} props - The component props.
+ * @param {Function} props.setCurrConv - Function to set the current conversation.
+ * @param {Array} props.conversations - List of conversation objects.
+ * @param {Array} props.messages - List of message objects.
+ * @param {Array} props.users - List of user objects.
+ * @returns {JSX.Element|null} The rendered ChatSidebar component or null if required data is missing.
+ */
 "use client";
 
 import { ScrollArea } from "./ui/scroll-area"

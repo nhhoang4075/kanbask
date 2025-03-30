@@ -5,7 +5,8 @@
         "email": "john.doe@example.com",
         "password": "123456",
         "avatar_url": "https://ui-avatars.com/api/?name=John+Doe&background=random",
-        "role": "admin"
+        "role": "admin",
+        "fullname": "John Doe"
     },
     {
         "id": "user2",
@@ -13,7 +14,8 @@
         "email": "jane.doe@example.com",
         "password": "password456",
         "avatar_url": "https://ui-avatars.com/api/?name=Jane+Doe&background=random",
-        "role": "user"
+        "role": "user",
+        "fullname": "Jane Doe"
     },
     {
         "id": "user3",
@@ -21,7 +23,8 @@
         "email": "bob.smith@example.com",
         "password": "password789",
         "avatar_url": "https://ui-avatars.com/api/?name=Bob+Smith&background=random",
-        "role": "user"
+        "role": "user",
+        "fullname": "Bob Smith"
     },
     {
         "id": "user4",
@@ -29,7 +32,8 @@
         "email": "alice.johnson@example.com",
         "password": "passwordabc",
         "avatar_url": "https://ui-avatars.com/api/?name=Alice+Johnson&background=random",
-        "role": "user"
+        "role": "user",
+        "fullname": "Alice Johnson"
     },
     {
         "id": "user5",
@@ -37,6 +41,7 @@
         "email": "mike.brown@example.com",
         "password": "passworddef",
         "avatar_url": "https://ui-avatars.com/api/?name=Mike+Brown&background=random",
-        "role": "manager"
+        "role": "manager",
+        "fullname": "Mike Brown"
     }
 ]

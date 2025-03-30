@@ -3,11 +3,11 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { validateUser } from "@/lib/ValidateUser";
 import { useRouter } from "next/navigation";
 
@@ -25,13 +25,11 @@ export default function Login() {
     },
   });
   const searchParams = useSearchParams();
-  const [isValid, setIsValid] = useState(0);
-  const [loginUser, setLoginUser] = useState(null);
+  const [isValid, setIsValid] = useState(0); // 0: not submitted, 1: success, 2: error
   const router = useRouter();
   const onSubmit = async (data) => {
     try {
       const user = await validateUser(data.username, data.password);
-      setLoginUser(user);
       if (!user) {
         setIsValid(2);
       } else {

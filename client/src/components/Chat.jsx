@@ -1,3 +1,15 @@
+/**
+ * Chat component for rendering a chat interface with messages, input, and user details.
+ *
+ * @param {Object} props - The properties passed to the Chat component.
+ * @param {Object} props.currConv - The current conversation object.
+ * @param {Array} props.messages - Array of message objects.
+ * @param {Array} props.users - Array of user objects.
+ * @param {Function} props.handleSendMessage - Function to handle sending a message.
+ * @param {boolean} props.loading - Indicates if a message is currently being sent.
+ *
+ * @returns {JSX.Element|null} The rendered Chat component or null if no conversation is selected.
+ */
 "use client";
 
 import { useSearchParams } from "next/navigation";

@@ -32,13 +32,11 @@ export async function POST(request) {
 export async function PUT(request) {
     try {
         const { conversationId, messageId, timeSent } = await request.json();
-        
         if (!conversationId || !messageId) {
             return Response.json({ 
                 error: 'Missing required fields: conversationId or messageId' 
             }, { status: 400 });
         }
-        
         const data = await fsPromises.readFile(usersFilePath, 'utf-8');
         const conversations = JSON.parse(data);
         const conversationIndex = conversations.findIndex(conv => conv.id === conversationId);

@@ -17,27 +17,14 @@
       "msg-12",
       "msg-13",
       "msg-14",
-      "msg-1743329123192"
+      "msg-1743329123192",
+      "msg-1743390329121",
+      "msg-1743514266416",
+      "msg-1743783265993"
     ],
     "title": "Task board issue",
     "createdAt": "2023-06-10T08:30:00.000+07:00",
-    "updatedAt": "2025-03-30T10:05:23.192Z"
-  },
-  {
-    "id": "conv-2",
-    "teamId": "team-1",
-    "projectId": "project-102",
-    "participants": [
-      "user2",
-      "user3"
-    ],
-    "messageIds": [
-      "msg-4",
-      "msg-5"
-    ],
-    "title": "Team meeting",
-    "createdAt": "2023-06-11T14:23:00.000+07:00",
-    "updatedAt": "2023-06-11T14:28:30.000+07:00"
+    "updatedAt": "2025-04-04T16:14:25.993Z"
   },
   {
     "id": "conv-3",
@@ -50,11 +37,27 @@
     "messageIds": [
       "msg-6",
       "msg-7",
-      "msg-8"
+      "msg-8",
+      "msg-1743514274727",
+      "msg-1743764498867"
     ],
-    "title": "Sprint report",
-    "createdAt": "2023-06-12T10:05:00.000+07:00",
-    "updatedAt": "2023-06-12T10:20:45.000+07:00"
+    "title": "Project kickoff",
+    "createdAt": "2023-06-12T10:00:00.000+07:00",
+    "updatedAt": "2025-04-04T11:01:38.867Z"
+  },
+  {
+    "id": "conv-5",
+    "teamId": "team-3",
+    "projectId": "project-301",
+    "participants": [
+      "user2",
+      "user4",
+      "user5"
+    ],
+    "messageIds": [],
+    "title": "Budget review",
+    "createdAt": "2023-06-14T11:30:00.000+07:00",
+    "updatedAt": "2023-06-14T11:30:00.000+07:00"
   },
   {
     "id": "conv-4",
@@ -71,17 +74,19 @@
     "updatedAt": "2023-06-13T09:00:00.000+07:00"
   },
   {
-    "id": "conv-5",
-    "teamId": "team-3",
-    "projectId": "project-301",
+    "id": "conv-2",
+    "teamId": "team-1",
+    "projectId": "project-102",
     "participants": [
       "user2",
-      "user4",
-      "user5"
+      "user3"
     ],
-    "messageIds": [],
-    "title": "Budget review",
-    "createdAt": "2023-06-14T11:30:00.000+07:00",
-    "updatedAt": "2023-06-14T11:30:00.000+07:00"
+    "messageIds": [
+      "msg-4",
+      "msg-5"
+    ],
+    "title": "Team meeting",
+    "createdAt": "2023-06-11T14:23:00.000+07:00",
+    "updatedAt": "2023-06-11T14:28:30.000+07:00"
   }
 ]

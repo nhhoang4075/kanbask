@@ -49,8 +49,8 @@
     "username": "a",
     "email": "a@a.com",
     "password": "11111111",
-    "id": "6",
+    "id": "user6",
     "role": "user",
-    "avatar_url": ""
+    "avatar_url": null
   }
 ]

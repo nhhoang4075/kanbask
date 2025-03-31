@@ -32,14 +32,12 @@ export function Chat({ currConv, messages, users, handleSendMessage, loading }) 
             chatContainerRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
         }
     }
-    
     // Scroll to bottom when messages or current conversation changes
     useEffect(() => {
         if (currConv) { // Only scroll if we have a conversation
             scrollToBottom();
         }
     }, [currConv, messages]);
-    
     // Handle Enter key press for sending messages
     const handleKeyPress = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -47,11 +45,9 @@ export function Chat({ currConv, messages, users, handleSendMessage, loading }) 
             sendMessageHandler();
         }
     };
-    
     // Handle sending message
     const sendMessageHandler = async () => {
         if (!mess || mess.trim() === "" || !currConv) return;
-        
         const timeSent = new Date();
         const newMessage = {
             id: `msg-${timeSent.getTime()}`, // Time unique ID to prevent collisions
@@ -65,7 +61,6 @@ export function Chat({ currConv, messages, users, handleSendMessage, loading }) 
         setMess("");
         await handleSendMessage(newMessage);
     }
-
     // Early return after all hooks have been called
     if (!currConv) {
         return (
@@ -74,7 +69,6 @@ export function Chat({ currConv, messages, users, handleSendMessage, loading }) 
             </div>
         );
     }
-
     // Get the receiver user(s) for the current conversation
     const receiverUsers = currConv.participants
         .filter(id => id !== currUser)
@@ -82,19 +76,17 @@ export function Chat({ currConv, messages, users, handleSendMessage, loading }) 
         
     // Get messages for current conversation, including newly added ones
     const conversationMessages = currConv.messageIds
-        .map(messageId => messages.find(message => message.id === messageId))
-        .filter(Boolean); // Filter out any undefined messages
-        
+        .map(messageId => messages.find(message => message.id === messageId))      
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <Card className="flex-none bg-amber-100 py-4">
                 <CardContent className="flex w-full gap-3">
                     <Avatar className="flex-none size-10">
-                        <AvatarImage src={receiverUsers[0]?.avatar_url} alt=""/>
-                        <AvatarFallback>{receiverUsers[0]?.fullname?.[0] || 'U'}</AvatarFallback>
+                        <AvatarImage src={receiverUsers.length == 1 ? receiverUsers[0].avatar_url : null} alt=""/>
+                        <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 text-3xl font-bold">
-                        {receiverUsers[0]?.fullname}
+                        {receiverUsers.length == 1 ? receiverUsers[0].fullname : currConv.title}
                     </div>
                 </CardContent>
             </Card>
@@ -112,8 +104,8 @@ export function Chat({ currConv, messages, users, handleSendMessage, loading }) 
                                         <div className="flex mx-2 gap-2">
                                             {message.senderId !== currUser && (
                                                 <Avatar className="flex-none">
-                                                    <AvatarImage src={sender.avatar_url} alt="" />
-                                                    <AvatarFallback>{sender.fullname?.[0] || 'U'}</AvatarFallback>
+                                                    <AvatarImage src={sender.avatar_url ? sender.avatar_url : null} alt="" />
+                                                    <AvatarFallback>CN</AvatarFallback>
                                                 </Avatar>
                                             )}
                                             <div className={cn("flex items-center p-3 w-fit max-w-xs h-fit rounded-md bg-amber-300", 

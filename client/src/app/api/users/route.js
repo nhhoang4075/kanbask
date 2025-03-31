@@ -24,8 +24,9 @@ export async function POST(request) {
         if (userExists) {
             return Response.json({ error: 'Username already exists' }, { status: 409 });
         }
-        const newId = users.length + 1
-        const newUser = { ...userGet, id: newId.toString(), role: "user", avatar_url: ""};
+        const newNumberId = users.length + 1
+        const newId = "user" + newNumberId.toString();
+        const newUser = { ...userGet, id: newId, role: "user", avatar_url: null};
         users.push(newUser);
         await fsPromises.writeFile(usersFilePath, JSON.stringify(users, null, 2));
         return Response.json(newUser, { status: 201 });

@@ -9,6 +9,8 @@ export async function GET() {
     try {
         const data = await fsPromises.readFile(usersFilePath, 'utf-8');
         const conversations = JSON.parse(data);
+        // Sort conversations by updatedAt in descending order
+        conversations.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
         return Response.json(conversations, { status: 200 });
     } catch (error) {
         return Response.json({ error: 'Failed to fetch conversations' }, { status: 500 });
@@ -31,6 +33,8 @@ export async function POST(request) {
         const conversations = JSON.parse(data);
         // Add the new conversation
         conversations.unshift(conversation);
+        // Sort conversations by updatedAt in descending order
+        conversations.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
         // Write updated conversations back to the file
         await fsPromises.writeFile(usersFilePath, JSON.stringify(conversations, null, 2));
         return Response.json({ text: "Success", status: 201 });

@@ -40,44 +40,62 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Home, MessageSquare, Calendar, CheckSquare, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sidebar, SidebarContent} from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function AppSidebar() {
-    const navItems = [
-        { name: "Dashboard", href: "/dashboard", icon: Home },
-        { name: "Message", href: "/message", icon: MessageSquare },
-        { name: "Calendar", href: "/calendar", icon: Calendar },
-        { name: "Tasks", href: "/tasks", icon: CheckSquare },
-        { name: "Teams", href: "/teams", icon: Users },
-    ];
+// Define the navigation items with their names, hrefs, and icons
+const navItems = [
+    { name: "Dashboard", href: "/dashboard", icon: Home },
+    { name: "Message", href: "/message", icon: MessageSquare },
+    { name: "Calendar", href: "/calendar", icon: Calendar },
+    { name: "Tasks", href: "/tasks", icon: CheckSquare },
+    { name: "Teams", href: "/teams", icon: Users },
+];
+
+export default function AppSidebar({ ...props }) {
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
     const param = searchParams.toString();
+    const { toggleSidebar } = useSidebar();
     return (
-        <Sidebar className="relative">
-            <SidebarContent className="w-64 bg-gray-200 rounded-md">
-                <ScrollArea>
-                    <div className="flex flex-col space-y-2 p-4">
-                        {navItems.map((item) => (
-                            <Button key={item.name} 
-                                    className={cn("w-full bg-white text-black justify-start text-left hover:bg-gray-400", pathname === item.href && "bg-gray-400")}
-                                    onClick={() => {
-                                        router.push(item.href + (param ? `?${param}` : ""));}}
-                                >
-                                <item.icon className="mr-2 h-5 w-5" />
-                                {item.name}
-                            </Button>
-                        ))}
-                    </div>
-                </ScrollArea>
-            </SidebarContent>
-        </Sidebar>
+        <div
+            className="relative h-full"
+            onMouseEnter={toggleSidebar}
+            onMouseLeave={toggleSidebar}
+        >
+            <div className="fixed inset-y-0 z-50">
+                <div className="absolute top-19 left-0 h-full">
+                    <Sidebar collapsible="icon" {...props} className="absolute top-0 left-0 w-56 h-full z-50">
+                        <SidebarContent className="bg-gray-200 rounded-md">
+                            <ScrollArea className="h-full">
+                                <SidebarMenu className="flex flex-col space-y-2 p-4">
+                                    {navItems.map((item) => (
+                                        <SidebarMenuButton
+                                            key={item.name}
+                                            isActive={pathname === item.href}
+                                            className={cn(
+                                                "transition-all duration-200 rounded-md",
+                                                "bg-white text-black hover:bg-gray-300",
+                                                pathname === item.href && "bg-gray-300 text-black",
+                                            )}
+                                            onClick={() => {
+                                                router.push(item.href + (param ? `?${param}` : ""));
+                                            }}
+                                        >
+                                            <item.icon className="h-5 w-5"/>
+                                            <span>{item.name}</span>
+                                        </SidebarMenuButton>
+                                    ))}
+                                </SidebarMenu>
+                            </ScrollArea>
+                        </SidebarContent>
+                    </Sidebar>
+                </div>
+            </div>
+        </div>
     );
 }

@@ -17,7 +17,7 @@ import { Separator } from "./ui/separator"
 import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-export function ChatSidebar({ setCurrConv, conversations, messages, users, searchText, setSearchText, convContainerRef }) {
+export function ChatSidebar({ currConv, setCurrConv, conversations, messages, users, searchText, setSearchText, convContainerRef }) {
     const searchParams = useSearchParams();
     const currentId = searchParams.get("userId");
     const searchUsers = users.filter(user => user.id !== currentId).filter(user => user.fullname.toLowerCase().includes(searchText.toLowerCase()));
@@ -95,6 +95,7 @@ export function ChatSidebar({ setCurrConv, conversations, messages, users, searc
                             key={conversation.id} 
                             conversation={conversation}
                             currentUserId={currentId} 
+                            currConv={currConv}
                             setCurrConv={setCurrConv} 
                             messages={messages} 
                             users={users}
@@ -106,7 +107,7 @@ export function ChatSidebar({ setCurrConv, conversations, messages, users, searc
     )
 }
 
-function Conversation({ conversation, currentUserId, setCurrConv, messages, users }) {
+function Conversation({ conversation, currentUserId, currConv, setCurrConv, messages, users }) {
     const lastUpdate = new Date(conversation.updatedAt);
     // Find the last message in the conversation
     const lastMessage = lastUpdate
@@ -117,7 +118,7 @@ function Conversation({ conversation, currentUserId, setCurrConv, messages, user
         .filter(id => id !== currentUserId)
         .map(id => users.find(user => user.id === id));
     return (
-        <button onClick={() => setCurrConv(conversation)} className={cn("flex gap-2 p-4 w-90 hover:bg-gray-400")}>
+        <button onClick={() => setCurrConv(conversation)} className={cn("flex gap-2 p-4 w-90 hover:bg-gray-400", conversation?.id === currConv?.id && "bg-gray-400")}>
             <Avatar className="flex-none">
                 <AvatarImage src={receiverUsers.length == 1 ? receiverUsers[0]?.avatar_url : null} alt="" />
                 <AvatarFallback>CN</AvatarFallback>

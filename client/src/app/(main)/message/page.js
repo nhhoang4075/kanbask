@@ -53,6 +53,8 @@ export default function Message() {
                     }
                     return conv;
                 });
+                // Sort conversations by updatedAt in descending order
+                updatedConversations.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
                 setConversations(updatedConversations);
                 // Update the current conversation if it matches
                 if (workConv && workConv.id === newmess.conversationId) {
@@ -114,6 +116,7 @@ export default function Message() {
         <div className="flex h-full w-full overflow-hidden">
             <div className="flex-none w-90 overflow-hidden">
                 <ChatSidebar 
+                    currConv={currConv}
                     setCurrConv={setCurrConv} 
                     conversations={conversations} 
                     messages={messages} 

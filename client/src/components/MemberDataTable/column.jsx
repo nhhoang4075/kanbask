@@ -12,6 +12,8 @@ import {
 import { Button } from "../ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
+import DeleteAlert from "./DeleteAlert";
+import EditMember from "./EditMember";
 
 export const columns = [
 	{
@@ -81,11 +83,11 @@ export const columns = [
 								navigator.clipboard.writeText(user.id)
 							}
 						>
-							Copy payment ID
+							Copy user ID
 						</DropdownMenuItem>
+						<EditMember user={row} />
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>View customer</DropdownMenuItem>
-						<DropdownMenuItem>Delete Member</DropdownMenuItem>
+						<DeleteAlert />
 					</DropdownMenuContent>
 				</DropdownMenu>
 			);

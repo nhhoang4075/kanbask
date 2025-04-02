@@ -20,6 +20,9 @@ import {
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
+import DeleteAlert from "./DeleteAlert";
+import EditMember from "./EditMember";
+import AddMember from "./AddMember";
 
 export function DataTable({ columns, data }) {
 	const [rowSelection, setRowSelection] = useState({});
@@ -49,36 +52,15 @@ export function DataTable({ columns, data }) {
 		<div>
 			<div className="flex flex-row justify-end gap-3 my-2">
 				{table.getSelectedRowModel()?.rows.length == 1 && (
-					<Button
-						className="bg-white text-red-500 border-2 border-red-500 w-18 hover:bg-red-600 hover:cursor-pointer hover:text-white"
-						onClick={() => {}}
-					>
-						Edit
-					</Button>
+					<EditMember user={table.getSelectedRowModel().rows[0]} />
 				)}
 				{table.getSelectedRowModel().rows.length > 0 && (
 					<>
-						<Button
-							className="bg-red-500 w-18 hover:bg-red-600 hover:cursor-pointer hover:text-white"
-							onClick={() => {}}
-						>
-							Delete
-						</Button>
+						<DeleteAlert />
 					</>
 				)}
 
-				<Button
-					className="bg-blue-600  hover:bg-blue-800 hover:cursor-pointer"
-					onClick={() => {
-						const selectedRows = table.getSelectedRowModel().rows;
-						console.log(
-							"Selected rows:",
-							table.getSelectedRowModel().rows.length
-						);
-					}}
-				>
-					Add Member
-				</Button>
+				<AddMember />
 			</div>
 
 			<Table className="rounded-md border-2 text-center border-neutral-400">

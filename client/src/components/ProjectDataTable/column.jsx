@@ -23,12 +23,12 @@ export const columns = [
 		header: "Sizes",
 	},
 	{
-		accessorKey: "email",
-		header: "Email",
+		accessorKey: "description",
+		header: "Description",
 	},
 	{
-		accessorKey: "role",
-		header: "Role",
+		accessorKey: "createdAt",
+		header: "Created At",
 	},
 	{
 		header: "Actions",
@@ -51,10 +51,9 @@ export const columns = [
 								navigator.clipboard.writeText(user.id)
 							}
 						>
-							Copy payment ID
+							Copy user ID
 						</DropdownMenuItem>
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>View customer</DropdownMenuItem>
 						<DropdownMenuItem>Delete Member</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

@@ -20,8 +20,9 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "../ui/dialog";
+import { Textarea } from "../ui/textarea";
 
-const EditMember = ({ user }) => {
+const EditProject = ({ project }) => {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
@@ -32,10 +33,10 @@ const EditMember = ({ user }) => {
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
 					<DialogTitle>
-						Edit user profile: {user.original.id}
+						Edit project information: {project.original.id}
 					</DialogTitle>
 					<DialogDescription>
-						Make changes to your profile here. Click save when
+						Make changes to your project here. Click save when
 						you're done.
 					</DialogDescription>
 				</DialogHeader>
@@ -43,55 +44,27 @@ const EditMember = ({ user }) => {
 					<div className="grid gap-4 py-4">
 						<div className="grid grid-cols-4 items-center gap-4">
 							<Label htmlFor="name" className="text-right">
-								Name
+								Project Name
 							</Label>
 							<Input
 								id="name"
-								defaultValue={user.original.name}
+								defaultValue={project.original.name}
 								className="col-span-3"
 								type="text"
 								required
 							/>
 						</div>
 						<div className="grid grid-cols-4 items-center gap-4">
-							<Label htmlFor="username" className="text-right">
-								Email
+							<Label htmlFor="description" className="text-right">
+								Description
 							</Label>
-							<Input
-								id="email"
-								defaultValue={user.original.email}
+							<Textarea
+								id="description"
+								defaultValue={project.original.description}
 								className="col-span-3"
 								type="email"
 								required
 							/>
-						</div>
-						<div className="grid grid-cols-4 items-center gap-4">
-							<Label htmlFor="role" className="text-right">
-								Role
-							</Label>
-							<Select
-								id="role"
-								className="col-span-3"
-								defaultValue={user.original.role}
-							>
-								<SelectTrigger className="w-[180px]">
-									<SelectValue placeholder="Select a role" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectGroup>
-										<SelectLabel>Role</SelectLabel>
-										<SelectItem value="owner">
-											Owner
-										</SelectItem>
-										<SelectItem value="admin">
-											Admin
-										</SelectItem>
-										<SelectItem value="member">
-											Member
-										</SelectItem>
-									</SelectGroup>
-								</SelectContent>
-							</Select>
 						</div>
 					</div>
 					<DialogFooter className="flex justify-between">
@@ -114,4 +87,4 @@ const EditMember = ({ user }) => {
 	);
 };
 
-export default EditMember;
+export default EditProject;

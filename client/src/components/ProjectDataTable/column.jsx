@@ -10,13 +10,45 @@ import {
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
+import DeleteAlert from "../DeleteAlert";
+import EditProject from "./EditProject";
 
 export const columns = [
 	{
+		header: "Select",
+		cell: ({ row }) => (
+			<Checkbox
+				className="border-neutral-400"
+				checked={row.getIsSelected()}
+				onCheckedChange={(value) => {
+					row.toggleSelected(!!value);
+				}}
+				aria-label="Select row"
+				id={row.id}
+				name={row.id}
+			/>
+		),
+		id: "select",
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
 		accessorKey: "name",
-		header: "Project Name",
+		header: ({ column }) => {
+			return (
+				<Button
+					variant="ghost"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === "asc")
+					}
+				>
+					Email
+					<ArrowUpDown className="ml-1 h-4 w-4" />
+				</Button>
+			);
+		},
 	},
 	{
 		accessorKey: "sizes",
@@ -28,13 +60,41 @@ export const columns = [
 	},
 	{
 		accessorKey: "createdAt",
-		header: "Created At",
+		header: ({ column }) => {
+			return (
+				<Button
+					variant="ghost"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === "asc")
+					}
+				>
+					Created At
+					<ArrowUpDown className="ml-1 h-4 w-4" />
+				</Button>
+			);
+		},
+	},
+	{
+		accessorKey: "updatedAt",
+		header: ({ column }) => {
+			return (
+				<Button
+					variant="ghost"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === "asc")
+					}
+				>
+					Updated At
+					<ArrowUpDown className="ml-1 h-4 w-4" />
+				</Button>
+			);
+		},
 	},
 	{
 		header: "Actions",
 		id: "actions",
 		cell: ({ row }) => {
-			const user = row.original;
+			const project = row.original;
 
 			return (
 				<DropdownMenu>
@@ -48,13 +108,14 @@ export const columns = [
 						<DropdownMenuLabel>Actions</DropdownMenuLabel>
 						<DropdownMenuItem
 							onClick={() =>
-								navigator.clipboard.writeText(user.id)
+								navigator.clipboard.writeText(project.id)
 							}
 						>
-							Copy user ID
+							Copy project ID
 						</DropdownMenuItem>
+						<EditProject project={row} />
 						<DropdownMenuSeparator />
-						<DropdownMenuItem>Delete Member</DropdownMenuItem>
+						<DeleteAlert />
 					</DropdownMenuContent>
 				</DropdownMenu>
 			);

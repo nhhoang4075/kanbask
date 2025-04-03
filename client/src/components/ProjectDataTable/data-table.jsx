@@ -19,8 +19,11 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
+import DeleteAlert from "../DeleteAlert";
+import EditProject from "./EditProject";
+import AddProject from "./AddProject";
 
-export function DataTable({ columns, data }) {
+export function DataTable({ columns, data, setProject }) {
 	const [rowSelection, setRowSelection] = useState({});
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
@@ -39,9 +42,22 @@ export function DataTable({ columns, data }) {
 	});
 
 	return (
-		<div className="rounded-md border-2 text-center">
-			<Table>
-				<TableHeader>
+		<div className="rounded-md text-center">
+			<div className="flex flex-row justify-end gap-3 my-2">
+				{table.getSelectedRowModel()?.rows.length == 1 && (
+					<EditProject
+						project={table.getSelectedRowModel().rows[0]}
+					/>
+				)}
+				{table.getSelectedRowModel().rows.length > 0 && (
+					<>
+						<DeleteAlert />
+					</>
+				)}
+				<AddProject />
+			</div>
+			<Table className="rounded-md border-2 text-center border-neutral-400">
+				<TableHeader className="bg-neutral-200">
 					{table.getHeaderGroups().map((headerGroup) => (
 						<TableRow key={headerGroup.id}>
 							{headerGroup.headers.map((header) => {
@@ -68,7 +84,8 @@ export function DataTable({ columns, data }) {
 						table.getRowModel().rows.map((row) => (
 							<TableRow
 								onClick={() => {
-									row.toggleSelected();
+									// row.toggleSelected();
+									setProject(row.original);
 								}}
 								key={row.id}
 								data-state={row.getIsSelected() && "selected"}

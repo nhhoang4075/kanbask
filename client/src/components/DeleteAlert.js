@@ -9,8 +9,8 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 	AlertDialogTrigger,
-} from "../ui/alert-dialog";
-import { Button } from "../ui/button";
+} from "./ui/alert-dialog";
+import { Button } from "./ui/button";
 
 const DeleteAlert = () => {
 	return (
@@ -18,9 +18,9 @@ const DeleteAlert = () => {
 			<AlertDialogTrigger>
 				<Button
 					variant="outline"
-					className="bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer hover:text-white"
+					className="w-33 bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer hover:text-white"
 				>
-					Delete Member
+					Delete
 				</Button>
 			</AlertDialogTrigger>
 			<AlertDialogContent>
@@ -30,7 +30,7 @@ const DeleteAlert = () => {
 					</AlertDialogTitle>
 					<AlertDialogDescription>
 						This action cannot be undone. This will permanently
-						delete this memeber and remove data from our servers.
+						delete this and remove data from our servers.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>

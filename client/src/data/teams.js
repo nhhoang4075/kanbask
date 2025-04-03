@@ -7,7 +7,7 @@ export const users = [
 		avatar_url:
 			"https://ui-avatars.com/api/?name=John+Doe&background=random",
 		role: "user",
-		name: "John Doe",
+		name: "Mohn Wick",
 	},
 	{
 		id: "2",
@@ -66,7 +66,7 @@ export const teamsMember = [
 	{ teamId: "3", userId: "1", role: "admin" },
 ];
 
-export const projects = [
+export const projectsData = [
 	{
 		id: "1",
 		teamId: "1",

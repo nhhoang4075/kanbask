@@ -1,7 +1,7 @@
 import React from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import { Separator } from "../ui/separator";
-import { teams, projects } from "@/data/teams";
+import { teams, projectsData } from "@/data/teams";
 import { MoreVertical, Search } from "lucide-react";
 import { Input } from "../ui/input";
 
@@ -48,7 +48,7 @@ const MemberSideBar = ({ props }) => {
 							<MoreVertical />
 						</div>
 						<Separator />
-						{projects.map((project) => {
+						{projectsData.map((project) => {
 							if (project.teamId == team.id)
 								return (
 									<>

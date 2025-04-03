@@ -3,6 +3,7 @@
 import {
 	ColumnDef,
 	flexRender,
+	SortingState,
 	getCoreRowModel,
 	getFilteredRowModel,
 	getSortedRowModel,
@@ -20,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import DeleteAlert from "./DeleteAlert";
+import DeleteAlert from "../DeleteAlert";
 import EditMember from "./EditMember";
 import AddMember from "./AddMember";
 
@@ -34,6 +35,7 @@ export function DataTable({ columns, data }) {
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		onRowSelectionChange: setRowSelection,
+		onSortingChange: setSorting,
 		getSortedRowModel: getSortedRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),

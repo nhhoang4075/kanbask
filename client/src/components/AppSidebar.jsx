@@ -55,17 +55,25 @@ const navItems = [
     { name: "Teams", href: "/teams", icon: Users },
 ];
 
-export default function AppSidebar({ ...props }) {
+export default function AppSidebar({ setisCollapsed, ...props }) {
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
     const param = searchParams.toString();
     const { toggleSidebar } = useSidebar();
+    const handleMouseEnter = () => {
+        toggleSidebar(true);
+        setisCollapsed(false);
+    }
+    const handleMouseLeave = () => {
+        toggleSidebar(false);
+        setisCollapsed(true);
+    };
     return (
         <div
             className="relative h-full"
-            onMouseEnter={toggleSidebar}
-            onMouseLeave={toggleSidebar}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
         >
             <div className="fixed inset-y-0 z-50">
                 <div className="absolute top-19 left-0 h-full">

@@ -1,22 +1,21 @@
 /**
  * AppSidebar Component
  *
- * This component renders a sidebar navigation menu for the application.
- * It uses Next.js navigation hooks and dynamically generates navigation buttons
- * based on the provided `navItems` array. Each button navigates to a specific route
- * and preserves query parameters if present.
+ * This component renders a collapsible sidebar navigation menu for the application.
+ * It dynamically generates navigation buttons based on the `navItems` array, allowing
+ * users to navigate to different routes while preserving query parameters if present.
  *
  * @component
+ * @param {Object} props - Component props.
+ * @param {Function} props.setisCollapsed - Function to update the collapsed state of the sidebar.
  * @returns {JSX.Element} The rendered AppSidebar component.
  *
  * @example
- * <AppSidebar />
+ * <AppSidebar setisCollapsed={setCollapsedState} />
  *
  * @dependencies
  * - `next/navigation`: Provides `usePathname`, `useRouter`, and `useSearchParams` hooks for navigation.
- * - `next/link`: Used for client-side navigation.
  * - `lucide-react`: Provides icons for the navigation items.
- * - `@/components/ui/button`: Custom Button component for styling.
  * - `@/components/ui/scroll-area`: Scrollable container for the sidebar content.
  * - `@/components/ui/sidebar`: Sidebar and SidebarContent components for layout.
  * - `@/lib/utils`: Utility function `cn` for conditional class names.
@@ -25,6 +24,7 @@
  * - `usePathname`: Retrieves the current pathname.
  * - `useRouter`: Provides navigation methods like `router.push`.
  * - `useSearchParams`: Retrieves the current query parameters.
+ * - `useSidebar`: Manages the sidebar's open/close state.
  *
  * @state
  * - `navItems`: Array of navigation items, each containing:
@@ -33,9 +33,10 @@
  *   - `icon` (React.Component): The icon component for the navigation item.
  *
  * @styles
- * - The sidebar has a width of 64 and a gray background with rounded corners.
+ * - The sidebar is collapsible and styled with a gray background and rounded corners.
  * - Buttons are styled with conditional classes to indicate the active route.
  * - Hover effects are applied to buttons for better user experience.
+ * - The sidebar expands on hover and collapses when the mouse leaves.
  */
 "use client";
 

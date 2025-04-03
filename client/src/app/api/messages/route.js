@@ -26,3 +26,15 @@ export async function POST(request) {
         return Response.json({ error: 'Failed to send message' }, { status: 500 });
     }
 }
+export async function PUT(request) {
+    try {
+        const message = await request.json();
+        const data = await fsPromises.readFile(usersFilePath, 'utf-8');
+        const messages = JSON.parse(data);
+        messages.push(message);
+        await fsPromises.writeFile(usersFilePath, JSON.stringify(messages, null, 2));
+        return Response.json({text: "Success", status: 201 });
+    } catch (error) {
+        return Response.json({ error: 'Failed to send message' }, { status: 500 });
+    }
+}

@@ -10,17 +10,14 @@
  */
 "use client";
 
-import { ScrollArea } from "./ui/scroll-area"
-import { Input } from "./ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
-import { Separator } from "./ui/separator"
-import { useSearchParams } from "next/navigation"
+import { ScrollArea } from "../ui/scroll-area"
+import { Input } from "../ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
+import { Separator } from "../ui/separator"
 import { cn } from "@/lib/utils"
 
-export function ChatSidebar({ currConv, setCurrConv, conversations, messages, users, searchText, setSearchText, convContainerRef }) {
-    const searchParams = useSearchParams();
-    const currentId = searchParams.get("userId");
-    const searchUsers = users.filter(user => user.id !== currentId).filter(user => user.fullname.toLowerCase().includes(searchText.toLowerCase()));
+export function ChatSidebar({ currentId, currConv, setCurrConv, conversations, messages, users, searchText, setSearchText, convContainerRef }) {
+    const searchUsers = users.filter(user => user.id !== currentId).filter(user => user.fullname.toLowerCase().startsWith(searchText.toLowerCase()));
     // Only render if conversations, messages, and users are available else render this
     if (!conversations?.length || !messages?.length || !users?.length) {
         return (

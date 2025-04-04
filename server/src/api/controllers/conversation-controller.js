@@ -24,7 +24,7 @@ const getManyConversationsByUserId = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json({
       success: true,
-      conversations,
+      data: { conversations },
     });
   } catch (error) {
     return next(error);

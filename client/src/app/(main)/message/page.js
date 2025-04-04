@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Chat } from '@/components/ChatComponents/Chat';
 import { useState, useEffect, useRef } from 'react';
 import { getConversations, updateConversation, addConversation } from '@/lib/ConversationActions';
-import { getMessages, sendMessage } from '@/lib/MessageActions';
+import { getMessages, sendMessage, updateMesssages } from '@/lib/MessageActions';
 import { getUsers } from '@/lib/UserActions';
 import { useSearchParams } from 'next/navigation';
 
@@ -25,11 +25,22 @@ export default function Message() {
         // This will make the code cleaner and more efficient
         Promise.all([
             getConversations(),
-            getMessages(currentId),
+            getMessages(),
             getUsers()
-        ]).then(([conversations, messages, users]) => {
+        ]).then(async ([conversations, messages, users]) => {
+            const setReceivedMessages = messages.map((message) => {
+                // Check if the message is received from another user and update its status
+                if (message.senderId !== currentId && message.status === "sent" && conversations.some(conv => conv.participants.includes(currentId) && conv.id === message.conversationId)) {
+                    return { ...message, status: "received" };
+                }
+            });
             setConversations(conversations);
-            setMessages(messages);
+            const changedMessages = setReceivedMessages.filter(message => message === "received");
+            if (changedMessages.length > 0) {
+                // Update the messages in the server
+                await updateMesssages({ messages: changedMessages, changes: { status: "received" } });
+                setMessages(setReceivedMessages)
+            } else setMessages(messages);
             setUsers(users);
         }).catch(error => {
             console.error("Error fetching data:", error);
@@ -120,7 +131,7 @@ export default function Message() {
 
     return (
         <div className="flex h-full w-full overflow-hidden">
-            <div className="flex-none w-90 overflow-hidden">
+            <div className="flex-none w-fit min-w-80 overflow-hidden">
                 <ChatSidebar 
                     currentId={currentId}
                     currConv={currConv}
@@ -133,7 +144,7 @@ export default function Message() {
                     convContainerRef={convContainerRef}
                 />
             </div>
-            <Separator orientation="vertical" className="flex-none w-0.5 bg-black dark:bg-white"/>
+            {/* <Separator orientation="vertical" className="flex-none w-0.5 bg-black dark:bg-white"/> */}
             <div className="flex-1 overflow-hidden">
                 <Chat 
                     currConv={currConv} 

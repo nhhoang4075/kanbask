@@ -8,14 +8,14 @@ const register = async (req, res, next) => {
   try {
     const user = await authService.register(req.body);
 
-    return res.status(StatusCodes.CREATED).json({
+    res.status(StatusCodes.CREATED).json({
       success: true,
       data: {
         user
       }
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -30,12 +30,12 @@ const login = async (req, res, next) => {
       email_verified: user.email_verified
     };
 
-    const accessToken = await jwtProvider.generateToken(
+    const accessToken = jwtProvider.generateToken(
       userPayload,
       process.env.ACCESS_TOKEN_SECRET,
       "1h"
     );
-    const refreshToken = await jwtProvider.generateToken(
+    const refreshToken = jwtProvider.generateToken(
       userPayload,
       process.env.REFRESH_TOKEN_SECRET,
       "7 days"
@@ -55,14 +55,14 @@ const login = async (req, res, next) => {
       sameSite: "strict"
     });
 
-    return res.status(StatusCodes.OK).json({
+    res.status(StatusCodes.OK).json({
       success: true,
       data: {
         user
       }
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -73,12 +73,12 @@ const logout = async (req, res, next) => {
 
     const user = await authService.logout(req.user.id);
 
-    return res.status(StatusCodes.OK).json({
+    res.status(StatusCodes.OK).json({
       success: true,
       message: `User logged out successfully - Id: ${user.id}`
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -105,7 +105,7 @@ const verifyEmail = async (req, res, next) => {
       message: `Email verified successfully - Id: ${user.id}`
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -119,7 +119,7 @@ const sendPasswordResetMail = async (req, res, next) => {
       message: `Password reset mail sent successfully to ${email}`
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -132,7 +132,7 @@ const resetPassword = async (req, res, next) => {
       message: `Password reset successfully - Id: ${user.id}`
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -144,7 +144,7 @@ const refreshToken = async (req, res, next) => {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "No refresh token provided");
     }
 
-    const decodedRefreshToken = await jwtProvider.verifyToken(
+    const decodedRefreshToken = jwtProvider.verifyToken(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET
     );
@@ -160,11 +160,7 @@ const refreshToken = async (req, res, next) => {
       email_verified: decodedRefreshToken.email_verified
     };
 
-    const accessToken = await jwtProvider.generateToken(
-      payload,
-      process.env.ACCESS_TOKEN_SECRET,
-      "1h"
-    );
+    const accessToken = jwtProvider.generateToken(payload, process.env.ACCESS_TOKEN_SECRET, "1h");
 
     res.cookie("access_token", accessToken, {
       maxAge: ms("1h"),
@@ -173,12 +169,12 @@ const refreshToken = async (req, res, next) => {
       sameSite: "strict"
     });
 
-    return res.status(StatusCodes.OK).json({
+    res.status(StatusCodes.OK).json({
       success: true,
       message: "Refreshed access token"
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 

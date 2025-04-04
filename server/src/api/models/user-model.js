@@ -5,7 +5,7 @@ import { db } from "../../config/db.js";
 const createOneUser = async ({ email, password_hash, first_name, last_name }) => {
   try {
     const userId = uuidv4();
-    const [user] = await db("users")
+    const [createdUser] = await db("users")
       .insert({
         id: userId,
         email,
@@ -13,15 +13,9 @@ const createOneUser = async ({ email, password_hash, first_name, last_name }) =>
         first_name,
         last_name
       })
-      .returning([
-        "id",
-        "email",
-        "first_name",
-        "last_name",
-        db.raw("first_name || ' ' || last_name as full_name")
-      ]);
+      .returning(["*", db.raw("first_name || ' ' || last_name as full_name")]);
 
-    return user;
+    return createdUser;
   } catch (err) {
     throw new Error(err);
   }
@@ -82,18 +76,7 @@ const updateOneUserById = async (id, updateData) => {
     const [updatedUser] = await db("users")
       .where({ id })
       .update({ ...updateData, updated_at: new Date().toISOString() })
-      .returning([
-        "id",
-        "email",
-        "first_name",
-        "last_name",
-        db.raw("first_name || ' ' || last_name as full_name"),
-        "avatar_url",
-        "last_active",
-        "is_active",
-        "email_verified",
-        "role"
-      ]);
+      .returning(["*", db.raw("first_name || ' ' || last_name as full_name")]);
 
     return updatedUser;
   } catch (err) {
@@ -103,7 +86,10 @@ const updateOneUserById = async (id, updateData) => {
 
 const deleteOneUserById = async (id) => {
   try {
-    const [deletedUser] = await db.delete().from("users").where({ id }).returning(["id", "email"]);
+    const [deletedUser] = await db("users")
+      .delete()
+      .where({ id })
+      .returning(["*", db.raw("first_name || ' ' || last_name as full_name")]);
 
     return deletedUser;
   } catch (err) {

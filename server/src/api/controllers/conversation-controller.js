@@ -1,37 +1,66 @@
-// import { StatusCodes } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 
-// import conversationService from "../services/conversation-service.js";
+import conversationService from "../services/conversation-service.js";
 
-// const createOneConversation = async (req, res, next) => {
-//   try {
-//     const conversationId = await conversationService.createOneConversation(
-//       req.body
-//     );
+const createOneConversation = async (req, res, next) => {
+  try {
+    const conversation = await conversationService.createOneConversation(req.body);
 
-//     return res.status(StatusCodes.CREATED).json({
-//       success: true,
-//       conversationId,
-//     });
-//   } catch (error) {
-//     return next(error);
-//   }
-// };
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      data: {
+        conversation
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-// const getManyConversationsByUserId = async (req, res, next) => {
-//   try {
-//     const conversations =
-//       await conversationService.getManyConversationsByUserId(req.params.userId);
+const getManyConversationsByUserId = async (req, res, next) => {
+  try {
+    const conversations = await conversationService.getManyConversationsByUserId(req.params.userId);
 
-//     return res.status(StatusCodes.OK).json({
-//       success: true,
-//       data: { conversations },
-//     });
-//   } catch (error) {
-//     return next(error);
-//   }
-// };
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: { conversations }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
-// export default {
-//   createOneConversation,
-//   getManyConversationsByUserId,
-// };
+const deleteOneConversation = async (req, res, next) => {
+  try {
+    const conversation = await conversationService.deleteOneConversation(req.params.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Deleted successfully conversation with id ${conversation.id}`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getParticipantsOfConversation = async (req, res, next) => {
+  try {
+    const participants = await conversationService.getParticipantsOfConversation(req.params.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        participants
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default {
+  createOneConversation,
+  getManyConversationsByUserId,
+  deleteOneConversation,
+  getParticipantsOfConversation
+};

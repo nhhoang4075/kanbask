@@ -19,12 +19,40 @@
  */
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { CheckCheck, Eye, Send } from "lucide-react";
+import { useEffect, useRef } from "react";
 
-export default function Message({ message, users, conversationMessages, currUser }) {
-    console.log("Message: ", message);
+export default function Message({ message, users, conversationMessages, currUser, onMessageSeen, isFirstUnreadMessage }) {
     if (!message) return null;
     const sender = users.find(user => user.id === message.senderId);
     if (!sender) return null;
+
+    const messageRef = useRef(null);
+
+    // Set up intersection observer to detect when message is visible
+    useEffect(() => {
+        // Only set up observer for messages sent to current user that aren't already read
+        if (message.senderId !== currUser && message.status === "received") {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Message is visible in the viewport
+                        onMessageSeen && onMessageSeen(message.id);
+                        // Disconnect the observer after message is read
+                        observer.disconnect();
+                    }
+                });
+            }, { threshold: 0.5 }); // Message is considered "read" when 50% visible
+            // Observe the message element
+            if (messageRef.current) {
+                observer.observe(messageRef.current);
+            }
+            // Clean up the observer on component unmount
+            return () => {
+                observer.disconnect();
+            };
+        }
+    }, [message.id, message.senderId, message.status, currUser, onMessageSeen]);
 
     // Check if the previous message is from the same sender and on the same date
     const prevMessage = conversationMessages[conversationMessages.indexOf(message) - 1];
@@ -35,7 +63,10 @@ export default function Message({ message, users, conversationMessages, currUser
     const nextMessage = conversationMessages[conversationMessages.indexOf(message) + 1];
     const nextIsSameSender = nextMessage && nextMessage.senderId === message.senderId;
     const nextIsSameDate = nextMessage && new Date(nextMessage.createdAt).toDateString() === new Date(message.createdAt).toDateString();
-
+    // Check if the message is the last in the group of messages from the same sender
+    const isLastInGroup = !nextIsSameSender || (nextIsSameSender && !nextIsSameDate);
+    // Check if the message is the last in the conversation
+    const isLastMessage = conversationMessages.indexOf(message) === conversationMessages.length - 1;
     return (
         <>
             {(!prevIsSameDate) ? (
@@ -43,8 +74,11 @@ export default function Message({ message, users, conversationMessages, currUser
                     {new Date(message.createdAt).toLocaleDateString()}
                 </div>
             ) : null}
+            
             <div className={cn("flex py-2 gap-2", 
-                sender.id === currUser ? "justify-end" : "justify-start")}>
+                sender.id === currUser ? "justify-end" : "justify-start")}
+                ref={messageRef}
+            >
                 <div className={cn("flex mx-2 gap-2", sender.id !== currUser ? "flex-row" : "flex-row-reverse")}>
                     {(message.senderId !== currUser && !prevIsSameSender) ? (
                         <Avatar className="flex-none">
@@ -61,13 +95,24 @@ export default function Message({ message, users, conversationMessages, currUser
                     >
                         {message.content}
                     </div>
-                    {(!nextIsSameSender || (nextIsSameSender && !nextIsSameDate)) ? (
+                    {isLastInGroup && (
                         <div className="text-sm text-gray-500">
                             {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
-                    ) : null}
+                    )}
                 </div>
             </div>
+            {isLastMessage && (
+                <div className="flex justify-end mr-14">
+                    {message.status === "read" ? (
+                        <Eye className="w-4 h-4 text-gray-500" />
+                    ) : message.status === "sent" ? (
+                        <Send className="w-4 h-4 text-gray-500" />
+                    ) : message.status === "received" ? (
+                        <CheckCheck className="w-4 h-4 text-gray-500" />
+                    ) : null}
+                </div>
+            )}
         </>
     );
 }

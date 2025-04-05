@@ -33,19 +33,19 @@ export async function sendMessage({ message }) {
     }
     return res.json();
 }
-export async function updateMesssages({ messages, changes }) {
+export async function updateMesssages({ messagesId, changes }) {
     // Update messages in the api
     const res = await fetch("http://localhost:3000/api/messages", {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(messages, changes),
+        body: JSON.stringify({messagesNeedChangeId: messagesId, changes: changes}),
     });
     // Handle error response
     if (!res.ok) {
         console.error("Error updating message:", res.statusText);
-        return null;
+        return {status: res.status};
     }
     return res.json();
 }

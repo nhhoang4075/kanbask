@@ -44,7 +44,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Home, MessageSquare, Calendar, CheckSquare, Users } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // Define the navigation items with their names, hrefs, and icons
@@ -62,7 +62,7 @@ export default function AppSidebar({ setisCollapsed, ...props }) {
     const searchParams = useSearchParams();
     const param = searchParams.toString();
     return (
-        <div className="relative h-full">
+        <div className="relative h-full overflow-hidden">
             <div className="fixed inset-y-0 z-50">
                 <div className="absolute top-19 left-0 h-full">
                     <Sidebar collapsible="icon" {...props} className="absolute top-0 left-0 w-56 h-full z-50">

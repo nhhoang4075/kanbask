@@ -4,7 +4,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "Hello, I need help with my task board.",
-    "status": "seen",
+    "status": "read",
     "createdAt": "2023-06-10T08:30:25.000+07:00"
   },
   {
@@ -20,7 +20,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "I can't create new cards on the board.",
-    "status": "seen",
+    "status": "read",
     "createdAt": "2023-06-10T08:42:08.000+07:00"
   },
   {
@@ -28,7 +28,7 @@
     "conversationId": "conv-2",
     "senderId": "user3",
     "content": "When is the next team meeting scheduled?",
-    "status": "seen",
+    "status": "read",
     "createdAt": "2023-06-11T14:23:45.000+07:00"
   },
   {
@@ -76,7 +76,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "When I click the 'Add Card' button, nothing happens. No error message or anything.",
-    "status": "seen",
+    "status": "read",
     "createdAt": "2023-06-10T08:48:15.000+07:00"
   },
   {
@@ -92,7 +92,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "I'll try that now.",
-    "status": "seen",
+    "status": "read",
     "createdAt": "2023-06-10T08:51:45.000+07:00"
   },
   {
@@ -100,7 +100,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "That worked! Thanks for the suggestion.",
-    "status": "seen",
+    "status": "read",
     "createdAt": "2023-06-10T08:55:33.000+07:00"
   },
   {
@@ -124,7 +124,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "Hello",
-    "status": "seen",
+    "status": "read",
     "createdAt": "2025-03-31T03:05:29.121Z"
   },
   {
@@ -132,7 +132,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "testing",
-    "status": "seen",
+    "status": "read",
     "createdAt": "2025-04-01T13:31:06.416Z"
   },
   {
@@ -150,21 +150,5 @@
     "content": "asdjahsjdhsadjkshajkdhajkhdjkahjdhajkhdjkahdjkahjkdhajkhdjkahdjhajkdhajkhdjahdjkhajkdhadjkahjkdhajkhdashdjkashdshajdhasjkhdjkashdjk",
     "status": "read",
     "createdAt": "2025-04-04T11:01:38.867Z"
-  },
-  {
-    "id": "msg-1743783265993",
-    "conversationId": "conv-1",
-    "senderId": "user1",
-    "content": "testing",
-    "status": "sent",
-    "createdAt": "2025-04-04T16:14:25.993Z"
-  },
-  {
-    "id": "msg-1743825269492",
-    "conversationId": "conv-2",
-    "senderId": "user2",
-    "content": "Hello",
-    "status": "read",
-    "createdAt": "2025-04-05T03:54:29.492Z"
   }
 ]

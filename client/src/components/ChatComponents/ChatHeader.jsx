@@ -16,7 +16,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
 
-export default function ChatHeader({ currUser, currConv, users }) {
+export default function ChatHeader({ currUser, currConv, users}) {
     // Get the receiver user(s) for the current conversation
     const receiverUsers = currConv.participants
         .filter(id => id !== currUser)
@@ -26,11 +26,11 @@ export default function ChatHeader({ currUser, currConv, users }) {
         <Card className="flex-none bg-neutral-200 dark:bg-black py-2">
             <CardContent className="flex w-full gap-3">
                 <Avatar className="flex-none size-10">
-                    <AvatarImage src={receiverUsers.length == 1 ? receiverUsers[0].avatar_url : null} alt=""/>
+                    <AvatarImage src={receiverUsers.length == 1 ? receiverUsers[0]?.avatar_url : null} alt=""/>
                     <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <div className="flex-1 text-3xl font-bold">
-                    {receiverUsers.length == 1 ? receiverUsers[0].fullname : currConv.title}
+                <div className="flex-none text-3xl font-bold">
+                    {receiverUsers.length == 1 ? receiverUsers[0]?.fullname : currConv.title}
                 </div>
             </CardContent>
         </Card>

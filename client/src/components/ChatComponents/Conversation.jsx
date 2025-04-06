@@ -33,8 +33,7 @@ export default function Conversation({ conversation, currentUserId, currConv, se
     const changeConversation = () => {
         setCurrConv(conversation);
         const params = new URLSearchParams(searchParams.toString());
-        params.set('convId', conversation.id);
-        router.push(`?${params.toString()}`, undefined, { shallow: true });
+        router.push(`/message/${conversation.id}?${params.toString()}`, undefined, { shallow: true });
     }
     return (
         <button onClick={changeConversation} className={cn("flex gap-2 p-4 w-full rounded-2xl hover:bg-gray-200", conversation?.id === currConv?.id && "bg-gray-300")}>

@@ -21,23 +21,26 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { CheckCheck, Eye, Send } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useChatData } from "@/hooks/use-chatdata";
 
-export default function Message({ message, users, conversationMessages, currUser, onMessageSeen, isFirstUnreadMessage }) {
+export default function Message({ message, users, conversationMessages, currUser, onMessageSeen }) {
     if (!message) return null;
     const sender = users.find(user => user.id === message.senderId);
     if (!sender) return null;
 
     const messageRef = useRef(null);
+    const { observedMessage, setObservedMessage } = useChatData();
 
     // Set up intersection observer to detect when message is visible
     useEffect(() => {
         // Only set up observer for messages sent to current user that aren't already read
-        if (message.senderId !== currUser && message.status === "received") {
+        if (message.senderId !== currUser && message.status === "received" && !observedMessage.includes(message.id)) {
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         // Message is visible in the viewport
                         onMessageSeen && onMessageSeen(message.id);
+                        setObservedMessage(prev => [...prev, message.id]); // Add message ID to observed messages
                         // Disconnect the observer after message is read
                         observer.disconnect();
                     }
@@ -50,10 +53,12 @@ export default function Message({ message, users, conversationMessages, currUser
             // Clean up the observer on component unmount
             return () => {
                 observer.disconnect();
+                if (messageRef.current) {
+                    observer.unobserve(messageRef.current); // Unobserve the message element
+                }
             };
         }
     }, [message.id, message.senderId, message.status, currUser, onMessageSeen]);
-
     // Check if the previous message is from the same sender and on the same date
     const prevMessage = conversationMessages[conversationMessages.indexOf(message) - 1];
     const prevIsSameSender = prevMessage && prevMessage.senderId === message.senderId;

@@ -12,7 +12,7 @@
     "id": "user2",
     "username": "janedoe",
     "email": "jane.doe@example.com",
-    "password": "password456",
+    "password": "12345678",
     "avatar_url": "https://ui-avatars.com/api/?name=Jane+Doe&background=random",
     "role": "user",
     "fullname": "Jane Doe"

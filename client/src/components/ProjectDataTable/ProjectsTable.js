@@ -1,32 +1,32 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { DataTable } from "./data-table";
+import { DataTable } from "@/components/data-table";
 import { columns } from "./column";
 import { projectsData } from "@/data/teams";
 
 const ProjectsTable = ({ props }) => {
 	const { project, setProject } = props;
-	console.log("Project: ", project);
 
 	useEffect(() => {}, []);
 
 	return (
-		<div className="w-full h-full px-3">
+		<div className="w-full h-[calc(100vh-140px)] px-5 overflow-y-auto pt-1.5 pb-3">
 			{/* Display Project Properties */}
-			<div className="grid grid-cols-5 h-45 my-3">
-				<div className="col-span-4 h-full bg-gray-100 rounded-lg shadow-md py-3 px-4">
-					<h2 className="font-bold text-2xl capitalize mb-1">
+			<div className="grid grid-cols-5 h-fit max-h-60 my-3 gap-1 ">
+				<div className="col-span-4 h-full bg-gray-100 rounded-lg shadow-xs border-2 border-gray-600 py-3 px-6">
+					<h2 className="font-bold text-3xl capitalize mb-2">
 						{project.name}
 					</h2>
-					<p className="text-sm text-start text-gray-500">
+					<p className="text-base text-start text-gray-500">
 						Created By: {project.createdBy}
 					</p>
-					<p className="text-base text-blackcapitalize my-2.5	">
-						Description: {project.description}
-					</p>
+					<p className="text-base">Description:</p>
+					<div className="text-base text-black text-ellipsis h-fit max-h-37 overflow-auto">
+						{project.description}
+					</div>
 				</div>
-				<div className="grid grid-cols-2 gap-x-1.5 my-2 h-15">
+				<div className="grid grid-cols-2 gap-x-2 mb-2 h-15">
 					<p className="text-sm text-end text-gray-500 capitalize">
 						Created At:
 					</p>
@@ -46,7 +46,7 @@ const ProjectsTable = ({ props }) => {
 				<DataTable
 					columns={columns}
 					data={projectsData}
-					setProject={setProject}
+					setFunction={setProject}
 				/>
 			</div>
 			<div></div>

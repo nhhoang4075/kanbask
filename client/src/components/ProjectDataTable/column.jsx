@@ -44,19 +44,39 @@ export const columns = [
 						column.toggleSorting(column.getIsSorted() === "asc")
 					}
 				>
-					Email
+					Name
 					<ArrowUpDown className="ml-1 h-4 w-4" />
 				</Button>
 			);
 		},
 	},
 	{
-		accessorKey: "sizes",
-		header: "Sizes",
+		accessorKey: "teams",
+		header: ({ column }) => {
+			return (
+				<Button
+					variant="ghost"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === "asc")
+					}
+				>
+					Team
+					<ArrowUpDown className="ml-1 h-4 w-4" />
+				</Button>
+			);
+		},
 	},
 	{
 		accessorKey: "description",
 		header: "Description",
+		cell: ({ row }) => {
+			const project = row.original;
+			return (
+				<div className="w-full text-ellipsis overflow-hidden whitespace-nowrap max-w-[200px] text-center">
+					{project.description}
+				</div>
+			);
+		},
 	},
 	{
 		accessorKey: "createdAt",

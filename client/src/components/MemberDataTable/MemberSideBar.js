@@ -9,7 +9,7 @@ const MemberSideBar = ({ props }) => {
 	const { teamShow, setTeamShow, showData, setShowData } = props;
 
 	return (
-		<div className="w-80 bg-neutral-100 px-3 py-2 h-full">
+		<div className="w-80 bg-neutral-100 px-3 py-2 max-h-[calc(100vh-80px)]">
 			<h2 className="text-center font-bold text-xl mb-2 py-2">
 				Teams and Members
 			</h2>
@@ -31,9 +31,9 @@ const MemberSideBar = ({ props }) => {
 				</button>
 			</form>
 			<Separator />
-			<ScrollArea>
+			<ScrollArea className="flex flex-col border-2 max-h-103 border-neutral-300 rounded-lg">
 				{teams.map((team) => (
-					<>
+					<div key={team.id}>
 						<div className="flex justify-between py-2 hover:bg-neutral-200">
 							<button
 								onClick={(teamShow) => {
@@ -51,7 +51,7 @@ const MemberSideBar = ({ props }) => {
 						{projectsData.map((project) => {
 							if (project.teamId == team.id)
 								return (
-									<>
+									<div key={project.id}>
 										<div className="flex justify-between py-1.5 pl-5 hover:bg-neutral-200">
 											<button
 												onClick={(teamShow) => {
@@ -66,10 +66,10 @@ const MemberSideBar = ({ props }) => {
 											<MoreVertical />
 										</div>
 										<Separator />
-									</>
+									</div>
 								);
 						})}
-					</>
+					</div>
 				))}
 			</ScrollArea>
 		</div>

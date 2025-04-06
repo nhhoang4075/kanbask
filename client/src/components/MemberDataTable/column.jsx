@@ -53,9 +53,7 @@ export const columns = [
 				<Button
 					variant="ghost"
 					onClick={() => {
-						column.toggleSorting(
-							column.getIsSorted() == "asc" ? "desc" : "asc"
-						);
+						column.toggleSorting(column.getIsSorted() === "asc");
 					}}
 				>
 					Name
@@ -71,9 +69,7 @@ export const columns = [
 				<Button
 					variant="ghost"
 					onClick={() => {
-						column.toggleSorting(
-							column.getIsSorted() == "asc" ? "desc" : "asc"
-						);
+						column.toggleSorting(column.getIsSorted() === "asc");
 					}}
 				>
 					Status
@@ -89,9 +85,7 @@ export const columns = [
 				<Button
 					variant="ghost"
 					onClick={() => {
-						column.toggleSorting(
-							column.getIsSorted() == "asc" ? "desc" : "asc"
-						);
+						column.toggleSorting(column.getIsSorted() === "asc");
 					}}
 				>
 					Email

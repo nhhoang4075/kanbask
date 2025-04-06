@@ -254,5 +254,13 @@
     "content": "]",
     "status": "sent",
     "createdAt": "2025-04-05T15:15:30.145Z"
+  },
+  {
+    "id": "msg-1743949231294",
+    "conversationId": "conv-3",
+    "senderId": "user1",
+    "content": "121231",
+    "status": "sent",
+    "createdAt": "2025-04-06T14:20:31.294Z"
   }
 ]

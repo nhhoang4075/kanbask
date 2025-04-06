@@ -70,5 +70,14 @@
     "id": "user8",
     "role": "user",
     "avatar_url": null
+  },
+  {
+    "fullname": "NamTran",
+    "username": "namtran",
+    "email": "zztpnzz@gmai.com",
+    "password": "12345678",
+    "id": "user9",
+    "role": "user",
+    "avatar_url": null
   }
 ]

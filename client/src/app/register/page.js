@@ -2,7 +2,8 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
+import { FiLock, FiUser, FiMail } from "react-icons/fi";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -65,10 +66,19 @@ export default function Register() {
                                 control={form.control}
                                 render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Full name:</FormLabel>
+                                    <FormLabel>Fullname:</FormLabel>
                                     <FormControl>
-                                        <Input {...field} type="text" required />
+                                    <div className="relative">
+                                        <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                        <Input
+                                        {...field}
+                                        type="text"
+                                        required
+                                        className="pl-10" // Add padding-left to avoid overlapping with the icon
+                                        />
+                                    </div>
                                     </FormControl>
+                                    <FormDescription>This is your full name.</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                                 )}
@@ -77,52 +87,88 @@ export default function Register() {
                                 name="username"
                                 control={form.control}
                                 render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Username:</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} type="text" required />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
+                                    <FormItem>
+                                        <FormLabel>Username:</FormLabel>
+                                        <FormControl>
+                                        <div className="relative">
+                                            <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                            <Input
+                                            {...field}
+                                            type="text"
+                                            required
+                                            className="pl-10" // Add padding-left to avoid overlapping with the icon
+                                            />
+                                        </div>
+                                        </FormControl>
+                                        <FormDescription>This is your public display name.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
                                 )}
                             />
                             <FormField
                                 name="email"
                                 control={form.control}
                                 render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email:</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} type="email" required />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
+                                    <FormItem>
+                                        <FormLabel>Email:</FormLabel>
+                                        <FormControl>
+                                        <div className="relative">
+                                            <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                            <Input
+                                            {...field}
+                                            type="email"
+                                            required
+                                            className="pl-10" // Add padding-left to avoid overlapping with the icon
+                                            />
+                                        </div>
+                                        </FormControl>
+                                        <FormDescription>This is your public display name.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
                                 )}
                             />
                             <FormField
                                 name="password"
                                 control={form.control}
                                 render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>New password:</FormLabel>
-                                    <FormControl>
-                                    <Input {...field} type="password" required />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
+                                    <FormItem>
+                                        <FormLabel>Password:</FormLabel>
+                                        <FormControl>
+                                        <div className="relative">
+                                            <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                            <Input
+                                            {...field}
+                                            type="password"
+                                            required
+                                            className="pl-10" // Add padding-left to avoid overlapping with the icon
+                                            />
+                                        </div>
+                                        </FormControl>
+                                        <FormDescription>This is your public display name.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
                                 )}
                             />
                             <FormField
                                 name="confirm"
                                 control={form.control}
                                 render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Confirm your password:</FormLabel>
-                                    <FormControl>
-                                    <Input {...field} type="password" required />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
+                                    <FormItem>
+                                        <FormLabel>Confirm your password:</FormLabel>
+                                        <FormControl>
+                                        <div className="relative">
+                                            <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                            <Input
+                                            {...field}
+                                            type="password"
+                                            required
+                                            className="pl-10" // Add padding-left to avoid overlapping with the icon
+                                            />
+                                        </div>
+                                        </FormControl>
+                                        <FormDescription>This is your public display name.</FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
                                 )}
                             />
                             {(isValid == 1) && <p className="text-green-500">Register successful!</p>}

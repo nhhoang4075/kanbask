@@ -3,6 +3,7 @@ import express, { json } from "express";
 import { createServer } from "http";
 import cors from "cors";
 import { StatusCodes } from "http-status-codes";
+import cookieParser from "cookie-parser";
 // const socketIo = require("socket.io");
 
 import { connectDb, sql } from "./config/db.js";
@@ -25,8 +26,13 @@ const startServer = () => {
   //   },
   // });
 
-  app.use(json());
-  app.use(cors());
+  // Middlewares
+  app.use(json()); // Parse JSON bodies
+  app.use(cors({
+      origin: process.env.CLIENT_URL || 'http://localhost:3000', 
+      credentials: true 
+  }));
+  app.use(cookieParser()); // Parse cookies
 
   // io.on("connection", (socket) => {
   //   console.log("A user connected: " + socket.id);

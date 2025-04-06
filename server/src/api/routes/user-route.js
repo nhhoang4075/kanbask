@@ -1,27 +1,46 @@
 import userController from "../controllers/user-controller.js";
-import { authenticateUser, authorizeUserOrAdmin, authorizeAdmin } from "../../middlewares/auth-middleware.js";
+import { authenticateUser, authorizeAdmin } from "../../middlewares/auth-middleware.js";
+import {
+    validateRegister,
+    validateLogin,
+    validateUpdateProfile,
+    validateAdminUpdateProfile,
+    validateChangePassword,
+    validateForgotPassword,
+    validateResetPassword,
+    validateUserIdParam,
+    validateTokenParam,
+    validateResendVerification
+} from "../validations/user-validation.js";
+
 
 const userRoute = (router) => {
-  // Đăng ký người dùng
-  router.post("/users/register", userController.register);
 
-  // Đăng nhập người dùng
-  router.post("/users/login", userController.login);
+  // --- Public Routes ---
+  router.post("/users/register", validateRegister, userController.register);
+  router.get("/users/verify-email/:token", validateTokenParam, userController.verifyEmail); 
+  router.post("/users/login", validateLogin, userController.login);
+  router.post("/users/forgot-password", validateForgotPassword, userController.forgotPassword);
+  router.put("/users/reset-password/:token", validateTokenParam, validateResetPassword, userController.resetPassword); 
+  router.post("/resend-verification", validateResendVerification, userController.resendVerificationEmail);
 
-  // Cập nhật thông tin người dùng (Chỉ người dùng hiện tại hoặc admin)
-  router.put("/profile/:userId", authenticateUser, authorizeUserOrAdmin, userController.updateProfile);
+  // --- Authenticated Routes ---
+  router.use(authenticateUser);
 
-  // Đổi mật khẩu người dùng (Chỉ người dùng hiện tại)
-  router.put("/change-password/:userId", authenticateUser, userController.changePassword);
+  router.post("/users/logout", userController.logout);
 
-  // Xóa tài khoản người dùng (Chỉ admin hoặc chính người dùng đó)
-  router.delete("/users/:userId", authenticateUser, authorizeUserOrAdmin, userController.deleteUser);
+  router.get("/users/me", userController.getMyProfile);
+  router.put("/users/me/profile", validateUpdateProfile, userController.updateMyProfile); 
+  router.put("/users/me/password", validateChangePassword, userController.changeMyPassword); 
+  router.delete("/users/me", userController.deleteMyAccount);
 
-  // Lấy thông tin người dùng (Chỉ admin hoặc người dùng đó)
-  router.get("/users/:userId", authenticateUser, authorizeUserOrAdmin, userController.getUserById);
+  // --- Admin Routes ---
 
-  // Lấy danh sách tất cả người dùng (Chỉ admin)
-  router.get("/", authenticateUser, authorizeAdmin, userController.getAllUsers);
+  router.get("/users", authorizeAdmin, userController.getAllUsers);
+
+  router.get("/users/:userId", authorizeAdmin, validateUserIdParam, userController.getUserById); 
+  router.delete("/users/:userId", authorizeAdmin, validateUserIdParam, userController.deleteUserByAdmin);
+  router.put("/users/:userId", authorizeAdmin, validateUserIdParam, validateAdminUpdateProfile, userController.updateUserByAdmin); 
 };
 
 export default userRoute;

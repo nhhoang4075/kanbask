@@ -55,84 +55,86 @@ export default function Register() {
             }
         };
     return (
-        <div className="min-w-xs mx-auto p-6">
-            <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField
-                        name="fullname"
-                        control={form.control}
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Full name:</FormLabel>
-                            <FormControl>
-                                <Input {...field} type="text" required />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <FormField
-                        name="username"
-                        control={form.control}
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Username:</FormLabel>
-                            <FormControl>
-                                <Input {...field} type="text" required />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <FormField
-                        name="email"
-                        control={form.control}
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Email:</FormLabel>
-                            <FormControl>
-                                <Input {...field} type="email" required />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <FormField
-                        name="password"
-                        control={form.control}
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>New password:</FormLabel>
-                            <FormControl>
-                            <Input {...field} type="password" required />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <FormField
-                        name="confirm"
-                        control={form.control}
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Confirm your password:</FormLabel>
-                            <FormControl>
-                            <Input {...field} type="password" required />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    {(isValid == 1) && <p className="text-green-500">Register successful!</p>}
-                    {(isValid == 2) && <p className="text-red-500">Registration failed. Please try again later.</p>}
-                    {(isValid == 3) && <p className="text-red-500">Username already exists!</p>}
-                    <p className="mt-4 text-center">
-                        Already have an account? <a href="/" className="text-blue-500">Login</a>
-                    </p>
-                    <Button type="submit" className="w-full">Register</Button>
-                </form>
-            </Form>
+        <div className="min-h-screen min-w-screen bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center p-4">
+            <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 space-y-6">
+                <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                            <FormField
+                                name="fullname"
+                                control={form.control}
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Full name:</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} type="text" required />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <FormField
+                                name="username"
+                                control={form.control}
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Username:</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} type="text" required />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <FormField
+                                name="email"
+                                control={form.control}
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email:</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} type="email" required />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <FormField
+                                name="password"
+                                control={form.control}
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>New password:</FormLabel>
+                                    <FormControl>
+                                    <Input {...field} type="password" required />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            <FormField
+                                name="confirm"
+                                control={form.control}
+                                render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Confirm your password:</FormLabel>
+                                    <FormControl>
+                                    <Input {...field} type="password" required />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                )}
+                            />
+                            {(isValid == 1) && <p className="text-green-500">Register successful!</p>}
+                            {(isValid == 2) && <p className="text-red-500">Registration failed. Please try again later.</p>}
+                            {(isValid == 3) && <p className="text-red-500">Username already exists!</p>}
+                            <p className="mt-4 text-center">
+                                Already have an account? <a href="/" className="text-blue-500">Login</a>
+                            </p>
+                            <Button type="submit" className="w-full">Register</Button>
+                        </form>
+                    </Form>
+            </div>
         </div>
     );
 }

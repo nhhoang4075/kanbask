@@ -13,12 +13,12 @@ const ProjectsTable = ({ props }) => {
 	return (
 		<div className="w-full h-[calc(100vh-140px)] px-5 overflow-y-auto pt-1.5 pb-3">
 			{/* Display Project Properties */}
-			<div className="grid grid-cols-5 h-fit max-h-60 my-3 gap-1 ">
-				<div className="col-span-4 h-full bg-gray-100 rounded-lg shadow-xs border-2 border-gray-600 py-3 px-6">
-					<h2 className="font-bold text-3xl capitalize mb-2">
+			<div className="grid grid-cols-6 h-fit max-h-80 my-3 gap-1 overflow-hidden">
+				<div className="col-span-5 max-h-80 bg-gray-100 rounded-lg shadow-xs border-2 border-gray-600 py-3 px-6 overflow-hidden">
+					<h2 className="font-bold text-3xl capitalize overflow-x-auto mb-2 py-2">
 						{project.name}
 					</h2>
-					<p className="text-base text-start text-gray-500">
+					<p className="text-base text-start overflow-auto text-gray-500">
 						Created By: {project.createdBy}
 					</p>
 					<p className="text-base">Description:</p>
@@ -47,6 +47,7 @@ const ProjectsTable = ({ props }) => {
 					columns={columns}
 					data={projectsData}
 					setFunction={setProject}
+					manage={"project"}
 				/>
 			</div>
 			<div></div>

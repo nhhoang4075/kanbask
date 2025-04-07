@@ -14,6 +14,7 @@ import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
 import DeleteAlert from "../DeleteAlert";
 import EditProject from "./EditProject";
+import ProjectMoreButton from "./ProjectMoreButton";
 
 export const columns = [
 	{
@@ -69,14 +70,6 @@ export const columns = [
 	{
 		accessorKey: "description",
 		header: "Description",
-		cell: ({ row }) => {
-			const project = row.original;
-			return (
-				<div className="w-full text-ellipsis overflow-hidden whitespace-nowrap max-w-[200px] text-center">
-					{project.description}
-				</div>
-			);
-		},
 	},
 	{
 		accessorKey: "createdAt",
@@ -116,29 +109,7 @@ export const columns = [
 		cell: ({ row }) => {
 			const project = row.original;
 
-			return (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" className="h-8 w-8 p-0">
-							<span className="sr-only">Open menu</span>
-							<MoreHorizontal className="h-4 w-4" />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
-						<DropdownMenuItem
-							onClick={() =>
-								navigator.clipboard.writeText(project.id)
-							}
-						>
-							Copy project ID
-						</DropdownMenuItem>
-						<EditProject project={row} />
-						<DropdownMenuSeparator />
-						<DeleteAlert />
-					</DropdownMenuContent>
-				</DropdownMenu>
-			);
+			return <ProjectMoreButton project={project} />;
 		},
 	},
 ];

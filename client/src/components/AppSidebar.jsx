@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
 	Home,
@@ -10,47 +10,75 @@ import {
 	CheckSquare,
 	Users,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sidebar, SidebarContent } from "@/components/ui/sidebar";
-import { useRouter, useSearchParams } from "next/navigation";
 
-export default function AppSidebar() {
-	const navItems = [
-		{ name: "Dashboard", href: "/dashboard", icon: Home },
-		{ name: "Message", href: "/message", icon: MessageSquare },
-		{ name: "Calendar", href: "/calendar", icon: Calendar },
-		{ name: "Tasks", href: "/tasks", icon: CheckSquare },
-		{ name: "Teams", href: "/teams/members", icon: Users },
-	];
+import {
+	Sidebar,
+	SidebarContent,
+	SidebarGroup,
+	SidebarGroupContent,
+	SidebarGroupLabel,
+	SidebarHeader,
+	SidebarMenu,
+	SidebarMenuButton,
+	SidebarMenuItem,
+	SidebarRail,
+	SidebarTrigger,
+	useSidebar,
+} from "@/components/ui/sidebar";
+
+const navItems = [
+	{ name: "Dashboard", href: "/dashboard", icon: Home },
+	{ name: "Message", href: "/message", icon: MessageSquare },
+	{ name: "Calendar", href: "/calendar", icon: Calendar },
+	{ name: "Tasks", href: "/tasks", icon: CheckSquare },
+	{ name: "Teams", href: "/teams/members", icon: Users },
+];
+
+export default function AppSidebar({ isCollapsed, setIsCollapsed }) {
 	const pathname = usePathname();
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const param = searchParams.toString();
+
+	const { toggleSidebar } = useSidebar();
+	const handleToggleSidebar = () => {
+		setIsCollapsed(!isCollapsed);
+		toggleSidebar();
+	};
+
 	return (
-		<Sidebar className="relative w-60 mx-2 h-[calc(100vh-70px)] shadow-md overflow-hidden rounded-md bg-gray-200">
-			<SidebarContent className="w-full bg-gray-200 rounded-md">
-				<ScrollArea className="h-auto w-full">
-					<div className="flex flex-col space-y-2 p-4">
-						{navItems.map((item) => (
-							<Button
-								key={item.name}
-								className={cn(
-									"w-full py-5.5 text-base bg-white text-black justify-start text-left hover:bg-gray-400",
-									pathname === item.href && "bg-gray-400"
-								)}
-								onClick={() => {
-									router.push(
-										item.href + (param ? `?${param}` : "")
-									);
-								}}
-							>
-								<item.icon className="mx-2 h-7 w-7" />
+		<Sidebar
+			collapsible="icon"
+			className="relative w-50 h-[calc(100vh-70px)] my-2 mx-3 bg-gray-200 border-3 border-r-5 border-gray-300"
+		>
+			<SidebarContent className="bg-neutral-200">
+				<SidebarMenu className="flex flex-col space-y-2 items-center px-2 py-2">
+					<SidebarTrigger
+						className="self-start bg-white text-black"
+						onClick={handleToggleSidebar}
+					/>
+					{navItems.map((item) => (
+						<SidebarMenuButton
+							key={item.name}
+							className={cn(
+								"w-full px-4 py-5.5 text-base bg-white text-black justify-start text-left hover:bg-gray-300 hover:cursor-pointer",
+								pathname === item.href &&
+									"bg-gray-400 text-white"
+							)}
+							onClick={() => {
+								router.push(
+									item.href + (param ? `?${param}` : "")
+								);
+							}}
+							isActive={item.isActive}
+						>
+							<item.icon className="w-6 h-6 mr-2" />
+							<span className="text-base font-medium">
 								{item.name}
-							</Button>
-						))}
-					</div>
-				</ScrollArea>
+							</span>
+						</SidebarMenuButton>
+					))}
+				</SidebarMenu>
 			</SidebarContent>
 		</Sidebar>
 	);

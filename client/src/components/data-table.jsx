@@ -25,8 +25,10 @@ import EditProject from "@/components/ProjectDataTable/EditProject";
 import AddProject from "@/components/ProjectDataTable/AddProject";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import EditMember from "./MemberDataTable/EditMember";
+import AddMember from "./MemberDataTable/AddMember";
 
-export function DataTable({ columns, data, setFunction }) {
+export function DataTable({ columns, data, setFunction, manage }) {
 	const [rowSelection, setRowSelection] = useState({});
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
@@ -68,17 +70,22 @@ export function DataTable({ columns, data, setFunction }) {
 					/>
 				</div>
 				<div className="flex flex-row justify-end gap-3 my-2">
-					{table.getSelectedRowModel()?.rows.length == 1 && (
-						<EditProject
-							project={table.getSelectedRowModel().rows[0]}
-						/>
-					)}
+					{table.getSelectedRowModel()?.rows.length == 1 &&
+						(manage == "project" ? (
+							<EditProject
+								project={table.getSelectedRowModel().rows[0]}
+							/>
+						) : (
+							<EditMember
+								user={table.getSelectedRowModel().rows[0]}
+							/>
+						))}
 					{table.getSelectedRowModel().rows.length > 0 && (
 						<>
-							<DeleteAlert />
+							<DeleteAlert manage={manage} />
 						</>
 					)}
-					<AddProject />
+					{manage == "project" ? <AddProject /> : <AddMember />}
 				</div>
 			</div>
 			<Table className="rounded-md border-2 text-center border-neutral-400">
@@ -88,7 +95,7 @@ export function DataTable({ columns, data, setFunction }) {
 							{headerGroup.headers.map((header) => {
 								return (
 									<TableHead
-										className="text-center border-x-1 border-neutral-400"
+										className="text-center border-x-1 max-w-[200px] border-neutral-400 overflow-hidden text-ellipsis"
 										key={header.id}
 									>
 										{header.isPlaceholder
@@ -118,7 +125,7 @@ export function DataTable({ columns, data, setFunction }) {
 								{row.getVisibleCells().map((cell) => (
 									<TableCell
 										key={cell.id}
-										className="text-center border-x-1 border-neutral-400"
+										className="text-center border-x-1 max-w-[200px] border-neutral-400 overflow-hidden text-ellipsis"
 									>
 										{flexRender(
 											cell.column.columnDef.cell,

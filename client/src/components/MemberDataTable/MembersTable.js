@@ -24,37 +24,19 @@ const MembersTable = ({ props }) => {
 		})
 	);
 
-	useEffect(() => {
-		setUsersInTeam(
-			users.filter((user) => {
-				if (showData == "team")
-					return teamsMember.some(
-						(team) =>
-							team.userId == user.id && team.teamId == teamShow.id
-					);
-				else if (showData == "project")
-					return projectMember.some(
-						(project) =>
-							project.userId == user.id &&
-							project.projectId == teamShow.id
-					);
-			})
-		);
-	}, [teamShow]);
-
 	return (
-		<div className="w-full h-[calc(100vh-140px)] px-3 overflow-auto">
+		<div className="w-full px-3 h-full overflow-auto col-span-7">
 			{/* Display properties */}
-			<div className="grid grid-cols-5 h-fit max-h-60 my-3 gap-1.5">
-				<div className="col-span-4 h-full bg-gray-100 rounded-lg shadow-xs border-2 border-gray-600 py-3 px-4">
-					<h2 className="font-bold text-2xl capitalize mb-1">
+			<div className="grid grid-cols-5 h-fit max-h-80 my-3 gap-1 overflow-auto">
+				<div className="col-span-4 h-full bg-gray-100 rounded-lg shadow-xs border-2 border-gray-600 py-3 px-6 overflow-hidden">
+					<h2 className="font-bold text-3xl capitalize overflow-x-auto mb-2 py-2">
 						{teamShow.name}
 					</h2>
-					<p className="text-sm text-start text-gray-500">
+					<p className="text-base text-start overflow-auto text-gray-500">
 						Created By: {teamShow.createdBy}
 					</p>
-					<p className="">Description:</p>
-					<div className="text-base h-fit max-h-37 overflow-auto">
+					<p className="text-base">Description:</p>
+					<div className="text-base text-black text-ellipsis h-fit max-h-37 overflow-auto">
 						{teamShow.description}
 					</div>
 				</div>
@@ -75,11 +57,12 @@ const MembersTable = ({ props }) => {
 			</div>
 
 			{/*Display data  */}
-			<div className="w-full">
+			<div className="w-full overflow-auto">
 				<DataTable
 					columns={columns}
 					data={usersInTeam}
 					setFunction={null}
+					manage={"member"}
 				/>
 			</div>
 		</div>

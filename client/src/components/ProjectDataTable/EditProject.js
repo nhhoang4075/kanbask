@@ -33,7 +33,7 @@ const EditProject = ({ project }) => {
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
 					<DialogTitle>
-						Edit project information: {project.original.id}
+						Edit project information: {project.id}
 					</DialogTitle>
 					<DialogDescription>
 						Make changes to your project here. Click save when
@@ -48,7 +48,7 @@ const EditProject = ({ project }) => {
 							</Label>
 							<Input
 								id="name"
-								defaultValue={project.original.name}
+								defaultValue={project.name}
 								className="col-span-3"
 								type="text"
 								required
@@ -60,7 +60,7 @@ const EditProject = ({ project }) => {
 							</Label>
 							<Textarea
 								id="description"
-								defaultValue={project.original.description}
+								defaultValue={project.description}
 								className="col-span-3"
 								type="email"
 								required

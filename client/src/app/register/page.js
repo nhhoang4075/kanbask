@@ -122,7 +122,7 @@ export default function Register() {
                                             />
                                         </div>
                                         </FormControl>
-                                        <FormDescription>This is your public display name.</FormDescription>
+                                        <FormDescription>Enter your email.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -144,7 +144,7 @@ export default function Register() {
                                             />
                                         </div>
                                         </FormControl>
-                                        <FormDescription>This is your public display name.</FormDescription>
+                                        <FormDescription>Enter your password.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -166,7 +166,7 @@ export default function Register() {
                                             />
                                         </div>
                                         </FormControl>
-                                        <FormDescription>This is your public display name.</FormDescription>
+                                        <FormDescription>Check your password.</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}

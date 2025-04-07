@@ -26,7 +26,7 @@ const register = async (req, res, next) => {
       }
     });
   } catch (error) {
-    return next(error); // Chuyển lỗi đến error handling middleware
+    return next(error); 
   }
 };
 
@@ -293,7 +293,6 @@ const deleteUserByAdmin = async (req, res, next) => {
 const resendVerificationEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
-    // Gọi service để xử lý việc gửi lại email
     await userService.resendVerificationEmail(email);
 
     res.status(StatusCodes.OK).json({ 

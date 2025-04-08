@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { validate } from "../../utils/helper.js";
+import { validate } from "../../config/validator.js";
 
 const validateUpdateProfile = validate(
   z.object({

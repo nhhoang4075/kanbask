@@ -6,6 +6,7 @@ import { StatusCodes } from "http-status-codes";
 import cookieParser from "cookie-parser";
 
 import apiRouter from "./api/routes/index.js";
+import setupSocket from "./socket/index.js";
 
 /**
  * Starts the server with Express and HTTP.
@@ -28,6 +29,7 @@ const startServer = () => {
   app.use(cookieParser());
 
   app.use("/api", apiRouter());
+  setupSocket(server);
 
   app.get("/health-check", async (req, res) => {
     res.status(StatusCodes.OK).json({

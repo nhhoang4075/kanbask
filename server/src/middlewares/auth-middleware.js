@@ -38,7 +38,7 @@ const authorizeAdmin = (req, res, next) => {
       return next(new ApiError(StatusCodes.UNAUTHORIZED, "Please login to access this resource"));
     }
     if (req.user.role !== "admin") {
-      return next(new ApiError(StatusCodes.FORBIDDEN, "Access denied. Admins only."));
+      return next(new ApiError(StatusCodes.FORBIDDEN, "Access denied. Admins only"));
     }
 
     next(); // Là admin, cho phép đi tiếp

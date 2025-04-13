@@ -37,7 +37,7 @@ export async function addConversation(conversation) {
         return null;
     }
 }
-export async function updateConversation({ conversationId, messageId, timeSent }) {
+export async function updateConversation({ conversationId, messageId, timeSent, command }) {
     // Update the conversation in the api
     try {
         const res = await fetch("http://localhost:3000/api/conversations", {
@@ -45,7 +45,7 @@ export async function updateConversation({ conversationId, messageId, timeSent }
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ conversationId, messageId, timeSent }),
+            body: JSON.stringify({ conversationId, messageId, timeSent, command }),
         });
 
         if (!res.ok) {

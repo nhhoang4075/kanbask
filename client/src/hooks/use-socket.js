@@ -1,3 +1,5 @@
+"use client";
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -36,7 +38,13 @@ export function SocketProvider({ children }) {
         console.log("Disconnected from socket server");
       });
 
-      newSocket.on("")
+      newSocket.on("connect_error", (error) => {
+        console.error("Socket connection error:", error);
+      });
+
+      newSocket.on("connect_timeout", (timeout) => {
+        console.error("Socket connection timeout:", timeout);
+      });
     };
     initSocket();
     return () => {

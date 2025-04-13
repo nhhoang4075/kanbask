@@ -33,18 +33,34 @@ export async function sendMessage({ message }) {
     }
     return res.json();
 }
-export async function updateMessages({ messagesId, changes }) {
+export async function updateMessages({ messageIds, changes }) {
     // Update messages in the api
     const res = await fetch("http://localhost:3000/api/messages", {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({messagesNeedChangeId: messagesId, changes: changes}),
+        body: JSON.stringify({messagesNeedChangeId: messageIds, changes: changes}),
     });
     // Handle error response
     if (!res.ok) {
         console.error("Error updating message:", res.statusText);
+        return {status: res.status};
+    }
+    return res.json();
+}
+export async function deleteMessages({ deleteMessageIds }) {
+    // Delete messages in the api
+    const res = await fetch("http://localhost:3000/api/messages", {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ deleteMessageIds }),
+    });
+    // Handle error response
+    if (!res.ok) {
+        console.error("Error deleting message:", res.statusText);
         return {status: res.status};
     }
     return res.json();

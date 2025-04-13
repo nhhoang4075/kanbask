@@ -47,9 +47,11 @@ export default function Conversation({ conversation, currentUserId, currConv, se
                 </div>
                 <div className="flex-1 text-base text-gray-500">
                     {lastMessage?.content
-                        ? lastMessage.content.length > 30
-                            ? `${lastMessage.content.slice(0, 30)}...`
-                            : lastMessage.content
+                        ? lastMessage.status === "deleted"
+                            ? "This message was deleted"
+                            : lastMessage.content.length > 30
+                                ? `${lastMessage.content.slice(0, 30)}...`
+                                : lastMessage.content
                         : "No messages yet"
                     }
                 </div>

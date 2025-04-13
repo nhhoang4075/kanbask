@@ -53,6 +53,13 @@ app.prepare().then(() => {
             // Emit the updated message to all clients in the conversation
             socket.to(conversationId).emit("updated-message", { messageId, changes });
         });
+
+        // Listen for the "delete-message" event to handle message deletions
+        socket.on("delete-message", ({ message }) => {
+            console.log(`Message ${message} deleted`);
+            // Emit the deleted message to all clients in the conversation
+            socket.to(message.conversationId).emit("deleted-message", message.id);
+        });
     });
 
     // Handle all other routes with Next.js

@@ -2,7 +2,7 @@
 
 import { ChatSidebar } from '@/components/ChatComponents/ChatSidebar';
 import { Chat } from '@/components/ChatComponents/Chat';
-import { useState, useEffect, useRef, use } from 'react';
+import { useState, useEffect, use } from 'react';
 import { updateConversation, addConversation } from '@/lib/ConversationActions';
 import { sendMessage, updateMessages } from '@/lib/MessageActions';
 import { useSearchParams } from 'next/navigation';
@@ -24,64 +24,16 @@ export default function Messages({ params }) {
     } = useChatData();
     const [loading, setLoading] = useState(false);
     const searchParams = useSearchParams();
-    const currentId = searchParams.get("userId");
-    const { socket, isConnected } = useSocket();
-    const { conversation_id } = use(params);
+    const currentUserId = searchParams.get("userId");
+    const { socket } = useSocket();
+    const { conversation_id } = use(params); // use Use hook to get promises
 
     useEffect(() => {
         // Automatically select the conversation based on the conversation_id from the route
         const selectedConv = conversations.find(conv => conv.id === conversation_id);
         setCurrConv(selectedConv);
     }, [conversations, conversation_id]);
-    useEffect(() => {
-        if (!isConnected || !socket) return;
-        // Handle socket events
-        socket.on("received-message", async (message) => {
-            // Check if the message is from another user and update its status
-            if (message.senderId !== currentId && message.status === "sent") {
-                message.status = "received";
-                await updateMessages({ messagesId: [message.id], changes: { status: "received" } });
-                if (socket){
-                    socket.emit("update-message", { messageId: message.id, changes: { status: "received" }, conversationId: message.conversationId });
-                }
-            }
-            setMessages((prevMessages) => [...prevMessages, message]);
-            // Update the conversation if it already exists
-            const updatedConversations = conversations.map((conv) => {
-                if (conv.id === message.conversationId) {
-                    return {
-                        ...conv,
-                        messageIds: [...conv.messageIds, message.id],
-                        updatedAt: message.createdAt,
-                    };
-                }
-                return conv;
-            }).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-            setConversations(updatedConversations);
-            // Update the current conversation if it matches
-            if (currConv && currConv.id === message.conversationId) {
-                setCurrConv({
-                    ...currConv,
-                    messageIds: [...currConv.messageIds, message.id],
-                    updatedAt: message.createdAt,
-                });
-            }
-        });
-        // Update the message when it is updated from another client
-        socket.on("updated-message", ({ messageId, changes }) => {           
-            setMessages((prevMessages) => prevMessages.map((message) => {
-                if (message.id === messageId) {
-                    return { ...message, ...changes };
-                }
-                return message;
-            }));
-        });
-
-        return () => {
-            socket.off("received-message");
-            socket.off("updated-message");
-        }
-    }, [socket, currConv, currentId, conversations]);
+    
     // Scroll to the newly created conversation
     const ScrollToTop = () => {
         if (convContainerRef.current) {
@@ -131,6 +83,7 @@ export default function Messages({ params }) {
                     conversationId: newmess.conversationId,
                     messageId: newmess.id,
                     timeSent: newmess.createdAt,
+                    command: "add"
                 });
             }
             // Emit the new message to other clients
@@ -174,7 +127,7 @@ export default function Messages({ params }) {
     // Handle the case when a message is seen
     const handleSeenMessage = async (messageId) => {
         const message = messages.find((msg) => msg.id === messageId);
-        if (message?.status === "received" && message.senderId !== currentId) {
+        if (message?.status === "received" && message.senderId !== currentUserId) {
             const updatedMessages = messages.map((message) => {
                 if (message.id === messageId) {
                     return { ...message, status: "read" };
@@ -182,21 +135,44 @@ export default function Messages({ params }) {
                 return message;
             });
             // Update the server with the new status first
-            const result = await updateMessages({ messagesId: [messageId], changes: { status: "read" } });
+            const result = await updateMessages({ messageIds: [messageId], changes: { status: "read" } });
             if (result.status !== 201) {
-                console.error("Error updating messages:", result.error);
+                console.error("Error updating messages:", result);
             } else setMessages(updatedMessages);
             // Emit the updated message to other clients
             if (result.status === 201 && socket) {
-                socket.emit("update-message", { messageId, changes: { status: "read" }, conversationId: currConv.id });
+                socket.emit("update-message", { messageId: messageId, changes: { status: "read" }, conversationId: currConv.id });
             }
         }
+    }
+    // Change the message status to deleted when the user unsends it. The message will truely be deleted from the server when the user refreshes the page.
+    // This is to prevent the user from deleting the message and it being deleted from the server immediately.
+    const handleDeleteMessage = async (messageId) => {
+        const deletedMessage = messages.find((msg) => msg.id === messageId);
+        if (!deletedMessage) return;
+        const updatedMessages = messages.map((message) => {
+            if (message.id === messageId) {
+                return { ...message, status: "deleted" };
+            }
+            return message;
+        });
+        const result = await updateMessages({ messageIds: [messageId], changes: { status: "deleted" } });
+        if (result.status !== 201) {
+            console.error("Error deleting messages:", result);
+        } else {
+            // Emit the deleted message IDs to other clients
+            setMessages(updatedMessages);
+            if (socket) {
+                socket.emit("update-message", { messageId: messageId, changes: { status: "deleted" }, conversationId: currConv.id });
+            }
+        }
+        // Update the current conversation to remove the deleted message ID
     }
     return (
         <div className="flex h-full w-full overflow-hidden">
             <div className="flex-none w-fit min-w-80 overflow-hidden">
                 <ChatSidebar 
-                    currentId={currentId}
+                    currentUserId={currentUserId}
                     currConv={currConv}
                     setCurrConv={setCurrConv} 
                     conversations={conversations} 
@@ -216,6 +192,7 @@ export default function Messages({ params }) {
                     users={users}
                     handleSendMessage={handleSendMessage}
                     handleSeenMessage={handleSeenMessage}
+                    handleDeleteMessage={handleDeleteMessage}
                     loading={loading}
                 />
             </div>

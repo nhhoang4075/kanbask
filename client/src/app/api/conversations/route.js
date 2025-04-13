@@ -49,21 +49,23 @@ export async function POST(request) {
 
 export async function PUT(request) {
     try {
-        const { conversationId, messageId, timeSent } = await request.json();
-        if (!conversationId || !messageId) {
-            return Response.json({ 
-                error: 'Missing required fields: conversationId or messageId' 
-            }, { status: 400 });
-        }
+        const { conversationId, messageId, timeSent, command } = await request.json();
         const data = await fsPromises.readFile(usersFilePath, 'utf-8');
         const conversations = JSON.parse(data);
         const conversationIndex = conversations.findIndex(conv => conv.id === conversationId);
         if (conversationIndex === -1) {
             return Response.json({ error: 'Conversation not found' }, { status: 404 });
         }
-        //update the messageIds array and updatedAt field
-        conversations[conversationIndex].messageIds.push(messageId);
-        conversations[conversationIndex].updatedAt = timeSent || new Date().toISOString();
+        if (command === "delete") {
+            // Remove the messageId from the conversation's messageIds array
+            conversations[conversationIndex].messageIds = conversations[conversationIndex].messageIds.filter(id => id !== messageId);
+            // Update the updatedAt field to the latest message time
+            conversations[conversationIndex].updatedAt = timeSent || new Date().toISOString();
+        } else if (command === "add") {
+            //update the messageIds array and updatedAt field
+            conversations[conversationIndex].messageIds.push(messageId);
+            conversations[conversationIndex].updatedAt = timeSent || new Date().toISOString();
+        }
         // Sort conversations by updatedAt in descending order
         conversations.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
         // Write updated conversations back to the file

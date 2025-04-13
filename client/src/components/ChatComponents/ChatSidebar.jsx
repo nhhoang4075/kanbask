@@ -16,8 +16,8 @@ import { Separator } from "../ui/separator"
 import SearchChatSidebar from "./SearchChatSidebar";
 import Conversation from "./Conversation";
 
-export function ChatSidebar({ currentId, currConv, setCurrConv, conversations, messages, users, searchText, setSearchText, convContainerRef }) {
-    const searchUsers = users.filter(user => user.id !== currentId).filter(user => user.fullname.toLowerCase().startsWith(searchText.toLowerCase()));
+export function ChatSidebar({ currentUserId, currConv, setCurrConv, conversations, messages, users, searchText, setSearchText, convContainerRef }) {
+    const searchUsers = users.filter(user => user.id !== currentUserId).filter(user => user.fullname.toLowerCase().startsWith(searchText.toLowerCase()));
     // Only render if conversations, messages, and users are available else render this
     if (!conversations?.length || !messages?.length || !users?.length) {
         return (
@@ -55,12 +55,12 @@ export function ChatSidebar({ currentId, currConv, setCurrConv, conversations, m
                 <div ref={convContainerRef}></div>
                 <div className="flex flex-col gap-2 pr-2">
                     {conversations
-                        .filter(conversation => conversation?.participants?.includes(currentId))
+                        .filter(conversation => conversation?.participants?.includes(currentUserId))
                         .map(conversation => (
                             <Conversation 
                                 key={conversation.id} 
                                 conversation={conversation}
-                                currentUserId={currentId} 
+                                currentUserId={currentUserId} 
                                 currConv={currConv}
                                 setCurrConv={setCurrConv} 
                                 messages={messages} 

@@ -210,7 +210,7 @@ export const teamsMember = [
 
 	{ teamId: "2", userId: "2", role: "admin" },
 	{ teamId: "2", userId: "3", role: "member" },
-	{ teamId: "3", userId: "1", role: "admin" },
+	{ teamId: "3", userId: "8", role: "admin" },
 ];
 
 export const projectsData = [

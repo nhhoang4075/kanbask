@@ -19,7 +19,7 @@ export default function Layout({ children }) {
 					<div
 						className={cn(
 							"flex flex-col h-full",
-							isCollapsed ? "w-16" : "w-55"
+							isCollapsed ? "w-13" : "w-50"
 						)}
 					>
 						<AppSidebar

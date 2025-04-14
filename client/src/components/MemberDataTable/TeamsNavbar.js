@@ -23,7 +23,7 @@ const TeamsNavbar = () => {
 							<NavigationMenuLink
 								className={
 									navigationMenuTriggerStyle() +
-									" min-w-[100px] text-base"
+									"min-w-[100px] text-base"
 								}
 							>
 								{item.name}

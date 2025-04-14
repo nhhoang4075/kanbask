@@ -6,7 +6,7 @@ import { columns } from "./column";
 import { DataTable } from "@/components/data-table";
 
 const MembersTable = ({ props }) => {
-	const { teamShow, setTeamShow, showData } = props;
+	const { teamShow, showData } = props;
 
 	const [usersInTeam, setUsersInTeam] = useState(
 		users.filter((user) => {
@@ -23,6 +23,25 @@ const MembersTable = ({ props }) => {
 				);
 		})
 	);
+
+	useEffect(() => {
+		// Get the users in the selected team
+		setUsersInTeam(() => {
+			return users.filter((user) => {
+				if (showData == "team")
+					return teamsMember.some(
+						(team) =>
+							team.userId == user.id && team.teamId == teamShow.id
+					);
+				else if (showData == "project")
+					return projectMember.some(
+						(project) =>
+							project.userId == user.id &&
+							project.projectId == teamShow.id
+					);
+			});
+		});
+	}, [teamShow]);
 
 	return (
 		<div className="w-full px-3 h-full overflow-auto col-span-7">

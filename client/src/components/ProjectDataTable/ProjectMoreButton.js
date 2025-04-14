@@ -30,7 +30,7 @@ const ProjectMoreButton = ({ project }) => {
 				</DropdownMenuItem>
 				<EditProject project={project} />
 				<DropdownMenuSeparator />
-				<DeleteAlert manage={"project"} />
+				<DeleteAlert manage={"project"} rows={[project]} />
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

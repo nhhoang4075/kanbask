@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
-
 import registerMessageHandlers from "./message-socket.js";
+import registerNotificationHandlers from "./notification-socket.js";
 
 let ioInstance = null;
 
@@ -18,13 +18,18 @@ const setupSocket = (server) => {
     console.log("A client connected: " + socket.id);
 
     registerMessageHandlers(io, socket);
+    registerNotificationHandlers(io, socket);
 
-    socket.on("disconnect", () => {
-      console.log("Client disconnected: " + socket.id);
+    socket.on("disconnect", (reason) => {
+      console.log(`Client disconnected: ${socket.id}, Reason: ${reason}`);
     });
 
     socket.on("error", (error) => {
-        console.error("Socket Error:", error);
+        console.error("Socket Error on connection:", error);
+    });
+
+    socket.on("connect_error", (err) => {
+      console.log(`connect_error due to ${err.message}`);
     });
   });
 

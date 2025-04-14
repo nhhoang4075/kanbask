@@ -1,0 +1,77 @@
+import { z } from "zod";
+
+import { validate } from "../../config/validator.js";
+
+const validateRegister = validate(
+  z.object({
+    body: z
+      .object({
+        email: z.string().email().max(100),
+        password: z.string().min(8).max(255),
+        first_name: z.string().min(1).max(100),
+        last_name: z.string().min(1).max(100)
+      })
+      .strict(),
+    params: z.object({}).optional(),
+    query: z.object({}).optional()
+  })
+);
+
+const validateLogin = validate(
+  z.object({
+    body: z
+      .object({
+        email: z.string().email().max(100),
+        password: z.string().min(8).max(255)
+      })
+      .strict(),
+    params: z.object({}).optional(),
+    query: z.object({}).optional()
+  })
+);
+
+const validateEmail = validate(
+  z.object({
+    body: z
+      .object({
+        email: z.string().email().max(100)
+      })
+      .strict(),
+    params: z.object({}).optional(),
+    query: z.object({}).optional()
+  })
+);
+
+const validateVerification = validate(
+  z.object({
+    body: z
+      .object({
+        email: z.string().email().max(100),
+        verification_code: z.string().length(6)
+      })
+      .strict(),
+    params: z.object({}).optional(),
+    query: z.object({}).optional()
+  })
+);
+
+const validatePasswordReset = validate(
+  z.object({
+    body: z
+      .object({
+        code: z.string(),
+        new_password: z.string().min(8).max(255)
+      })
+      .strict(),
+    params: z.object({}).optional(),
+    query: z.object({}).optional()
+  })
+);
+
+export default {
+  validateRegister,
+  validateLogin,
+  validateEmail,
+  validateVerification,
+  validatePasswordReset
+};

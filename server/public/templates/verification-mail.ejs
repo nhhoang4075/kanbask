@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Kanbask - Email Verification</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style type="text/css">
+      /* Base */
+      * {
+        box-sizing: border-box;
+        font-family: serif;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        min-width: 100%;
+        font-size: 16px;
+        line-height: 1.5;
+        background-color: #fafafa;
+        color: #222222;
+      }
+      a {
+        color: #000;
+        text-decoration: none;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0;
+        text-align: center;
+      }
+      p {
+        margin-top: 12px 0;
+      }
+      table td {
+        vertical-align: top;
+      }
+      /* Layout */
+      .email-wrapper {
+        max-width: 600px;
+        margin: 0 auto;
+        border: 1px solid #eaeaea;
+        border-radius: 12px;
+      }
+      .email-header {
+        background-color: #3d83f6;
+        padding: 12px 24px;
+        color: #ffffff;
+        border-radius: 12px 12px 0 0;
+      }
+      .email-body {
+        padding: 12px 24px;
+        background-color: #ffffff;
+      }
+      .email-footer {
+        padding: 12px 12px;
+        background-color: #f6f6f6;
+        border-radius: 0 0 12px 12px;
+        text-align: center;
+      }
+      .email-footer p {
+        margin: 0;
+      }
+      .verification-code {
+        text-align: center;
+        margin: 24px 0;
+        font-size: 48px;
+        letter-spacing: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-wrapper">
+      <header class="email-header">
+        <h1>Email Verification</h1>
+      </header>
+      <div class="email-body">
+        <p>Hi <b><%= user.name %></b>,</p>
+        <p>
+          Thank you for registering with <b>Kanbask</b>. Here is your
+          verification code:
+        </p>
+        <h2 class="verification-code"><%= verificationCode %></h2>
+        <p>This verification code will expire after <b>10 minutes</b>.</p>
+        <p>
+          If you did not register for a <b>Kanbask</b> account, please ignore
+          this email.
+        </p>
+      </div>
+      <footer class="email-footer">
+        <p>
+          If you have any questions, please don't hesitate to contact us at:
+        </p>
+        <a href="mailto:kanbask.tech@gmail.com">kanbask.tech@gmail.com</a>
+      </footer>
+    </div>
+  </body>
+</html>

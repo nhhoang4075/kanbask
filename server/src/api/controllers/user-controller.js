@@ -9,7 +9,7 @@ const getMyAccount = async (req, res, next) => {
 
     res.status(StatusCodes.OK).json({ success: true, data: { user } });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -19,7 +19,7 @@ const updateMyProfile = async (req, res, next) => {
 
     res.status(StatusCodes.OK).json({ success: true, message: "Updated profile successfully" });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -33,7 +33,7 @@ const changeMyPassword = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json({ success: true, message: "Changed password successfully" });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -45,7 +45,7 @@ const deleteMyAccount = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json({ success: true, message: "Deleted account successfully" });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -55,7 +55,7 @@ const getOneUserById = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json({ success: true, data: { user } });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -65,7 +65,7 @@ const getOneUserByEmail = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json({ success: true, data: { user } });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -75,7 +75,7 @@ const getAllUsers = async (req, res, next) => {
 
     res.status(StatusCodes.OK).json({ success: true, data: { users } });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -88,7 +88,7 @@ const updateOneUserForAdmin = async (req, res, next) => {
       message: `Admin only - Update user ${userId} successfully`
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -106,7 +106,7 @@ const deleteOneUserForAdmin = async (req, res, next) => {
       .status(StatusCodes.OK)
       .json({ success: true, message: `Admin only - Deleted user ${userId} successfully` });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 

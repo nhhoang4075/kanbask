@@ -5,6 +5,7 @@ import cors from "cors";
 import { StatusCodes } from "http-status-codes";
 import cookieParser from "cookie-parser";
 
+import { handleApiError } from "./middlewares/error-middleware.js";
 import apiRouter from "./api/routes/index.js";
 import setupSocket from "./socket/index.js";
 
@@ -30,8 +31,9 @@ const startServer = () => {
 
   app.use("/api", apiRouter());
   setupSocket(server);
+  app.use(handleApiError);
 
-  app.get("/health-check", async (req, res) => {
+  app.get("/health-check", (req, res) => {
     res.status(StatusCodes.OK).json({
       success: true,
       message: "Healthcheck passed!"

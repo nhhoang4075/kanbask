@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { cn, formatDate } from "@/lib/utils";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,10 +13,14 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import TaskDetailsDialog from "../TaskDetailsDialog";
+import TaskDetails from "../TaskDetails";
+import { AvatarGroup } from "@/components/ui/avatar-group";
 
 const KanbanTask = ({ task, columnId, handleEditTask, handleDeleteTask }) => {
   const [showDetails, setShowDetails] = useState(false);
+
+  // Add a ref to track edit mode intent
+  const editModeRef = useRef(false);
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData("taskId", task.id);
@@ -31,7 +35,7 @@ const KanbanTask = ({ task, columnId, handleEditTask, handleDeleteTask }) => {
   };
 
   const handleDelete = (e) => {
-    e.stopPropagation();
+    // e.stopPropagation();
     if (handleDeleteTask) {
       handleDeleteTask(task.id);
     }
@@ -39,14 +43,20 @@ const KanbanTask = ({ task, columnId, handleEditTask, handleDeleteTask }) => {
 
   const handleEdit = (e) => {
     e.stopPropagation();
-    if (handleEditTask) {
-      handleEditTask(task);
-    }
+    setShowDetails(true);
+    // We'll use a ref to track that we want to open in edit mode
+    editModeRef.current = true;
   };
 
   const handleViewDetails = (e) => {
     e.stopPropagation();
     setShowDetails(true);
+  };
+
+  const handleSaveTask = (updatedTask) => {
+    if (handleEditTask) {
+      handleEditTask(updatedTask);
+    }
   };
 
   const dueDate = formatDate(task.dueDate);
@@ -98,19 +108,27 @@ const KanbanTask = ({ task, columnId, handleEditTask, handleDeleteTask }) => {
         </CardHeader>
         <CardContent className="p-3 text-xs text-muted-foreground">{task.description}</CardContent>
         <CardFooter className="p-3 pt-0 flex justify-between items-center">
-          {task.assignedTo ? (
-            <Avatar className="h-6 w-6">
-              <AvatarImage
-                src={task.assignedTo.avatar || "/placeholder.svg"}
-                alt={task.assignedTo.name}
-              />
-              <AvatarFallback className="text-xs">
-                {task.assignedTo.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
-              </AvatarFallback>
-            </Avatar>
+          {task.assignedTo && task.assignedTo.length > 0 ? (
+            <AvatarGroup>
+              {task.assignedTo.slice(0, 3).map((assignee) => (
+                <Avatar key={assignee.id} className="h-6 w-6 border-2 border-background">
+                  <AvatarImage src={assignee.avatar || "/placeholder.svg"} alt={assignee.name} />
+                  <AvatarFallback className="text-xs">
+                    {assignee.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+              {task.assignedTo.length > 3 && (
+                <Avatar className="h-6 w-6 border-2 border-background">
+                  <AvatarFallback className="text-xs bg-muted">
+                    +{task.assignedTo.length - 3}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+            </AvatarGroup>
           ) : (
             <span className="h-6 w-6" />
           )}
@@ -129,7 +147,13 @@ const KanbanTask = ({ task, columnId, handleEditTask, handleDeleteTask }) => {
         </CardFooter>
       </Card>
 
-      <TaskDetailsDialog task={task} open={showDetails} onOpenChange={setShowDetails} />
+      <TaskDetails
+        task={task}
+        open={showDetails}
+        onOpenChange={setShowDetails}
+        onSave={handleSaveTask}
+        initialEditMode={editModeRef.current}
+      />
     </>
   );
 };

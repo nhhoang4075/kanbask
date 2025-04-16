@@ -34,7 +34,7 @@ const KanbanBoard = ({ tasks, setTasks, handleEditTask, handleDeleteTask }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pb-4" tabIndex="-1">
         {columns.map((column) => (
           <KanbanColumn key={column.id} column={column} {...props} />
         ))}

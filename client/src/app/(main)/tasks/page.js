@@ -22,7 +22,7 @@ const page = () => {
   const handleAddTask = (taskData) => {
     const newTask = {
       id: `task-${Date.now()}`,
-      projectId: selectedProject.id,
+      projectId: projectId,
       title: taskData.title,
       description: taskData.description,
       status: "To Do",
@@ -45,13 +45,30 @@ const page = () => {
 
   const handleDeleteTask = (taskId) => {
     const taskToDelete = tasks.find((task) => task.id === taskId);
+
     setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
   };
 
-  const handleEditTask = (task) => {
-    // In a real implementation, you would:
-    // setEditingTask(task)
-    // setIsEditTaskDialogOpen(true)
+  const handleEditTask = (updatedTask) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) =>
+        task.id === updatedTask.id
+          ? {
+              ...task,
+              ...updatedTask,
+              updatedAt: new Date().toISOString(),
+              // If moving to Done, set completedAt
+              ...(updatedTask.status === "Done" && !task.completedAt
+                ? { completedAt: new Date().toISOString() }
+                : {}),
+              // If moving from Done to another status, clear completedAt
+              ...(task.status === "Done" && updatedTask.status !== "Done"
+                ? { completedAt: null }
+                : {})
+            }
+          : task
+      )
+    );
   };
 
   const filteredTasks = tasks.filter(
@@ -99,13 +116,7 @@ const page = () => {
           selectedProject={selectedProject}
         />
       </div>
-      <div
-        clastasks={filteredTasks}
-        setTasks={setTasks}
-        searchTerm={searchTerm}
-        projectId={selectedProject.id}
-        sName="flex justify-between items-center mb-1.5"
-      >
+      <div className="flex justify-between items-center mb-1.5">
         <div className="text-sm text-muted-foreground">
           {`${filteredTasks.length} ${filteredTasks.length === 1 ? "task" : "tasks"} in ${
             selectedProject.name
@@ -121,7 +132,7 @@ const page = () => {
             setTasks={setTasks}
             handleDeleteTask={handleDeleteTask}
             handleEditTask={handleEditTask}
-          />
+          ></KanbanBoard>
         ) : (
           <ListView
             project={selectedProject}
@@ -129,7 +140,7 @@ const page = () => {
             setTasks={setTasks}
             handleDeleteTask={handleDeleteTask}
             handleEditTask={handleEditTask}
-          />
+          ></ListView>
         )}
       </div>
     </main>

@@ -34,11 +34,11 @@ import { Bell, SidebarClose } from "lucide-react";
 
 export default function AppHeader({ isCollapsed, setIsCollapsed }) {
 	return (
-		<header className="flex px-4 py-3 w-full items-center border-b-2 border-gray-300">
+		<header className="flex px-4 py-1.5 w-full items-center border-b-2 border-gray-300">
 			<h1 className="flex-4/5 text-2xl font-bold">Kanbask</h1>
 			<div className="flex-1/5 flex items-center justify-end gap-4">
 				<Button className="flex-none hover:bg-gray-300" variant="ghost">
-					<Bell className="size-6" />
+					<Bell className="size-5" />
 				</Button>
 				<Input
 					type="text"

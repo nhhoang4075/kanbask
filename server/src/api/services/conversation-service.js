@@ -31,11 +31,35 @@ const createOneConversation = async (data) => {
   }
 };
 
+const getOneConversationById = async (id, userId) => {
+  try {
+    const conversation = {
+      ...(await conversationModel.getOneConversationById(id)),
+      ...(await conversationModel.getDetailOfConversation(id, userId))
+    };
+
+    return conversation;
+  } catch (err) {
+    throw err;
+  }
+};
+
 const getManyConversationsByUserId = async (userId) => {
   try {
     const conversations = await conversationModel.getManyConversationsByUserId(userId);
 
-    return conversations;
+    const formattedConversations = await Promise.all(
+      conversations.map(async (c) => ({
+        ...c,
+        ...(await conversationModel.getDetailOfConversation(c.id, userId))
+      }))
+    );
+
+    formattedConversations.sort(
+      (a, b) => new Date(b.latest_message_at) - new Date(a.latest_message_at)
+    );
+
+    return formattedConversations;
   } catch (err) {
     throw err;
   }
@@ -61,9 +85,27 @@ const getParticipantsOfConversation = async (conversationId) => {
   }
 };
 
+const updateLastReadMessage = async (conversationId, userId) => {
+  try {
+    const conversation = await conversationModel.getDetailOfConversation(conversationId, userId);
+
+    await conversationModel.updateLastReadMessage(
+      conversationId,
+      userId,
+      conversation.latest_message_id
+    );
+
+    return userId;
+  } catch (err) {
+    throw err;
+  }
+};
+
 export default {
   createOneConversation,
+  getOneConversationById,
   getManyConversationsByUserId,
   deleteOneConversation,
-  getParticipantsOfConversation
+  getParticipantsOfConversation,
+  updateLastReadMessage
 };

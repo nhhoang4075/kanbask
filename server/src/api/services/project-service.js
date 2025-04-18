@@ -28,6 +28,18 @@ const ensureUserInProject = async (project_id, user_id) => {
   }
 };
 
+const checkUserProjectAdmin = async (project_id, user_id) => {
+  try {
+    const role = await projectModel.getUserProjectRole(project_id, user_id);
+
+    if (role != "owner" && role != "admin") {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Access denied. Admins only");
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
 const addUserToProject = async (project_id, user_id) => {
   try {
     const exists = await projectModel.ensureUserInProject(project_id, user_id);
@@ -67,6 +79,7 @@ const updateUserProjectRole = async (project_id, user_id, role) => {
 
 export default {
   createProject,
+  checkUserProjectAdmin,
   ensureUserInProject,
   addUserToProject,
   deleteUserFromProject,

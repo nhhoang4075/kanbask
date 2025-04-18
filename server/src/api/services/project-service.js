@@ -1,94 +1,74 @@
-import { StatusCodes } from 'http-status-codes';
-import ApiError from '../../utils/api-error.js';
-import projectModel from '../models/project-model.js';
+import { StatusCodes } from "http-status-codes";
+import ApiError from "../../utils/api-erroror.js";
+import projectModel from "../models/project-model.js";
 
-const createProject = async (teamId, userId, name, description) => {
-    try {
-        const project = await projectModel.createProject(teamId, userId, name, description);
+const createProject = async (team_id, user_id, name, description) => {
+  try {
+    const project = await projectModel.createProject(team_id, user_id, name, description);
 
-        if(!project.id) {
-            throw new ApiError(
-                StatusCodes.INTERNAL_SERVER_ERROR,
-                "Failed to create a project"
-            );
-        }
-
-        return project;
-    } catch (err) {
-        throw err;
+    if (!project.id) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_errorOR, "Failed to create a project");
     }
-}
 
-const ensureUserInProject = async(projectId, userId) => {
-    const exists = await projectModel.ensureUserInProject(projectId, userId);
+    return project;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const ensureUserInProject = async (project_id, user_id) => {
+  try {
+    const exists = await projectModel.ensureUserInProject(project_id, user_id);
 
     if (!exists) {
-        throw new ApiError(
-            StatusCodes.NOT_FOUND, 
-            "User is not a member of this project"
-        );
+      throw new ApiError(StatusCodes.NOT_FOUND, "User is not a member of this project");
     }
-}
+  } catch (error) {
+    throw error;
+  }
+};
 
-const addUserToProject = async(projectId, userId) => {
-    try {
-        const member = await projectModel.addUserToProject(projectId, userId);
+const addUserToProject = async (project_id, user_id) => {
+  try {
+    const exists = await projectModel.ensureUserInProject(project_id, user_id);
 
-        if(!member) {
-            throw new ApiError (
-                StatusCodes.CONFLICT,
-                "The user is already a member of the project"
-            )
-        }
-
-        return member;
-    } catch (err) {
-        throw err;
+    if (exists) {
+      throw new ApiError(StatusCodes.CONFLICT, "The user is already a member of the project");
     }
-}
 
-const deleteUserFromProject = async(projectId, userId) => {
-    try {
-        await ensureUserInProject(projectId, userId);
-    
-        const deleted = await projectModel.deleteUserFromProject(projectId, userId);
-      
-        if (!deleted) {
-            throw new ApiError(
-                StatusCodes.INTERNAL_SERVER_ERROR, 
-                "Failed to delete user from project"
-            );
-        }
-      
-        return deleted;
-    } catch (err) {
-        throw err;
-    }
-}
+    projectModel.addUserToProject(project_id, user_id);
+    return member;
+  } catch (error) {
+    throw error;
+  }
+};
 
-const updateUserProjectRole = async(projectId, userId, role) => {
-    try {
-        await ensureUserInProject(projectId, userId);
+const deleteUserFromProject = async (project_id, user_id) => {
+  try {
+    await ensureUserInProject(project_id, user_id);
 
-        const updated = await projectModel.updateUserProjectRole(projectId, userId, role);
+    await projectModel.deleteUserFromProject(project_id, user_id);
+  } catch (error) {
+    throw error;
+  }
+};
 
-        if(!updated) {
-            throw new ApiError (
-                StatusCodes.INTERNAL_SERVER_ERROR,
-                "Failed to update user role"
-            )
-        }
+const updateUserProjectRole = async (project_id, user_id, role) => {
+  try {
+    await ensureUserInProject(project_id, user_id);
 
-        return updated;
-    } catch (err) {
-        throw err;
-    }
-}
+    await projectModel.updateUserProjectRole(project_id, user_id, role);
+
+    return updated;
+  } catch (error) {
+    throw error;
+  }
+};
 
 export default {
-    createProject,
-    ensureUserInProject,
-    addUserToProject,
-    deleteUserFromProject,
-    updateUserProjectRole
-}
+  createProject,
+  ensureUserInProject,
+  addUserToProject,
+  deleteUserFromProject,
+  updateUserProjectRole
+};

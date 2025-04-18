@@ -10,7 +10,7 @@ export async function POST(req) {
         const loginUser = await req.json();
         const data = await fsPromises.readFile(usersFilePath, 'utf-8');
         const users = JSON.parse(data);
-        const user = users.find(user => user.username === loginUser.username && user.password === loginUser.password);
+        const user = users.find(user => user.email === loginUser.email && user.password === loginUser.password);
         if (user) {
             return Response.json(user, { status: 200 });
         } else {

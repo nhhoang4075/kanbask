@@ -5,6 +5,13 @@ const express = require("express");
 const http = require("http");
 const StatusCodes = require("http-status-codes").StatusCodes;
 const socketIo = require("socket.io");
+const fs = require("fs");
+const path = require("path");
+
+const app = express();
+app.use(express.json());
+
+const USERS_FILE = path.join(__dirname, "data/users.json");
 
 /**
  * Initializes and starts the HTTP server.
@@ -21,7 +28,6 @@ const socketIo = require("socket.io");
  * @function startServer
  */
 function startServer() {
-  const app = express();
   const server = http.createServer(app);
   const io = socketIo(server, {
     cors: {
@@ -30,19 +36,13 @@ function startServer() {
     },
   });
 
-  app.use(express.json());
-
   io.on("connection", (socket) => {
     console.log("A user connected: " + socket.id);
-
-    // Lắng nghe sự kiện 'chat message' từ client
     socket.on("chat message", (msg) => {
       console.log("Message received: ", msg);
-      // Phát lại tin nhắn đến tất cả client
       io.emit("chat message", msg);
     });
 
-    // Xử lý khi client ngắt kết nối
     socket.on("disconnect", () => {
       console.log("User disconnected: " + socket.id);
     });
@@ -57,6 +57,31 @@ function startServer() {
   app.get("/health-check", async function (req, res) {
     res.status(StatusCodes.OK).json({
       message: "Healthcheck API passed!",
+    });
+  });
+  app.put("/api/users", (req, res) => {
+    const userId = req.params.id;
+    const updatedUser = req.body;
+    
+    fs.readFile(USERS_FILE, "utf8", (err, data) => {
+      if (err) {
+        return res.status(500).json({ error: "Failed to read users file" });
+      }
+
+      let users = JSON.parse(data);
+      const userIndex = users.findIndex((user) => user.id === updatedUser.id);
+
+      if (userIndex === -1) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      users[userIndex] = { ...users[userIndex], ...updatedUser };
+
+      fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2), (err) => {
+        if (err) {
+          return res.status(500).json({ error: "Failed to write users file" });
+        }
+        res.json({ message: "User updated successfully", user: users[userIndex] });
+      });
     });
   });
 

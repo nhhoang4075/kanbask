@@ -33,7 +33,7 @@ export default function ProfilePage() {
     if (!user) return <div className="p-4">User not found</div>;
 
     return (
-        <div className="p-4">
+        <div>
             <UserProfile user={user} />
         </div>
     );

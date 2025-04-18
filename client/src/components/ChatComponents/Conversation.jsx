@@ -15,25 +15,45 @@
  */
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { getParticipantsOfConversation } from "@/lib/ConversationActions";
+import { getOneUserById } from "@/lib/UserActions";
+import { useEffect, useState } from "react";
 
-export default function Conversation({ conversation, currentUserId, currConv, setCurrConv, messages, users }) {
-    const lastUpdate = new Date(conversation.updatedAt);
-    // Find the last message in the conversation
-    const lastMessage = lastUpdate
-        ? messages.find(message => new Date(message.createdAt).valueOf() === lastUpdate.valueOf())
-        : null;
-    // Get the receiver user(s) for the current conversation
-    const receiverUsers = conversation.participants
-        .filter(id => id !== currentUserId)
-        .map(id => users.find(user => user.id === id));
-    const searchParams = useSearchParams();
+const getUser = async (userId) => {
+    const user = await getOneUserById(userId);
+    return user;
+}
+
+export default function Conversation({ conversation, currentUserId, currConv, setCurrConv }) {
+    const lastUpdate = conversation.latest_message_at && new Date(conversation.latest_message_at);
+    const [participants, setParticipants] = useState([]);
+    const [receiverUsers, setReceiverUsers] = useState([]);
     const router = useRouter();
-    // Set the current conversation and update the URL
+    useEffect(() => {
+        const fetchParticipants = async () => {
+            const participants = await getParticipantsOfConversation(conversation.id);
+            setParticipants(participants);
+        };
+        fetchParticipants();
+    }, [conversation.id]);
+    // Get the receiver user(s) for the current conversation
+    useEffect(() => {
+        const fetchUsers = async () => {
+            const filtered = participants.filter(user => user.user_id !== currentUserId);
+            const receiverUsers = await Promise.all(filtered.map(user => getUser(user.user_id)));
+            setReceiverUsers(receiverUsers);
+        };
+        fetchUsers();
+    }, [participants, currentUserId]);
+    // Find the last message in the conversation
+    const lastMessage = lastUpdate ? conversation.latest_message_content : null;
+    
+    // // Set the current conversation and update the URL
     const changeConversation = () => {
         setCurrConv(conversation);
-        const params = new URLSearchParams(searchParams.toString());
-        router.push(`/message/${conversation.id}?${params.toString()}`, undefined, { shallow: true });
+        console.log("Conversation", conversation);
+        router.push(`/message/${conversation.id}`, undefined, { shallow: true });
     }
     return (
         <button onClick={changeConversation} className={cn("flex gap-2 p-4 w-full rounded-2xl hover:bg-gray-200", conversation?.id === currConv?.id && "bg-gray-300")}>
@@ -43,15 +63,15 @@ export default function Conversation({ conversation, currentUserId, currConv, se
             </Avatar>
             <div className="flex flex-col flex-1 text-left">
                 <div className="flex-1 text-xl font-bold">
-                    {receiverUsers.length === 1 ? receiverUsers[0]?.fullname : conversation.title}
+                    {receiverUsers.length === 1 ? receiverUsers[0]?.full_name : conversation.title}
                 </div>
                 <div className="flex-1 text-base text-gray-500">
-                    {lastMessage?.content
+                    {lastMessage
                         ? lastMessage.status === "deleted"
                             ? "This message was deleted"
-                            : lastMessage.content.length > 30
-                                ? `${lastMessage.content.slice(0, 30)}...`
-                                : lastMessage.content
+                            : lastMessage.length > 30
+                                ? `${lastMessage.slice(0, 30)}...`
+                                : lastMessage
                         : "No messages yet"
                     }
                 </div>

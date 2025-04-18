@@ -1,61 +1,88 @@
 "use server";
 
-export async function getConversations() {
-    // Fetch conversations from the api
-    const res = await fetch("http://localhost:3000/api/conversations", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
-    // Handle error response
-    if (!res.ok) {
-        console.error("Error fetching conversations:", res.statusText);
-        return null; 
-    }
-    // Return conversations
-    const conversations = await res.json();
-    return conversations;
-}
-export async function addConversation(conversation) {
+const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+
+export async function getConversationFromUserId(userId) {
     try {
-        const res = await fetch("http://localhost:3000/api/conversations", {
+        // Fetch conversations from the api
+        const res = await fetch(`${url}/conversations?user_id=${userId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        });
+        const {success, data} = await res.json();
+        if (!success) {
+            console.error('Error registering user:', data);
+            return null; // Handle error response
+        }
+        // Return conversations
+        return data.conversations;
+    } catch (error) {
+        console.error('Error getting conversation from user ID:', error);
+        return null;
+    }
+}
+
+export async function addConversation(type, userIds) {
+    try {
+        const res = await fetch(`${url}/conversations`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(conversation),
+            body: JSON.stringify({ type, userIds }),
         });
-        if (!res.ok) {
-            const error = await res.json();
-            console.error("Error adding conversation:", error);
-            return null;
+        const {success, data} = await res.json();
+        if (!success) {
+            console.error('Error registering user:', data);
+            return null; // Handle error response
         }
-        return res.json();
+        // Return the conversation
+        return data.conversation;
     } catch (error) {
-        console.error("Error in addConversation:", error);
+        console.error('Error adding conversation:', error);
         return null;
     }
 }
-export async function updateConversation({ conversationId, messageId, timeSent, command }) {
-    // Update the conversation in the api
+
+export async function deleteOneConversationById(conversationId) {
     try {
-        const res = await fetch("http://localhost:3000/api/conversations", {
-            method: "PUT",
+        const res = await fetch(`${url}/conversations/${conversationId}`, {
+            method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ conversationId, messageId, timeSent, command }),
         });
-
-        if (!res.ok) {
-            const error = await res.json();
-            console.error("Error updating conversation:", error);
-            return null;
+        const {success, message} = await res.json();
+        if (!success) {
+            console.error('Error deleting conversation:', data);
+            return null; // Handle error response
         }
-        return res.json();
+        return message;
     } catch (error) {
-        console.error("Error in updateConversation:", error);
+        console.error('Error deleting conversation:', error);
+        return null;
+    }
+}
+
+export async function getParticipantsOfConversation(conversationId) {
+    try {
+        const res = await fetch(`${url}/conversations/${conversationId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        const {success, data} = await res.json();
+        if (!success) {
+            console.error('Error registering user:', data);
+            return null; // Handle error response
+        }
+        // Return conversations
+        return data.participants;
+    } catch (error) {
+        console.error('Error getting participants:', error);
         return null;
     }
 }

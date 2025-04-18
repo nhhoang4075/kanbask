@@ -2,7 +2,6 @@
 
 import { ChatSidebar } from '@/components/ChatComponents/ChatSidebar';
 import { useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { useChatData } from '@/hooks/use-chatdata';
 
 export default function DefaultMessages() {
@@ -15,10 +14,9 @@ export default function DefaultMessages() {
       searchText, 
       setSearchText, 
       convContainerRef,
-      setObservedMessage
+      setObservedMessage,
+      currentUserId
     } = useChatData();
-    const searchParams = useSearchParams();
-    const currentUserId = searchParams.get("userId");
     // Reset currConv and searchText when the component mounts
     useEffect(() => {
         setCurrConv(null);

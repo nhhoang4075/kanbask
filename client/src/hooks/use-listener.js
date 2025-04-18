@@ -9,23 +9,23 @@ import { updateMessages } from "@/lib/MessageActions";
 
 export function ListenerProvider({ children }) {
   const { socket, isConnected } = useSocket();
-  const { conversations, setConversations, messages, setMessages, currConv, setCurrConv } = useChatData();
+  const { conversations, setConversations, conversationMessages, setConversationMessages, currConv, setCurrConv } = useChatData();
   const searchParams = useSearchParams();
   const currentUserId = searchParams.get("userId");
 
   useEffect(() => {
     if (!isConnected || !socket) return;
     // Handle socket events
-    socket.on("received-message", async (message) => {
+    socket.on("new-message", async (message) => {
         // Check if the message is from another user and update its status
         if (message.senderId !== currentUserId && message.status === "sent") {
             message.status = "received";
-            await updateMessages({ messagesId: [message.id], changes: { status: "received" } });
-            if (socket){
-                socket.emit("update-message", { messageId: message.id, changes: { status: "received" }, conversationId: message.conversationId });
-            }
+            // await updateMessages({ messagesId: [message.id], changes: { status: "received" } });
+            // if (socket){
+            //     socket.emit("update-message", { messageId: message.id, changes: { status: "received" }, conversationId: message.conversationId });
+            // }
         }
-        setMessages((prevMessages) => [...prevMessages, message]);
+        setConversationMessages((prevMessages) => [...prevMessages, message]);
         // Update the conversation if it already exists
         const updatedConversations = conversations.map((conv) => {
             if (conv.id === message.conversationId) {
@@ -49,7 +49,7 @@ export function ListenerProvider({ children }) {
     });
     // Update the message when it is updated from another client
     socket.on("updated-message", ({ messageId, changes }) => {           
-        setMessages((prevMessages) => prevMessages.map((message) => {
+        setConversationMessages((prevMessages) => prevMessages.map((message) => {
             if (message.id === messageId) {
                 return { ...message, ...changes };
             }
@@ -57,9 +57,9 @@ export function ListenerProvider({ children }) {
         }));
     })
     socket.on("deleted-message", ({ messageId }) => {
-        const message = messages.find((msg) => msg.id === messageId);
+        const message = conversationMessages.find((msg) => msg.id === messageId);
         if (!message) return;
-        setMessages((prevMessages) => prevMessages.filter((message) => message.id !== messageId));
+        setConversationMessages((prevMessages) => prevMessages.filter((message) => message.id !== messageId));
         const updatedConversations = conversations.map((conv) => {
             if (conv.id === message.conversationId) {
                 return {
@@ -72,7 +72,7 @@ export function ListenerProvider({ children }) {
         setConversations(updatedConversations);
     })
     return () => {
-        socket.off("received-message");
+        socket.off("new-message");
         socket.off("updated-message");
         socket.off("deleted-message");
     }

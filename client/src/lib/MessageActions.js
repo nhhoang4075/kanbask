@@ -1,5 +1,7 @@
 "use server";
 
+const url = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+
 export async function getMessages() {
     // Fetch messages from the api
     const res = await fetch("http://localhost:3000/api/messages", {
@@ -64,4 +66,25 @@ export async function deleteMessages({ deleteMessageIds }) {
         return {status: res.status};
     }
     return res.json();
+}
+export async function getManyMessagesByConversationId(conversationId) {
+    try {
+        // Fetch messages from the api
+        const res = await fetch(`${url}/messages/${conversationId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        const { success, data } = await res.json();
+        if (!success) {
+            console.error("Error fetching messages:", data);
+            return null; // Handle error response
+        }
+        // Return messages
+        return data.messages;
+    } catch (error) {
+        console.error("Error fetching messages:", error);
+        return null; // Handle error response
+    }
 }

@@ -3,9 +3,9 @@ import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from '../ui/dialog';
 import { EllipsisVertical } from 'lucide-react';
 
-export default function MessageOption({ message, users, currUserId, handleSeenMessage, handleDeleteMessage }) {
+export default function MessageOption({ message, currentUserId, handleSeenMessage, handleDeleteMessage }) {
   // Check if the message is sent by the current user or if the user is an admin
-  const isSenderOrAdmin = message.senderId === currUserId || users.find(user => user.id === currUserId)?.role === "admin";
+  const isSender = message.sender_id === currentUserId;
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -15,12 +15,12 @@ export default function MessageOption({ message, users, currUserId, handleSeenMe
       </PopoverTrigger>
       <PopoverContent className="w-48 p-2">
         <Dialog className="flex flex-col space-y-2">
-          {message.senderId !== currUserId && (
+          {!isSender && (
             <Button variant="outline" className="w-full" onClick={() => handleSeenMessage(message.id)}>
               Mark as Seen
             </Button>
           )}
-          {isSenderOrAdmin && (
+          {isSender && (
             <>
             <DialogTrigger asChild>
               <Button variant="destructive" className="w-full">

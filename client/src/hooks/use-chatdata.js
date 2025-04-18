@@ -1,144 +1,172 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useRef } from "react";
-import { useSearchParams } from "next/navigation";
-import { getConversations, updateConversation } from "@/lib/ConversationActions";
-import { getMessages, updateMessages, deleteMessages } from "@/lib/MessageActions";
-import { getUsers } from "@/lib/UserActions";
-import { useSocket } from "./use-socket";
+import { createContext, useContext, useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { getConversationsFromUserId, getParticipantsOfConversation } from "@/lib/ConversationActions";
+import { getOneUserById } from "@/lib/UserActions";
+import { getManyMessagesByConversationId } from "@/lib/MessageActions";
+import { useSession } from "next-auth/react";
 
 const ChatDataContext = createContext(null);
 
 export function ChatDataProvider({ children }) {
     const [conversations, setConversations] = useState([]);
     const [messages, setMessages] = useState([]);
-    const [users, setUsers] = useState([]);
     const [currConv, setCurrConv] = useState(null);
     const [searchText, setSearchText] = useState("");
     const [observedMessage, setObservedMessage] = useState([]);
-    const { socket } = useSocket();
-    const searchParams = useSearchParams();
-    const currentUserId = searchParams.get("userId");
+    const [currUser, setCurrUser] = useState(null);
+    const [allParticipants, setAllParticipants] = useState([]);
+    const [loading, setLoading] = useState(true);
+    
+    // Cache the last user ID to avoid unnecessary rerenders
+    const userIdRef = useRef(null);
+    const dataLoaded = useRef(false);
+    const activeRequests = useRef({
+        conversations: false,
+        messages: {},
+        allActive: false,
+    })
+    
+    // References and session data
+    const { data: sessionData } = useSession();
+    const currentUserId = sessionData?.user?.id;
     const convContainerRef = useRef(null);
 
+    // Fetch conversations when user ID changes (with optimization)
     useEffect(() => {
-        // Fetch all data when the provider mounts
-        Promise.all([
-            getConversations(), 
-            getMessages(), 
-            getUsers()])
-        .then(async ([conversations, messages, users]) => {
-            const setReceivedMessages = messages.map((message) => {
-                // Check if the message is received from another user and update its status
-                if (message.senderId !== currentUserId && message.status === "sent" && conversations.some(conv => (conv.participants.includes(currentUserId) && conv.id === message.conversationId))) {
-                    return { ...message, status: "received" };
-                } else return message;
-            });
-            const remainedMessages = setReceivedMessages.filter(message => message.status !== "deleted");
-            const deletedMessagesIds = messages.filter(message => message.status === "deleted").map(message => message.id);
-            if (deletedMessagesIds.length > 0) {
-                // Delete the messages in the server
-                const result = await deleteMessages({ deleteMessageIds: deletedMessagesIds });
-                if (result.status !== 201) {
-                    console.error("Error deleting messages:", result.error);
-                }
-                if (result.status === 201 && socket) {
-                    // Emit the deleted messages to the socket
-                    deletedMessagesIds.forEach(deletedMessageId => {
-                        const deletedMessage = setReceivedMessages.find(message => message.id === deletedMessageId);
-                        socket.emit("delete-message", { message: deletedMessage });
-                    });
-                }
-            }
-            // Update conversations in the server
-            let allClear = true;
-            for (let i = 0; i < deletedMessagesIds.length; i++) {
-                const deletedMessageId = deletedMessagesIds[i];
-                const conversationId = setReceivedMessages.find((message) => message.id === deletedMessageId).conversationId;
-                // Find the last message timeSent in the conversation
-                const conversationMessages = setReceivedMessages.filter(message => message.conversationId === conversationId && message.id !== deletedMessageId);
-                const lastMessage = conversationMessages.find(message => conversations.find(conv => conv.id === conversationId).messageIds[conversationMessages.length - 1] === message.id);
-                const timeSent = lastMessage ? lastMessage.createdAt : null;
-                const result = await updateConversation({ conversationId: conversationId, messageId: deletedMessageId, timeSent: timeSent, command: "delete" });
-                if (!result) allClear = false;
-            }
-            if (allClear){
-                // Update conversations by removing deleted message IDs
-                const updatedConversations = conversations.map(conv => {
-                    return {
-                        ...conv,
-                        messageIds: conv.messageIds.filter(msgId => !deletedMessagesIds.includes(msgId))
-                    };
+        if (!currentUserId) return;
+        if (userIdRef.current === currentUserId) return;
+        if (dataLoaded.current.allActive) return;
+        userIdRef.current = currentUserId;
+        setLoading(true);
+        
+        // Define a function to load everything at once
+        const loadAllData = async () => {
+            try {
+                // 1. Get conversations
+                const fetchedConversations = await getConversationsFromUserId(currentUserId);
+                
+                console.log("Fetched conversations:", fetchedConversations);
+                // 2. Get current user data
+                const fetchedUser = await getOneUserById(currentUserId);
+                
+                // 3. Get participants id for each conversation
+                const participantsIdPromises = fetchedConversations?.map(async (conv) => {
+                    const participantsId = await getParticipantsOfConversation(conv.id);
+                    return participantsId;
                 });
-                // Update the conversation update time to the latest message time
-                updatedConversations.forEach(conv => {
-                    const convMessages = setReceivedMessages.filter(msg => conv.messageIds.includes(msg.id));
-                    if (convMessages.length > 0) {
-                        const lastMessage = convMessages[convMessages.length - 1];
-                        conv.updatedAt = lastMessage.createdAt;
-                    }
+                const participantsId = await Promise.all(participantsIdPromises);
+                console.log("Participants ID:", participantsId);
+                // 4. Get participants for each conversation
+                const allParticipantsPromise = participantsId?.map(async (participants) => {
+                    const users = await Promise.all(participants.map(user => getOneUserById(user.user_id)));
+                    return users;
                 });
-                setConversations(updatedConversations);
-            } else setConversations(conversations);
-            const changedMessageIds = remainedMessages.filter(message => message.status === "received").map(message => message.id);
-            if (changedMessageIds.length > 0) {
-                // Update the messages in the server
-                const result = await updateMessages({ messageIds: changedMessageIds, changes: { status: "received" } });
-                if (result.status !== 201) {
-                    console.error("Error updating messages:", result.error);
-                    setMessages(messages);
-                } else setMessages(remainedMessages)
-                if (result.status === 201 && socket) {
-                    // Emit the updated messages to the socket
-                    changedMessageIds.forEach(changedMessageId => {
-                        const conversationId = remainedMessages.find(message => message.id === changedMessageId)?.conversationId;
-                        socket.emit("update-message", { messageId: changedMessageId, changes: { status: "received" }, conversationId: conversationId });
-                    });
-                }
-            } else setMessages(messages);
-            setUsers(users);
-        })
-        .catch((error) => {
-            console.error("Error fetching data:", error);
-        })
-    }, []);
-    // Join all conversations room when the component mounts
-    // and leave them when the component unmounts
-    useEffect(() => {
-        conversations.filter(conv => conv.participants.includes(currentUserId)).forEach((conv) => {
-            if (socket) {
-                socket.emit("join", conv.id);
+                const allParticipants = await Promise.all(allParticipantsPromise);
+                console.log("All participants:", allParticipants);
+
+                setConversations(fetchedConversations || []);
+                setCurrUser(fetchedUser);
+                setAllParticipants(allParticipants || []);
+
+                dataLoaded.current = true;
+            } catch (error) {
+                console.error("Error loading initial data:", error);
+            } finally {
+                setLoading(false);
+                activeRequests.current.allActive = false;
             }
-        });
-        return () => {
-            conversations.filter(conv => conv.participants.includes(currentUserId)).forEach((conv) => {
-                if (socket) {
-                    socket.emit("leave", conv.id);
-                }
-            });
+        };
+        loadAllData();
+    }, [currentUserId]);
+
+    // Fetch messages with debouncing
+    const fetchMessagesDebounceTimer = useRef(null);
+    
+    const fetchMessagesForConversation = useCallback(async (conversationId) => {
+        if (!conversationId) return [];
+        
+        // Clear any pending fetch
+        if (fetchMessagesDebounceTimer.current) {
+            clearTimeout(fetchMessagesDebounceTimer.current);
         }
-    }, [socket, conversations, currentUserId]);
+        
+        // Debounce the fetch to prevent rapid successive calls
+        return new Promise((resolve) => {
+            fetchMessagesDebounceTimer.current = setTimeout(async () => {
+                try {
+                    console.log(`Fetching messages for conversation: ${conversationId}`);
+                    const fetchedMessages = await getManyMessagesByConversationId(conversationId);
+                    console.log("Fetched messages:", fetchedMessages?.length || 0);
+                    setMessages(fetchedMessages || []);
+                    resolve(fetchedMessages || []);
+                } catch (error) {
+                    console.error(`Error fetching messages for conversation ${conversationId}:`, error);
+                    resolve([]);
+                }
+            }, 100); // 100ms debounce time
+        });
+    }, []);
+
+    // Track the conversation ID to prevent unnecessary fetches
+    const lastFetchedConvId = useRef(null);
+    
+    // Separate the ID to reduce dependency changes
+    const currConvId = currConv?.id;
+
+    useEffect(() => {
+        if (!currConvId) {
+            setMessages([]);
+            return;
+        }
+        
+        console.log(`Current conversation changed to: ${currConvId}`);
+        
+        // Only fetch if conversation ID has changed
+        if (lastFetchedConvId.current !== currConvId) {
+            lastFetchedConvId.current = currConvId;
+            fetchMessagesForConversation(currConvId);
+        }
+    }, [currConvId, fetchMessagesForConversation]);
+    
+    // Memoize the context value
+    const contextValue = useMemo(() => ({
+        conversations: dataLoaded.current ? conversations : [],
+        setConversations,
+        messages,
+        setMessages,
+        currConv,
+        setCurrConv,
+        searchText,
+        setSearchText,
+        currUser: dataLoaded.current ? currUser : null,
+        currentUserId,
+        loading,
+        setLoading,
+        allParticipants: dataLoaded.current ? allParticipants : [],
+        convContainerRef,
+        observedMessage,
+        setObservedMessage,
+        dataLoaded: dataLoaded.current,
+    }), [
+        conversations,
+        messages, 
+        currConv, 
+        searchText, 
+        currUser, 
+        currentUserId,
+        loading,
+        allParticipants,
+        observedMessage,
+        dataLoaded.current,
+    ]);
+
     return (
-        <ChatDataContext.Provider 
-          value={{ 
-            conversations, 
-            setConversations, 
-            messages, 
-            setMessages,
-            users,
-            setUsers,
-            currConv,
-            setCurrConv,
-            searchText,
-            setSearchText,
-            convContainerRef,
-            observedMessage,
-            setObservedMessage,
-          }}>
+        <ChatDataContext.Provider value={contextValue}>
             {children}
         </ChatDataContext.Provider>
     );
-};
+}
 
 export function useChatData() {
     const context = useContext(ChatDataContext);

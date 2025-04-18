@@ -6,8 +6,8 @@ import io from "socket.io-client";
 
 import { cn } from "@/lib/utils"; // Utility function to combine class names
 
-// Initialize the socket connection using the provided API URL
-const socket = io("http://localhost:8080");
+// Kết nối tới server Socket.IO (điều chỉnh URL nếu cần)
+const socket = io(process.env.NEXT_PUBLIC_API_URL);
 
 const Chat = ({ userId, currentConversation, messageData }) => {
   // State to store messages in the conversation

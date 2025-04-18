@@ -11,12 +11,12 @@ const authRoute = (router) => {
 
   router
     .route("/auth/verify-email")
-    .get(authValidation.validateEmail, authController.sendVerificationMail)
+    .get(authValidation.validateEmailQuery, authController.sendVerificationMail)
     .put(authValidation.validateVerification, authController.verifyEmail);
 
   router
     .route("/auth/reset-password")
-    .get(authValidation.validateEmail, authController.sendPasswordResetMail)
+    .get(authValidation.validateEmailQuery, authController.sendPasswordResetMail)
     .put(authValidation.validatePasswordReset, authController.resetPassword);
 
   router.route("/auth/refresh-token").get(authController.refreshAccessToken);

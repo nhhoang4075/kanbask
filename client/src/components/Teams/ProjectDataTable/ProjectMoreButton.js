@@ -6,8 +6,8 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
+} from "../../ui/dropdown-menu";
+import { Button } from "../../ui/button";
 import { MoreVertical } from "lucide-react";
 import EditProject from "./EditProject";
 import DeleteAlert from "../DeleteAlert";

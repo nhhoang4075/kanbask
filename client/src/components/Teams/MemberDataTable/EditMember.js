@@ -1,7 +1,7 @@
 import React from "react";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Button } from "../../ui/button";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
 import {
 	Select,
 	SelectContent,
@@ -10,7 +10,7 @@ import {
 	SelectLabel,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
+} from "../../ui/select";
 import {
 	Dialog,
 	DialogContent,
@@ -19,22 +19,21 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "../ui/dialog";
+} from "../../ui/dialog";
 
-const AddMember = () => {
+const EditMember = ({ user }) => {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button
-					variant="outline"
-					className="bg-blue-600  hover:bg-blue-800 hover:cursor-pointer text-white hover:text-white"
-				>
-					Add Member
+				<Button variant="outline" className="w-33">
+					Edit
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
-					<DialogTitle>Add new member to team</DialogTitle>
+					<DialogTitle>
+						Edit user profile: {user.original.id}
+					</DialogTitle>
 					<DialogDescription>
 						Make changes to your profile here. Click save when
 						you're done.
@@ -48,7 +47,7 @@ const AddMember = () => {
 							</Label>
 							<Input
 								id="name"
-								placeholder="Enter member name"
+								defaultValue={user.original.name}
 								className="col-span-3"
 								type="text"
 								required
@@ -60,7 +59,7 @@ const AddMember = () => {
 							</Label>
 							<Input
 								id="email"
-								placeholder="Enter member email"
+								defaultValue={user.original.email}
 								className="col-span-3"
 								type="email"
 								required
@@ -73,8 +72,7 @@ const AddMember = () => {
 							<Select
 								id="role"
 								className="col-span-3"
-								placeholder="Select a role"
-								defaultValue="member"
+								defaultValue={user.original.role}
 							>
 								<SelectTrigger className="w-[180px]">
 									<SelectValue placeholder="Select a role" />
@@ -116,4 +114,4 @@ const AddMember = () => {
 	);
 };
 
-export default AddMember;
+export default EditMember;

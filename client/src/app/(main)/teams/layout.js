@@ -1,14 +1,14 @@
-import TeamsNavbar from "@/components/MemberDataTable/TeamsNavbar";
+import TeamsNavbar from "@/components/Teams/MemberDataTable/TeamsNavbar";
 import React from "react";
 
 const layout = ({ children }) => {
 	return (
-		<div className="grid grid-rows-[64px_auto] mx-2 my-2 bg-white h-full rounded-2xl border-2 border-neutral-400">
-			<nav className="px-3 py-3 bg-neutral-200 rounded-t-2xl">
-				<TeamsNavbar />
-			</nav>
-			<div className="h-full">{children}</div>
-		</div>
+		// <div className="grid grid-rows-[auto_1fr] bg-slate-100 max-h-[calc(100vh - 10rem)] border-l-2 border-gray-500">
+		// 	<nav className="px-3 py-2 bg-neutral-200 border-b-2 border-gray-500">
+		// 		<TeamsNavbar />
+		// 	</nav>
+		<div>{children}</div>
+		// </div>
 	);
 };
 

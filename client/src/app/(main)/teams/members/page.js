@@ -1,7 +1,7 @@
 "use client";
 
-import MemberSideBar from "@/components//MemberDataTable/MemberSideBar";
-import MembersTable from "@/components/MemberDataTable/MembersTable";
+import MemberSideBar from "@/components/Teams/MemberDataTable/MemberSideBar";
+import MembersTable from "@/components/Teams/MemberDataTable/MembersTable";
 import { teams } from "@/data/teams";
 import React, { useState } from "react";
 
@@ -20,7 +20,7 @@ const Member = () => {
 	};
 
 	return (
-		<div className="grid grid-cols-9 h-full max-h-[calc(100vh-140px)] overflow-hidden w-full bg-white rounded-b-2xl">
+		<div className="grid grid-cols-9 overflow-hidden w-full">
 			<MemberSideBar props={props} />
 			<MembersTable props={props} />
 		</div>

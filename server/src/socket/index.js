@@ -25,22 +25,20 @@ const setupSocket = (server) => {
     });
 
     socket.on("error", (error) => {
-        console.error("Socket Error on connection:", error);
+      console.error("Socket Error on connection:", error);
     });
 
     socket.on("connect_error", (err) => {
       console.log(`connect_error due to ${err.message}`);
     });
   });
-
-  console.log("Socket.IO setup complete.");
 };
 
 export const getIoInstance = () => {
-    if (!ioInstance) {
-        console.error("Socket.IO instance has not been initialized yet.");
-    }
-    return ioInstance;
+  if (!ioInstance) {
+    console.error("Socket.IO instance has not been initialized yet.");
+  }
+  return ioInstance;
 };
 
 export default setupSocket;

@@ -1,75 +1,73 @@
 import { db } from "../../config/db.js";
 
-const createOneNotification = async (notificationData) => {
+const createOneNotification = async (data) => {
   try {
     const [notification] = await db("notifications")
       .insert({
-          user_id: notificationData.user_id,
-          content: notificationData.content,
-          type: notificationData.type,
-          reference_id: notificationData.reference_id || null,
-          is_read: false
+        user_id: data.user_id,
+        content: data.content,
+        type: data.type,
+        reference_id: data.reference_id
       })
-      .returning("*");
+      .returning("id");
+
+    return notification.id;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const getOneNotificationById = async (id) => {
+  try {
+    const notification = db("notifications").select("*").where({ id }).first();
+
     return notification;
   } catch (err) {
-    throw new Error(`Error creating notification: ${err.message}`);
+    throw new Error(err);
   }
 };
 
 const getManyNotificationsByUserId = async (user_id, options = {}) => {
-  const { onlyUnread = false, limit = 20, offset = 0 } = options;
   try {
-    let query = db("notifications")
-      .select(
-          "id",
-          "user_id",
-          "content",
-          "type",
-          "reference_id",
-          "is_read",
-          "created_at"
-        )
-      .where("user_id", user_id);
+    const { limit = 20, offset = 0, unread = false } = options;
 
-    if (onlyUnread) {
+    let query = db("notifications").select("*").where("user_id", user_id);
+
+    if (unread) {
       query = query.andWhere("is_read", false);
     }
 
-    const notifications = await query
-      .orderBy("created_at", "desc")
-      .limit(limit)
-      .offset(offset);
+    const notifications = await query.orderBy("created_at", "desc").limit(limit).offset(offset);
 
     return notifications;
   } catch (err) {
-    throw new Error(`Error fetching notifications: ${err.message}`);
+    throw new Error(err);
   }
 };
 
 const countUnreadNotificationsByUserId = async (user_id) => {
-    try {
-        const result = await db("notifications")
-            .count("id as unread_count")
-            .where({ user_id, is_read: false })
-            .first();
+  try {
+    const result = await db("notifications")
+      .count("id as unread_count")
+      .where({ user_id, is_read: false })
+      .first();
 
-        return parseInt(result.unread_count || 0, 10);
-    } catch (err) {
-        throw new Error(`Error counting unread notifications: ${err.message}`);
-    }
+    return parseInt(result.unread_count || 0, 10);
+  } catch (err) {
+    throw new Error(err);
+  }
 };
 
-
-const markNotificationAsRead = async (id, user_id) => {
+const markOneNotificationAsRead = async (id, user_id) => {
   try {
     const [notification] = await db("notifications")
       .where({ id, user_id })
       .update({ is_read: true })
       .returning("id");
-    return notification ? notification.id : null;
+
+    return notification.id;
   } catch (err) {
-    throw new Error(`Error marking notification as read: ${err.message}`);
+    throw new Error(err);
   }
 };
 
@@ -77,42 +75,45 @@ const markAllNotificationsAsRead = async (user_id) => {
   try {
     const result = await db("notifications")
       .where({ user_id, is_read: false })
-      .update({ is_read: true });
+      .update({ is_read: true })
+      .returning("id");
+
     return result;
   } catch (err) {
-    throw new Error(`Error marking all notifications as read: ${err.message}`);
+    throw new Error(err);
   }
 };
 
 const deleteOneNotificationById = async (id, user_id) => {
   try {
-    const deletedCount = await db("notifications")
-      .where({ id: id, user_id: user_id })
-      .del();
-    return deletedCount;
+    const [notification] = await db("notifications")
+      .where({ id, user_id })
+      .delete()
+      .returning("id");
+
+    return notification.id;
   } catch (err) {
-    throw new Error(`Error deleting notification: ${err.message}`);
+    throw new Error(err);
   }
 };
 
 const deleteAllNotificationsByUserId = async (user_id) => {
-    try {
-        const deletedCount = await db("notifications")
-            .where({ user_id: user_id })
-            .del();
-        return deletedCount;
-    } catch (err) {
-        throw new Error(`Error deleting all notifications for user: ${err.message}`);
-    }
-};
+  try {
+    const result = await db("notifications").where({ user_id }).delete().returning("id");
 
+    return result;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
 
 export default {
   createOneNotification,
+  getOneNotificationById,
   getManyNotificationsByUserId,
   countUnreadNotificationsByUserId,
-  markNotificationAsRead,
+  markOneNotificationAsRead,
   markAllNotificationsAsRead,
   deleteOneNotificationById,
-  deleteAllNotificationsByUserId, 
+  deleteAllNotificationsByUserId
 };

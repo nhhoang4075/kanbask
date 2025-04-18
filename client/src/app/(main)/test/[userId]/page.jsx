@@ -2,11 +2,15 @@ import Chat from "@/components/test/Chat";
 
 const getMessages = async (conversationId) => {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/messages/${conversationId}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/messages/${conversationId}`,
     {
       method: "GET",
     }
   );
+
+  if (!res.ok) {
+    console.log("nn");
+  }
 
   const { success, data } = await res.json();
 
@@ -23,7 +27,7 @@ export default async function TestPage({ params }) {
   // Giả sử userId được lấy từ phiên đăng nhập
   // const userId = "fcb6c246-66dc-46c6-b612-db580c0fc1e2";
   // Giả sử conversationId của chat giữa user và đối tác
-  const conversationId = 8;
+  const conversationId = 2;
 
   const messageData = await getMessages(conversationId);
 

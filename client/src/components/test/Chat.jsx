@@ -5,7 +5,7 @@ import io from "socket.io-client";
 import { cn } from "@/lib/utils";
 
 // Kết nối tới server Socket.IO (điều chỉnh URL nếu cần)
-const socket = io("http://localhost:8080");
+const socket = io(process.env.NEXT_PUBLIC_API_URL);
 
 const Chat = ({ conversationId, userId, messageData }) => {
   const [messages, setMessages] = useState(messageData);

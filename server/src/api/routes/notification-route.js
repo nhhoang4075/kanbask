@@ -7,25 +7,27 @@ const notificationRoute = (router) => {
 
   router
     .route("/notifications")
-    .get(notificationValidation.validateGetNotifications, notificationController.getNotifications)
-    .post(notificationValidation.validateCreateNotification, notificationController.createNotification);
-
-  router
-    .route("/notifications/all")
+    .get(
+      notificationValidation.validateNotificationsOptionsQuery,
+      notificationController.getManyNotificationsByUserId
+    )
+    .post(
+      notificationValidation.validateNewNotification,
+      notificationController.createOneNotification
+    )
+    .put(notificationController.markAllNotificationsAsRead)
     .delete(notificationController.deleteAllNotifications);
 
   router
-    .route("/notifications/read-all")
-    .put(notificationController.markAllAsRead);
-
-  router
     .route("/notifications/:id")
-    .delete(notificationValidation.validateNotificationIdParam, notificationController.deleteNotification);
-
-  router
-    .route("/notifications/:id/read")
-    .put(notificationValidation.validateNotificationIdParam, notificationController.markAsRead);
-
+    .put(
+      notificationValidation.validateNotificationIdParam,
+      notificationController.markOneNotificationAsRead
+    )
+    .delete(
+      notificationValidation.validateNotificationIdParam,
+      notificationController.deleteOneNotification
+    );
 };
 
 export default notificationRoute;

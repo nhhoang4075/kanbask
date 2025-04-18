@@ -46,14 +46,14 @@ const login = async (req, res, next) => {
       maxAge: ms("1h"),
       httpOnly: true,
       secure: true,
-      sameSite: "strict"
+      sameSite: "none"
     });
 
     res.cookie("refresh_token", refreshToken, {
       maxAge: ms("7 days"),
       httpOnly: true,
       secure: true,
-      sameSite: "strict"
+      sameSite: "none"
     });
 
     res.status(StatusCodes.OK).json({
@@ -162,10 +162,13 @@ const refreshAccessToken = async (req, res, next) => {
     const accessToken = jwtProvider.generateToken(payload, process.env.ACCESS_TOKEN_SECRET, "1h");
 
     res.cookie("access_token", accessToken, {
+      domain: "localhost",
+      path: "/",
       maxAge: ms("1h"),
       httpOnly: true,
+      sameSite: "lax",
       secure: true,
-      sameSite: "strict"
+      sameSite: "none"
     });
 
     res.status(StatusCodes.OK).json({

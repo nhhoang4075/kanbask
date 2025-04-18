@@ -1,19 +1,14 @@
-import * as React from "react"
-import { FiEye, FiEyeOff,FiLock } from "react-icons/fi"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import { cn } from "@/lib/utils";
 
-function Input({
-  className,
-  type,
-  ...props
-}) {
-  const [showPassword, setShowPassword] = React.useState(false)
+function Input({ className, type, ...props }) {
+  const [showPassword, setShowPassword] = React.useState(false);
 
-  const isPassword = type === "password"
+  const isPassword = type === "password";
 
   return (
     <div className="relative">
-      
       <input
         {...props}
         type={isPassword && !showPassword ? "password" : "text"}
@@ -25,7 +20,6 @@ function Input({
         )}
       />
       {isPassword && (
-        
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
@@ -39,7 +33,7 @@ function Input({
         </button>
       )}
     </div>
-  )
+  );
 }
 
-export { Input }
+export { Input };

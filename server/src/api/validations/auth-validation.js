@@ -22,7 +22,8 @@ const validateLogin = validate(
     body: z
       .object({
         email: z.string().email().max(100),
-        password: z.string().min(8).max(255)
+        password: z.string().min(8).max(255),
+        remember: z.boolean()
       })
       .strict(),
     params: z.object({}).optional(),

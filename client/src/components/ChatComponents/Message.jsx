@@ -7,6 +7,7 @@
  * @param {Object} props - The props object.
  * @param {Object} props.message - The message object containing details about the message.
  * @param {string} props.message.sender_id - The ID of the sender of the message.
+ * @param {string} props.message.sender_id - The ID of the sender of the message.
  * @param {string} props.message.content - The content of the message.
  * @param {string} props.message.updated_at - The timestamp when the message was created.
  * @param {Array<Object>} props.users - The list of users in the conversation.
@@ -143,6 +144,7 @@ export default function Message({
                 </div>
             </div>
             {/* {isLastMessage && (
+            {/* {isLastMessage && (
                 <div className="flex justify-end mr-14">
                     {message.status === "read" ? (
                         <Eye className="w-4 h-4 text-gray-500" />
@@ -152,6 +154,7 @@ export default function Message({
                         <CheckCheck className="w-4 h-4 text-gray-500" />
                     ) : null}
                 </div>
+            )} */}
             )} */}
         </>
     );

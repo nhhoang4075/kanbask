@@ -78,7 +78,6 @@ export async function getManyMessagesByConversationId(conversationId) {
             },
         });
         const { success, data } = await res.json();
-        console.log("Messages:", data);
         if (!success) {
             console.error("Error fetching messages:", data);
             return null; // Handle error response

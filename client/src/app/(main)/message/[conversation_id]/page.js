@@ -136,7 +136,6 @@ export default function Messages({ params }) {
             setLoading(false);
         }
     };
-
     return (
         <div className="flex h-full w-full overflow-hidden">
             <div className="flex-none w-fit min-w-80 overflow-hidden">

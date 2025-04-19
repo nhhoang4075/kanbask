@@ -24,6 +24,15 @@ const getUser = async (userId) => {
     const user = await getOneUserById(userId);
     return user;
 }
+import { useRouter } from "next/navigation";
+import { getParticipantsOfConversation } from "@/lib/ConversationActions";
+import { getOneUserById } from "@/lib/UserActions";
+import { useEffect, useState } from "react";
+
+const getUser = async (userId) => {
+    const user = await getOneUserById(userId);
+    return user;
+}
 
 export default function Conversation({ conversation, currentUserId, currConv, setCurrConv, participants }) {
     const lastUpdate = conversation.latest_message_at && new Date(conversation.latest_message_at);
@@ -34,6 +43,8 @@ export default function Conversation({ conversation, currentUserId, currConv, se
     // // Set the current conversation and update the URL
     const changeConversation = () => {
         setCurrConv(conversation);
+        console.log("Conversation", conversation);
+        router.push(`/message/${conversation.id}`, undefined, { shallow: true });
         console.log("Conversation", conversation);
         router.push(`/message/${conversation.id}`, undefined, { shallow: true });
     }
@@ -49,8 +60,12 @@ export default function Conversation({ conversation, currentUserId, currConv, se
                 </div>
                 <div className="flex-1 text-base text-gray-500">
                     {lastMessage
+                    {lastMessage
                         ? lastMessage.status === "deleted"
                             ? "This message was deleted"
+                            : lastMessage.length > 30
+                                ? `${lastMessage.slice(0, 30)}...`
+                                : lastMessage
                             : lastMessage.length > 30
                                 ? `${lastMessage.slice(0, 30)}...`
                                 : lastMessage

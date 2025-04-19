@@ -34,6 +34,7 @@ export function ChatSidebar({ currentUserId, currConv, setCurrConv, searchText, 
     }
     // Only render if conversations, messages, and users are available else render this
     if (!conversations?.length) {
+    if (!conversations?.length) {
         return (
             <div className="flex flex-col h-full w-full pl-2">
                 <div className="py-4 px-3 text-2xl font-bold">All Messages</div>

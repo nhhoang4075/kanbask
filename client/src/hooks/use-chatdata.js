@@ -12,6 +12,7 @@ export function ChatDataProvider({ children }) {
     const [conversations, setConversations] = useState([]);
     const [messages, setMessages] = useState([]);
     const [currConv, setCurrConv] = useState(null);
+    const [conversationMessages, setConversationMessages] = useState([]);
     const [searchText, setSearchText] = useState("");
     const [observedMessage, setObservedMessage] = useState([]);
     const [currUser, setCurrUser] = useState(null);

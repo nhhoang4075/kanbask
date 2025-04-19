@@ -131,6 +131,8 @@ export function Chat({
             id: `msg-${timeSent.getTime()}`, // Time unique ID to prevent collisions
             conversation_id: currConv.id,
             sender_id: currentUserId,
+            conversation_id: currConv.id,
+            sender_id: currentUserId,
             content: mess.trim(),
             status: "sent",
             createdAt: timeSent.toISOString(),
@@ -149,6 +151,7 @@ export function Chat({
     }
     return (
         <div className="flex flex-col h-full overflow-hidden">
+            <ChatHeader currConv={currConv} currrntUserId={currentUserId}/>
             <ChatHeader currConv={currConv} currrntUserId={currentUserId}/>
             <Card className="flex-1 my-2 min-h-0 bg-neutral-100 dark:bg-black overflow-hidden">
                 <CardContent className="flex flex-col items-center h-full p-2">

@@ -44,53 +44,53 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Home, MessageSquare, Calendar, CheckSquare, Users } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarMenu, SidebarMenuButton } from "@/components/sidebar";
 import { useRouter, useSearchParams } from "next/navigation";
 
 // Define the navigation items with their names, hrefs, and icons
 const navItems = [
-    { name: "Dashboard", href: "/dashboard", icon: Home },
-    { name: "Message", href: "/message", icon: MessageSquare },
-    { name: "Calendar", href: "/calendar", icon: Calendar },
-    { name: "Tasks", href: "/tasks", icon: CheckSquare },
-    { name: "Teams", href: "/teams", icon: Users },
+  { name: "Dashboard", href: "/dashboard", icon: Home },
+  { name: "Message", href: "/message", icon: MessageSquare },
+  { name: "Calendar", href: "/calendar", icon: Calendar },
+  { name: "Tasks", href: "/tasks", icon: CheckSquare },
+  { name: "Teams", href: "/teams", icon: Users }
 ];
 
 export default function AppSidebar({ setisCollapsed, ...props }) {
-    const pathname = usePathname();
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const param = searchParams.toString();
-    return (
-        <div className="relative h-full overflow-hidden">
-            <div className="fixed inset-y-0 z-50">
-                <div className="absolute top-19 left-0 h-full">
-                    <Sidebar collapsible="icon" {...props} className="absolute top-0 left-0 w-56 h-full z-50">
-                        <SidebarContent className="bg-gray-200 rounded-md">
-                            <ScrollArea className="h-full">
-                                <SidebarMenu className="flex flex-col space-y-2 p-4">
-                                    {navItems.map((item) => (
-                                        <SidebarMenuButton
-                                            key={item.name}
-                                            className={cn(
-                                                "transition-all duration-200 rounded-md",
-                                                "bg-white text-black hover:bg-gray-300",
-                                                pathname === item.href && "bg-gray-300 text-black",
-                                            )}
-                                            onClick={() => {
-                                                router.push(item.href + (param ? `?${param}` : ""));
-                                            }}
-                                        >
-                                            <item.icon className="h-5 w-5"/>
-                                            <span>{item.name}</span>
-                                        </SidebarMenuButton>
-                                    ))}
-                                </SidebarMenu>
-                            </ScrollArea>
-                        </SidebarContent>
-                    </Sidebar>
-                </div>
-            </div>
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const param = searchParams.toString();
+  return (
+    <div className="relative h-full overflow-hidden">
+      <div className="fixed inset-y-0 z-50">
+        <div className="absolute top-19 left-0 h-full">
+          <Sidebar collapsible="icon" {...props} className="absolute top-0 left-0 w-56 h-full z-50">
+            <SidebarContent className="bg-gray-200 rounded-md">
+              <ScrollArea className="h-full">
+                <SidebarMenu className="flex flex-col space-y-2 p-4">
+                  {navItems.map((item) => (
+                    <SidebarMenuButton
+                      key={item.name}
+                      className={cn(
+                        "transition-all duration-200 rounded-md",
+                        "bg-white text-black hover:bg-gray-300",
+                        pathname === item.href && "bg-gray-300 text-black"
+                      )}
+                      onClick={() => {
+                        router.push(item.href + (param ? `?${param}` : ""));
+                      }}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      <span>{item.name}</span>
+                    </SidebarMenuButton>
+                  ))}
+                </SidebarMenu>
+              </ScrollArea>
+            </SidebarContent>
+          </Sidebar>
         </div>
-    );
+      </div>
+    </div>
+  );
 }

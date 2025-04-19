@@ -8,7 +8,7 @@
     "start": "node src/server.js"
   },
   "engines": {
-    "node": "22.4.1"
+    "node": "22.14.0"
   },
   "type": "module",
   "dependencies": {

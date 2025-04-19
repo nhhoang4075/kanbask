@@ -18,9 +18,12 @@ import {
   SidebarMenuItem,
   useSidebar
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSession } from "@/hooks/use-session";
 
-export default function NavUser({ user }) {
+export default function NavUser() {
   const { isMobile } = useSidebar();
+  const { user, loading, logout } = useSession();
 
   return (
     <SidebarMenu>
@@ -28,17 +31,30 @@ export default function NavUser({ user }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              size="xl"
+              className="flex items-center data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-              </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs text-muted-foreground">{user.email}</span>
-              </div>
+              {loading ? (
+                <Skeleton className="h-10 w-10 rounded-lg" />
+              ) : (
+                <Avatar className="h-10 w-10 rounded-lg">
+                  <AvatarImage src={user?.avatar_url} alt={user?.full_name} />
+                  <AvatarFallback className="rounded-lg bg-mustard">
+                    <span className="text-prussian-blue">KB</span>
+                  </AvatarFallback>
+                </Avatar>
+              )}
+              {loading ? (
+                <div className="space-y-1">
+                  <Skeleton className="h-4 w-[150px] rounded-lg" />
+                  <Skeleton className="h-4 w-[120px] rounded-lg" />
+                </div>
+              ) : (
+                <div className="grid flex-1 text-left text-sm leading-tight space-y-1">
+                  <span className="truncate font-medium">{user?.full_name}</span>
+                  <span className="truncate text-xs">{user?.email}</span>
+                </div>
+              )}
               <MoreVerticalIcon className="ml-auto size-4" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
@@ -51,29 +67,34 @@ export default function NavUser({ user }) {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">KB</AvatarFallback>
+                  <AvatarImage src={user?.avatar} alt={user?.full_name} />
+                  <AvatarFallback className="rounded-lg bg-mustard">
+                    <span className="text-prussian-blue">KB</span>
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                  <span className="truncate font-medium">{user?.full_name}</span>
+                  <span className="truncate text-xs text-muted-foreground">{user?.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <UserCircleIcon />
+              <DropdownMenuItem className="group focus:bg-prussian-blue focus:text-background">
+                <UserCircleIcon className="text-muted-foreground group-focus:text-background" />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings />
+              <DropdownMenuItem className="group focus:bg-prussian-blue focus:text-background">
+                <Settings className="text-muted-foreground group-focus:text-background" />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOutIcon />
+            <DropdownMenuItem
+              onSelect={logout}
+              className="group text-destructive focus:bg-destructive/75 focus:text-background"
+            >
+              <LogOutIcon className="text-destructive group-focus:text-background" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 
 import { SessionProvider } from "@/hooks/use-session";
-import { SocketProvider } from "@/hooks/use-socket.new";
+import { SocketProvider } from "@/hooks/use-socket";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/app/app-sidebar";
 

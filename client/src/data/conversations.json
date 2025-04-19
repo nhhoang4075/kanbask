@@ -3,17 +3,8 @@
     "id": "conv-3",
     "teamId": "team-2",
     "projectId": "project-201",
-    "participants": [
-      "user1",
-      "user3"
-    ],
-    "messageIds": [
-      "msg-6",
-      "msg-7",
-      "msg-8",
-      "msg-1743514274727",
-      "msg-1743764498867"
-    ],
+    "participants": ["user1", "user3"],
+    "messageIds": ["msg-6", "msg-7", "msg-8", "msg-1743514274727", "msg-1743764498867"],
     "title": "Project kickoff",
     "createdAt": "2023-06-12T10:00:00.000+07:00",
     "updatedAt": "2025-04-04T11:01:38.867Z"
@@ -22,10 +13,7 @@
     "id": "conv-1",
     "teamId": "team-1",
     "projectId": "project-101",
-    "participants": [
-      "user1",
-      "user2"
-    ],
+    "participants": ["user1", "user2"],
     "messageIds": [
       "msg-1",
       "msg-2",
@@ -46,11 +34,7 @@
     "id": "conv-5",
     "teamId": "team-3",
     "projectId": "project-301",
-    "participants": [
-      "user2",
-      "user4",
-      "user5"
-    ],
+    "participants": ["user2", "user4", "user5"],
     "messageIds": [],
     "title": "Budget review",
     "createdAt": "2023-06-14T11:30:00.000+07:00",
@@ -60,11 +44,7 @@
     "id": "conv-4",
     "teamId": "team-2",
     "projectId": "project-202",
-    "participants": [
-      "user1",
-      "user4",
-      "user5"
-    ],
+    "participants": ["user1", "user4", "user5"],
     "messageIds": [],
     "title": "New feature planning",
     "createdAt": "2023-06-13T09:00:00.000+07:00",
@@ -74,14 +54,8 @@
     "id": "conv-2",
     "teamId": "team-1",
     "projectId": "project-102",
-    "participants": [
-      "user2",
-      "user3"
-    ],
-    "messageIds": [
-      "msg-4",
-      "msg-5"
-    ],
+    "participants": ["user2", "user3"],
+    "messageIds": ["msg-4", "msg-5"],
     "title": "Team meeting",
     "createdAt": "2023-06-11T14:23:00.000+07:00",
     "updatedAt": "2023-06-11T14:28:30.000+07:00"

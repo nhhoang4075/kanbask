@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboardIcon,
   MessageSquareDot,
@@ -15,16 +16,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 const items = [
   {
     title: "Dashboard",
-    url: "#",
+    url: "/app",
     icon: LayoutDashboardIcon
   },
   {
     title: "Message",
-    url: "#",
+    url: "/app/message",
     icon: MessageSquareDot
   },
   {
@@ -45,20 +47,38 @@ const items = [
 ];
 
 export default function NavMain() {
+  const pathname = usePathname();
+
   return (
     <SidebarGroup>
       <SidebarMenu>
-        {items.map((item) => (
-          <SidebarMenuItem key={item.title}>
-            <SidebarMenuButton tooltip={item.title} asChild>
-              <Link href={item.url}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        ))}
+        {items.map((item) => {
+          const isActive = item.url === pathname;
+
+          return (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton isActive={isActive} tooltip={item.title} asChild>
+                <Link href={item.url}>
+                  {item.icon && <item.icon className={cn(isActive ? "text-blue-green" : "")} />}
+                  <span>{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          );
+        })}
       </SidebarMenu>
     </SidebarGroup>
   );
 }
+
+// (
+
+//   <SidebarMenuItem key={item.title}>
+//     <SidebarMenuButton isActive={item.url === pathname} tooltip={item.title} asChild>
+//       <Link href={item.url}>
+//         {item.icon && <item.icon />}
+//         <span>{item.title}</span>
+//       </Link>
+//     </SidebarMenuButton>
+//   </SidebarMenuItem>
+// )

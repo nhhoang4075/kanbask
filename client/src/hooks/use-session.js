@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import authService from "@/actions/auth-actions";
+import { getSession, logout } from "@/actions/auth-actions";
 
 // Context to hold session state and actions
 const SessionContext = createContext({
@@ -29,7 +29,7 @@ export function SessionProvider({ children }) {
   const refreshSession = useCallback(async () => {
     setLoading(true);
     try {
-      const sessionData = await authService.getSession();
+      const sessionData = await getSession();
       setUser(sessionData?.user || null);
     } catch (error) {
       console.error("refreshSession error:", error);
@@ -45,7 +45,7 @@ export function SessionProvider({ children }) {
    */
   const logoutHandler = useCallback(async () => {
     try {
-      await authService.logout();
+      await logout();
     } catch (err) {
       console.error("logout error:", err);
     } finally {

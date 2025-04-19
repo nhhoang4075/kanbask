@@ -3,7 +3,7 @@
 import { ChatSidebar } from "@/components/ChatComponents/ChatSidebar";
 import { Chat } from "@/components/ChatComponents/Chat";
 import { useState, useEffect, use, useRef } from "react";
-import { useSocket } from "@/hooks/use-socket";
+import { useSocket } from "@/hooks/_use-socket";
 import { useChatData } from "@/hooks/use-chatdata";
 
 export default function Messages({ params }) {
@@ -18,7 +18,7 @@ export default function Messages({ params }) {
     setSearchText,
     convContainerRef,
     currentUserId,
-    allParticipants,
+    allParticipants
   } = useChatData();
   const [loading, setLoading] = useState(false);
   const { socket } = useSocket();
@@ -26,9 +26,7 @@ export default function Messages({ params }) {
 
   useEffect(() => {
     if (!conversations?.length || !conversationId) return;
-    const selectedConv = conversations.find(
-      (conv) => conv.id === conversationId
-    );
+    const selectedConv = conversations.find((conv) => conv.id === conversationId);
     if (selectedConv && (!currConv || currConv.id !== conversationId)) {
       setCurrConv(selectedConv);
       console.log("Selected conversation:", selectedConv);
@@ -57,7 +55,7 @@ export default function Messages({ params }) {
     if (convContainerRef.current) {
       convContainerRef.current.scrollIntoView({
         behavior: "smooth",
-        block: "end",
+        block: "end"
       });
     }
   };
@@ -73,7 +71,7 @@ export default function Messages({ params }) {
         const newConvId = `conv-${Date.now()}`;
         const newFixedMessage = {
           ...newMessage,
-          conversation_id: newConvId,
+          conversation_id: newConvId
         };
 
         // Create new conversation object
@@ -81,7 +79,7 @@ export default function Messages({ params }) {
           ...currConv,
           id: newConvId,
           createdAt: newMessage.createdAt,
-          updatedAt: newMessage.createdAt,
+          updatedAt: newMessage.createdAt
         };
 
         // Update local state immediately
@@ -103,16 +101,14 @@ export default function Messages({ params }) {
           if (conv.id === newMessage.conversation_id) {
             return {
               ...conv,
-              updatedAt: newMessage.createdAt,
+              updatedAt: newMessage.createdAt
             };
           }
           return conv;
         });
 
         // Sort by updated time
-        updatedConversations.sort(
-          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
-        );
+        updatedConversations.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
         setConversations(updatedConversations);
 

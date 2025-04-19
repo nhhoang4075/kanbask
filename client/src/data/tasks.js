@@ -31,32 +31,32 @@ export const users = [
   {
     id: "user-1",
     name: "John Doe",
-    avatar: "/placeholder.svg?height=40&width=40"
+    avatar: ""
   },
   {
     id: "user-2",
     name: "Alex Johnson",
-    avatar: "/placeholder.svg?height=40&width=40"
+    avatar: ""
   },
   {
     id: "user-3",
     name: "Emily Chen",
-    avatar: "/placeholder.svg?height=40&width=40"
+    avatar: ""
   },
   {
     id: "user-4",
     name: "Sam Taylor",
-    avatar: "/placeholder.svg?height=40&width=40"
+    avatar: ""
   },
   {
     id: "user-5",
     name: "Jamie Smith",
-    avatar: "/placeholder.svg?height=40&width=40"
+    avatar: ""
   },
   {
     id: "user-6",
     name: "Taylor Wong",
-    avatar: "/placeholder.svg?height=40&width=40"
+    avatar: ""
   }
 ];
 
@@ -67,24 +67,31 @@ export const initialData = [
     id: "task-1",
     projectId: "project-1",
     title: "Research competitors",
-    description: "Analyze top 5 competitors in the market",
+    description: `
+    Conduct a comprehensive analysis of the top 5 competitors in the market. 
+    This includes identifying their strengths, weaknesses, opportunities, and threats (SWOT analysis). 
+    Focus on their product offerings, pricing strategies, marketing campaigns, customer reviews, and overall market positioning. 
+    Additionally, gather insights into their recent developments, such as new product launches, partnerships, or acquisitions. 
+    The goal is to identify areas where our company can differentiate itself and gain a competitive advantage. 
+    Prepare a detailed report summarizing the findings and include actionable recommendations for the team to consider.
+  `,
     status: "To Do",
     priority: "medium",
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-2",
         name: "Alex Johnson",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       },
       {
         id: "user-3",
         name: "Emily Chen",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-11-15",
@@ -102,7 +109,7 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [],
     dueDate: "2023-11-20",
@@ -120,13 +127,13 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-4",
         name: "Sam Taylor",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-11-10",
@@ -144,13 +151,13 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-5",
         name: "Jamie Smith",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-11-12",
@@ -168,18 +175,18 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-2",
         name: "Alex Johnson",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       },
       {
         id: "user-5",
         name: "Jamie Smith",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: null,
@@ -197,13 +204,13 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-6",
         name: "Taylor Wong",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-11-08",
@@ -221,13 +228,13 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-5",
         name: "Jamie Smith",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-10-30",
@@ -245,13 +252,13 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-4",
         name: "Sam Taylor",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-10-25",
@@ -271,13 +278,13 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-4",
         name: "Sam Taylor",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-11-18",
@@ -295,18 +302,18 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-5",
         name: "Jamie Smith",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       },
       {
         id: "user-6",
         name: "Taylor Wong",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-11-25",
@@ -324,13 +331,13 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-4",
         name: "Sam Taylor",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-10-30",
@@ -350,13 +357,13 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-6",
         name: "Taylor Wong",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-11-20",
@@ -374,18 +381,18 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-4",
         name: "Sam Taylor",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       },
       {
         id: "user-2",
         name: "Alex Johnson",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-11-15",
@@ -405,13 +412,13 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-5",
         name: "Jamie Smith",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-11-30",
@@ -429,18 +436,18 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: "/placeholder.svg?height=40&width=40"
+      avatar: ""
     },
     assignedTo: [
       {
         id: "user-2",
         name: "Alex Johnson",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       },
       {
         id: "user-6",
         name: "Taylor Wong",
-        avatar: "/placeholder.svg?height=40&width=40"
+        avatar: ""
       }
     ],
     dueDate: "2023-12-05",

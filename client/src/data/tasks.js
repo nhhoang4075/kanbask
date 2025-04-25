@@ -97,7 +97,15 @@ export const initialData = [
     dueDate: "2023-11-15",
     completedAt: null,
     createdAt: "2023-10-15T10:30:00Z",
-    updatedAt: "2023-10-15T10:30:00Z"
+    updatedAt: "2023-10-15T10:30:00Z",
+    comments: [
+      {
+        id: "comment-1"
+      },
+      {
+        id: "comment-2"
+      }
+    ]
   },
   {
     id: "task-2",
@@ -115,7 +123,8 @@ export const initialData = [
     dueDate: "2023-11-20",
     completedAt: null,
     createdAt: "2023-10-16T09:15:00Z",
-    updatedAt: "2023-10-16T09:15:00Z"
+    updatedAt: "2023-10-16T09:15:00Z",
+    comments: []
   },
   {
     id: "task-3",
@@ -139,7 +148,8 @@ export const initialData = [
     dueDate: "2023-11-10",
     completedAt: null,
     createdAt: "2023-10-17T14:20:00Z",
-    updatedAt: "2023-10-17T14:20:00Z"
+    updatedAt: "2023-10-17T14:20:00Z",
+    comment: []
   },
   {
     id: "task-4",
@@ -163,7 +173,15 @@ export const initialData = [
     dueDate: "2023-11-12",
     completedAt: null,
     createdAt: "2023-10-18T11:45:00Z",
-    updatedAt: "2023-10-20T09:30:00Z"
+    updatedAt: "2023-10-20T09:30:00Z",
+    comments: [
+      {
+        id: "comment-3"
+      },
+      {
+        id: "comment-4"
+      }
+    ]
   },
   {
     id: "task-5",
@@ -192,7 +210,8 @@ export const initialData = [
     dueDate: null,
     completedAt: null,
     createdAt: "2023-10-19T16:10:00Z",
-    updatedAt: "2023-10-21T10:15:00Z"
+    updatedAt: "2023-10-21T10:15:00Z",
+    comments: []
   },
   {
     id: "task-6",
@@ -216,7 +235,12 @@ export const initialData = [
     dueDate: "2023-11-08",
     completedAt: null,
     createdAt: "2023-10-22T13:25:00Z",
-    updatedAt: "2023-10-25T15:40:00Z"
+    updatedAt: "2023-10-25T15:40:00Z",
+    comments: [
+      {
+        id: "comment-5"
+      }
+    ]
   },
   {
     id: "task-7",
@@ -240,7 +264,8 @@ export const initialData = [
     dueDate: "2023-10-30",
     completedAt: "2023-10-28T11:20:00Z",
     createdAt: "2023-10-20T09:30:00Z",
-    updatedAt: "2023-10-28T11:20:00Z"
+    updatedAt: "2023-10-28T11:20:00Z",
+    comments: []
   },
   {
     id: "task-8",
@@ -264,7 +289,8 @@ export const initialData = [
     dueDate: "2023-10-25",
     completedAt: "2023-10-23T16:45:00Z",
     createdAt: "2023-10-15T14:20:00Z",
-    updatedAt: "2023-10-23T16:45:00Z"
+    updatedAt: "2023-10-23T16:45:00Z",
+    comments: []
   },
 
   // Project 2 tasks
@@ -290,7 +316,8 @@ export const initialData = [
     dueDate: "2023-11-18",
     completedAt: null,
     createdAt: "2023-10-20T09:30:00Z",
-    updatedAt: "2023-10-20T09:30:00Z"
+    updatedAt: "2023-10-20T09:30:00Z",
+    comments: []
   },
   {
     id: "task-10",
@@ -319,7 +346,8 @@ export const initialData = [
     dueDate: "2023-11-25",
     completedAt: null,
     createdAt: "2023-10-22T11:45:00Z",
-    updatedAt: "2023-10-22T11:45:00Z"
+    updatedAt: "2023-10-22T11:45:00Z",
+    comments: []
   },
   {
     id: "task-11",
@@ -343,7 +371,8 @@ export const initialData = [
     dueDate: "2023-10-30",
     completedAt: "2023-10-29T15:20:00Z",
     createdAt: "2023-10-15T14:20:00Z",
-    updatedAt: "2023-10-29T15:20:00Z"
+    updatedAt: "2023-10-29T15:20:00Z",
+    comments: []
   },
 
   // Project 3 tasks
@@ -369,7 +398,8 @@ export const initialData = [
     dueDate: "2023-11-20",
     completedAt: null,
     createdAt: "2023-10-25T09:30:00Z",
-    updatedAt: "2023-10-25T09:30:00Z"
+    updatedAt: "2023-10-25T09:30:00Z",
+    comments: []
   },
   {
     id: "task-13",
@@ -398,7 +428,8 @@ export const initialData = [
     dueDate: "2023-11-15",
     completedAt: null,
     createdAt: "2023-10-20T14:20:00Z",
-    updatedAt: "2023-10-20T14:20:00Z"
+    updatedAt: "2023-10-20T14:20:00Z",
+    comments: []
   },
 
   // Project 4 tasks
@@ -424,7 +455,8 @@ export const initialData = [
     dueDate: "2023-11-30",
     completedAt: null,
     createdAt: "2023-10-28T11:45:00Z",
-    updatedAt: "2023-10-28T11:45:00Z"
+    updatedAt: "2023-10-28T11:45:00Z",
+    comments: []
   },
   {
     id: "task-15",
@@ -453,7 +485,8 @@ export const initialData = [
     dueDate: "2023-12-05",
     completedAt: null,
     createdAt: "2023-10-30T09:15:00Z",
-    updatedAt: "2023-10-30T09:15:00Z"
+    updatedAt: "2023-10-30T09:15:00Z",
+    comments: []
   }
 ];
 
@@ -491,3 +524,61 @@ export function getGroupedTasks(tasks) {
 
   return columns;
 }
+
+export const sampleComments = [
+  {
+    id: "comment-1",
+    taskId: "task-1",
+    text: "I've started researching our top competitors. Will share initial findings tomorrow.",
+    author: {
+      id: "user-2",
+      name: "Alex Johnson",
+      avatar: "/placeholder.svg?height=40&width=40"
+    },
+    createdAt: "2023-10-16T14:30:00Z"
+  },
+  {
+    id: "comment-2",
+    taskId: "task-1",
+    text: "Great! I've also found some interesting insights about their marketing strategies.",
+    author: {
+      id: "user-3",
+      name: "Emily Chen",
+      avatar: "/placeholder.svg?height=40&width=40"
+    },
+    createdAt: "2023-10-16T15:45:00Z"
+  },
+  {
+    id: "comment-3",
+    taskId: "task-4",
+    text: "I'm having some issues with the OAuth implementation. Could use some help.",
+    author: {
+      id: "user-5",
+      name: "Jamie Smith",
+      avatar: "/placeholder.svg?height=40&width=40"
+    },
+    createdAt: "2023-10-21T09:15:00Z"
+  },
+  {
+    id: "comment-4",
+    taskId: "task-4",
+    text: "What specific issues are you encountering? I can help troubleshoot.",
+    author: {
+      id: "user-1",
+      name: "John Doe",
+      avatar: "/placeholder.svg?height=40&width=40"
+    },
+    createdAt: "2023-10-21T10:30:00Z"
+  },
+  {
+    id: "comment-5",
+    taskId: "task-6",
+    text: "I've completed the initial review. There are a few security concerns we need to address.",
+    author: {
+      id: "user-6",
+      name: "Taylor Wong",
+      avatar: "/placeholder.svg?height=40&width=40"
+    },
+    createdAt: "2023-10-23T16:20:00Z"
+  }
+];

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useRef, useEffect } from "react";
+import { createContext, useContext, useRef, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import { useSession } from "@/hooks/use-session";
 
@@ -8,16 +8,13 @@ import { useSession } from "@/hooks/use-session";
 const SocketContext = createContext(null);
 
 export function useSocket() {
-  const context = useContext(SocketContext);
-  if (context === null) {
-    throw new Error("useSocket must be used within a SocketProvider");
-  }
-  return context;
+  return useContext(SocketContext);
 }
 
 export function SocketProvider({ children }) {
   const { user, loading } = useSession(); // get current user from session
   const socketRef = useRef(null);
+  const [connected, setConnected] = useState(false);
 
   useEffect(() => {
     // Only connect when session is loaded and user is present
@@ -27,8 +24,13 @@ export function SocketProvider({ children }) {
         withCredentials: true
       });
 
+      socketRef.current.on("connect", () => {
+        setConnected(true);
+      });
+
       // Emit setup event with userId to authenticate socket
       socketRef.current.emit("setup");
+      setConnected(true);
     }
 
     // On unmount or when user changes, disconnect previous socket
@@ -36,9 +38,14 @@ export function SocketProvider({ children }) {
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
+        setConnected(false);
       }
     };
   }, [loading, user]); // rerun when loading or user changes
 
-  return <SocketContext.Provider value={socketRef.current}>{children}</SocketContext.Provider>;
+  return (
+    <SocketContext.Provider value={{ socket: socketRef.current, connected }}>
+      {children}
+    </SocketContext.Provider>
+  );
 }

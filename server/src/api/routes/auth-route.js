@@ -16,7 +16,7 @@ const authRoute = (router) => {
   router.route("/auth/logout").post(authController.logout);
 
   router.use("/mail/verify-email", authMiddleware.authenticate);
-  router.route("/mail/verify-email").get(authController.sendVerificationMail);
+  router.route("/mail/verify-email").post(authController.sendVerificationMail);
 
   router.use("/auth/verify-email", authMiddleware.authenticate);
   router

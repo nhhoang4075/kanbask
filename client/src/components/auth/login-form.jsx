@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { login } from "@/actions/auth-actions";
+import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 
 const greetings = [
   "Nice to see you again!",
@@ -61,6 +62,8 @@ export default function LoginForm() {
 
   const [remember, setRemember] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect") || DEFAULT_LOGIN_REDIRECT;
 
   const onSubmit = async (formData) => {
     try {
@@ -70,7 +73,7 @@ export default function LoginForm() {
         toast.error("Login failed! Try 'Forgot password?' ");
       } else {
         toast.success("Login successful!");
-        router.push("/");
+        router.push(redirectUrl);
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");

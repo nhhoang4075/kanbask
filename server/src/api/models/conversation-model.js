@@ -170,6 +170,22 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
           END AS title`,
           [user_id]
         ),
+        db.raw(
+          `
+          CASE
+            WHEN v.type = 'direct' THEN (
+              SELECT u2.avatar_url
+              FROM conversation_participants cp2
+              JOIN users u2 ON cp2.user_id = u2.id
+              WHERE cp2.conversation_id = v.conversation_id
+                AND u2.id <> ?
+              LIMIT 1
+            )
+            ELSE NULL
+          END AS avatar_url
+        `,
+          [user_id]
+        ),
         db.raw("COALESCE(um.unread_count, 0) AS unread_count")
       ])
       .where("v.conversation_id", conversation_id)

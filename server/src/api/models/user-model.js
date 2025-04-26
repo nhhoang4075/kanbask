@@ -69,11 +69,11 @@ const getAllUsers = async () => {
   }
 };
 
-const updateOneUserById = async (id, updateData) => {
+const updateOneUserById = async (id, data) => {
   try {
     const [user] = await db("users")
+      .update({ ...data, updated_at: new Date().toISOString() })
       .where({ id })
-      .update({ ...updateData, updated_at: new Date().toISOString() })
       .returning("id");
 
     return user.id;

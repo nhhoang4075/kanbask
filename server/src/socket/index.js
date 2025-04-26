@@ -17,7 +17,7 @@ const setupSocket = (server) => {
 
   ioInstance = io;
 
-  io.use(authMiddleware.socketAuthenticate);
+  io.use(authMiddleware.authenticateSocket);
 
   io.on("connection", (socket) => {
     console.log("A client connected: " + socket.id);

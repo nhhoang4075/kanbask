@@ -27,18 +27,35 @@ CREATE INDEX idx_users_password_reset_code ON users (password_reset_code);
 CREATE TABLE IF NOT EXISTS teams (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    code VARCHAR(20) NOT NULL,
+    code VARCHAR(20) NOT NULL UNIQUE,
     description TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    join_policy VARCHAR(20) NOT NULL DEFAULT 'manual'
+        CHECK (join_policy IN ('auto', 'manual')),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS user_team (
-    user_id UUID REFERENCES users(id),
-    team_id INT REFERENCES teams(id),
-    role VARCHAR(30),
+CREATE TABLE IF NOT EXISTS team_members (
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    team_id INT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    role VARCHAR(30) NOT NULL DEFAULT 'member',
+    joined_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id, team_id)
 );
+
+CREATE TABLE IF NOT EXISTS team_join_requests (
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    team_id INT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending','approved','rejected')),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX idx_unique_pending_request
+ON team_join_requests(user_id, team_id)
+WHERE status = 'pending';
 
 CREATE TABLE IF NOT EXISTS projects (
     id SERIAL PRIMARY KEY,

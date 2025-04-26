@@ -52,14 +52,14 @@ const getManyMessagesByConversationId = async (conversation_id) => {
   }
 };
 
-const updateOneMessageById = async (id, updateData) => {
+const updateOneMessageById = async (id, data) => {
   try {
     const [message] = await db("messages")
-      .where({ id })
       .update({
-        ...updateData,
+        ...data,
         updated_at: new Date().toISOString()
       })
+      .where({ id })
       .returning("id");
 
     return message.id;

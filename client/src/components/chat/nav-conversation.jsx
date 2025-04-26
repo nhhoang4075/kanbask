@@ -7,7 +7,7 @@ import ChatTabs from "./chat-tabs";
 export default function NavConversation() {
   const { conversations, loading } = useChat();
   return (
-    <Card className="h-full shadow-lg rounded-none overflow-hidden">
+    <Card className="h-full shadow-lg rounded-none overflow-hidden bg-ghost-white">
       <CardContent className="p-0 flex flex-col h-full">
         <div className="px-6 py-4 bg-ghost-white border-b">
           <h2 className="text-xl font-semibold text-gray-800">Messages</h2>

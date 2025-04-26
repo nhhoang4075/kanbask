@@ -1,16 +1,10 @@
 import { db } from "../../config/db.js";
 
-
-const createOneTeam = async (name, code, description) => {
+const createOneTeam = async (data) => {
   try {
     const [team] = await db("teams")
-      .insert({
-        name,
-        code,
-        description
-      })
+      .insert({ ...data })
       .returning("id");
-
 
     return team.id;
   } catch (err) {
@@ -18,49 +12,32 @@ const createOneTeam = async (name, code, description) => {
   }
 };
 
-
-const addMembersToTeam = async (teamId, userIds, role) => {
-  const memberIds = [];
+const getOneTeamById = async (id) => {
   try {
-    for (const userId of userIds) {
-      const [member] = await db("user_team")
-        .insert({
-          user_id: userId,
-          team_id: teamId,
-          role: role
-        })
-        .returning("user_id");
+    const [team] = await db("teams").select("*").where({ id }).limit(1);
 
-
-      memberIds.push(member.id);
-    }
-    return memberIds;
+    return team;
   } catch (err) {
     throw new Error(err);
   }
 };
 
-
-const deleteMembersFromTeam = async (teamId, userIds) => {
+const getOneTeamByCode = async (code) => {
   try {
-    const deletedMembers = await db("user_team")
-      .whereIn("user_id", userIds)
-      .andWhere("team_id", teamId)
-      .del()
-      .returning("user_id");
+    const [team] = await db("teams").select("*").where({ code }).limit(1);
 
-
-    return deletedMembers.map((member) => member.id);
+    return team;
   } catch (err) {
-    throw new Error("Error deleting members from team: " + err.message);
+    throw new Error(err);
   }
 };
 
-
-const getTeamsByUserId = async (userId) => {
+const getManyTeamsByUserId = async (user_id) => {
   try {
-    const teamIds = await db("user_team").where("user_team.user_id", userId).select("team_id");
-
+    const teamIds = await db("team_members AS tm")
+      .join("teams AS t", "t.id", "=", "tm.team_id")
+      .select("t.*", "tm.role")
+      .where("tm.user_id", user_id);
 
     return teamIds.map((team) => team.team_id);
   } catch (err) {
@@ -68,97 +45,103 @@ const getTeamsByUserId = async (userId) => {
   }
 };
 
-
-const getMembersByTeamId = async (teamId) => {
+const updateOneTeamById = async (id, data) => {
   try {
-    const memberIds = await db("user_team").where("user_team.team_id", teamId).select("user_id");
+    const [team] = await db("teams")
+      .update({ ...data, updated_at: new Date().toISOString() })
+      .where({ id })
+      .returning("id");
 
-
-    return memberIds.map((member) => member.user_id);
+    return team.id;
   } catch (err) {
     throw new Error(err);
   }
 };
 
-
-const getRole = async (userId, teamId) => {
+const deleteOneTeamById = async (id) => {
   try {
-    const [result] = await db("user_team")
-      .where({ user_id: userId, team_id: teamId })
-      .select("role");
+    const [team] = await db("teams").delete().where({ id }).returning("id");
 
-
-    return result?.role;
+    return team.id;
   } catch (err) {
     throw new Error(err);
   }
 };
 
-
-const deleteTeam = async (teamId) => {
+const addMembersToTeam = async (team_id, user_ids) => {
   try {
-    const [deleted] = await db("teams").where({ id: teamId }).del().returning("id");
+    await db.transaction(async (trx) => {
+      for (const user_id of user_ids) {
+        await trx("team_members").insert({
+          team_id,
+          user_id
+        });
+      }
+    });
 
-
-    return deleted?.id;
+    return team_id;
   } catch (err) {
     throw new Error(err);
   }
 };
 
-
-const addAdmin = async (teamId, userIds) => {
+const getMembersOfTeam = async (team_id) => {
   try {
-    const updates = await Promise.all(
-      userIds.map((userId) =>
-        db("user_team")
-          .where({ user_id: userId, team_id: teamId })
-          .update({ role: "admin" })
-          .returning("user_id")
-      )
-    );
+    const members = await db("team_members AS tm")
+      .join("users_public_view AS v", "v.id", "=", "tm.user_id")
+      .select("v.*", "tm.role")
+      .where({ team_id });
 
-
-    return updates.map(([row]) => row.id);
+    return members;
   } catch (err) {
     throw new Error(err);
   }
 };
 
-
-const getUsersByIds = async (userIds) => {
+const deleteMembersFromTeam = async (team_id, user_ids) => {
   try {
-    const users = await db("users")
-      .whereIn("id", userIds) // Tìm nhiều người dùng theo danh sách id
-      .select("*");
-    return users;
+    await db("team_members")
+      .delete()
+      .whereIn("user_id", user_ids)
+      .andWhere("team_id", team_id)
+      .returning("user_id");
+
+    return team_id;
+  } catch (err) {
+    throw new Error("Error deleting members from team: " + err.message);
+  }
+};
+
+const getTeamRoleOfUser = async (team_id, user_id) => {
+  try {
+    const [user] = await db("team_members").select("role").where({ team_id, user_id });
+
+    return user.role;
   } catch (err) {
     throw new Error(err);
   }
 };
 
-
-const getTeamsByIds = async (teamIds) => {
+const updateTeamRoleOfUser = async (team_id, user_id, role) => {
   try {
-    const teams = await db("teams")
-      .whereIn("id", teamIds) // Tìm nhiều nhóm theo danh sách id
-      .select("*");
-    return teams;
+    await db("team_members").update({ role }).where({ team_id, user_id });
+
+    return user_id;
   } catch (err) {
     throw new Error(err);
   }
 };
-
 
 export default {
   createOneTeam,
-  getTeamsByIds,
-  getUsersByIds,
+  getOneTeamById,
+  getOneTeamByCode,
+  getManyTeamsByUserId,
+  updateOneTeamById,
+  deleteOneTeamById,
   addMembersToTeam,
+  getMembersOfTeam,
   deleteMembersFromTeam,
-  getTeamsByUserId,
-  getMembersByTeamId,
-  getRole,
-  deleteTeam,
-  addAdmin
+  getTeamRoleOfUser,
+  updateTeamRoleOfUser
 };

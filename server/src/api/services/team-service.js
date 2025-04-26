@@ -1,155 +1,157 @@
+import { StatusCodes } from "http-status-codes";
+
 import teamModel from "../models/team-model.js";
+import ApiError from "../../utils/api-error.js";
+import { sanitizeAllowedFields, generateTeamCode } from "../../utils/helper.js";
 
-
-const createOneTeam = async ({ name, code, description, userId }) => {
+const createOneTeam = async (data, createrId) => {
   try {
-    const teamId = await teamModel.createOneTeam(name, code, description);
-    if (!teamId || teamId.length === 0) {
-      throw new Error("Failed to create team");
+    const { name, description, join_policy } = data;
+
+    let code;
+    const maxRetries = 5;
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const generatedCode = generateTeamCode(length);
+      const exists = await teamModel.getOneTeamByCode(code);
+
+      if (!exists) {
+        code = generatedCode;
+        break;
+      } else if (attempt === maxRetries - 1) {
+        throw new ApiError(StatusCodes.CONFLICT, "Failed to generate team code");
+      }
     }
 
+    const teamId = await teamModel.createOneTeam({ name, description, join_policy, code });
 
-    const newMemberIds = await teamModel.addMembersToTeam(teamId, [userId], "owner");
-    if (!newMemberIds || newMemberIds.length === 0) {
-      throw new Error("Failed to create team");
+    if (!teamId) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the team");
     }
-    return { teamId };
-  } catch (error) {
-    throw new Error(error.message);
+
+    await teamModel.updateTeamRoleOfUser(teamId, createrId, "owner");
+
+    const team = teamModel.getOneTeamById(teamId);
+
+    return team;
+  } catch (err) {
+    throw err;
   }
 };
 
+const getManyTeamsByUserId = async (userId) => {
+  try {
+    const teams = await teamModel.getManyTeamsByUserId(userId);
+
+    return teams;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const updateOneTeamById = async (teamId, updateData, updaterId) => {
+  try {
+    const role = await teamModel.getTeamRoleOfUser(teamId, updaterId);
+
+    if (role != "owner") {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can update team info");
+    }
+
+    const allowedData = sanitizeAllowedFields(data, ["name", "description", "join_policy"]);
+
+    if (Object.keys(allowedData).length === 0) {
+      throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "No allowed field to update");
+    }
+
+    await teamModel.updateOneTeamById(teamId, updateData);
+
+    return teamId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const deleteOneTeamById = async (teamId, deleterId) => {
+  try {
+    const role = await teamModel.getTeamRoleOfUser(teamId, deleterId);
+
+    if (role != "owner") {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can delete team");
+    }
+
+    await teamModel.deleteOneTeamById(teamId);
+
+    return teamId;
+  } catch (err) {
+    throw err;
+  }
+};
 
 const addMembersToTeam = async (teamId, userIds) => {
   try {
-    const memberIds = await teamModel.addMembersToTeam(teamId, userIds, "member");
-    if (!memberIds || memberIds.length === 0) {
-      throw new Error(`Failed to add member to team.`);
-    }
+    await teamModel.addMembersToTeam(teamId, userIds);
 
-    return userIds;
-  } catch (error) {
-    throw new Error(error.message);
+    return teamId;
+  } catch (err) {
+    throw err;
   }
 };
 
-
-const deleteMembersFromTeam = async (teamId, userIds, deleterID) => {
+const getMembersOfTeam = async (teamId, requesterId) => {
   try {
-    const role = await teamModel.getRole(deleterID, teamId);
-    if (role != "owner" && role != "admin") {
-      throw new Error("Only owner can delete members from team ");
-    }
-    const memberIds = await teamModel.deleteMembersFromTeam(teamId, userIds);
-    if (!memberIds || memberIds.length === 0) {
-      throw new Error("Failed to delete members from team.");
+    const role = await teamModel.getTeamRoleOfUser(requesterId);
+
+    if (!role) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of team can access this");
     }
 
+    const members = await teamModel.getMembersOfTeam(teamId);
 
-    return userIds;
-  } catch (error) {
-    throw new Error(error.message);
+    return members;
+  } catch (err) {
+    throw err;
   }
 };
 
-
-const getTeamsByUserId = async (userId) => {
+const deleteMembersFromTeam = async (teamId, userIds, deleterId) => {
   try {
-    const teamIds = await teamModel.getTeamsByUserId(userId);
+    const role = await teamModel.getTeamRoleOfUser(teamId, deleterId);
 
-
-    if (!teamIds || teamIds.length === 0) {
-      throw new Error("No teams found for this user.");
+    if (role != "owner") {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can delete members from team");
     }
 
+    await teamModel.deleteMembersFromTeam(teamId, userIds);
 
-    const teams = await teamModel.getTeamsByIds(teamIds);
-    return teams.map((teams) => teams.name);
+    return teamId;
   } catch (error) {
     throw new Error(error.message);
   }
 };
 
-
-const getMembersByTeamId = async (teamId) => {
+const updateTeamRoleOfUser = async (teamId, updateUserData, updaterId) => {
   try {
-    const memberIds = await teamModel.getMembersByTeamId(teamId);
+    const role = await teamModel.getTeamRoleOfUser(teamId, updaterId);
 
-
-    if (!memberIds || memberIds.length === 0) {
-      throw new Error("No members found for this team.");
+    if (role != "owner") {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can update team member's role");
     }
 
+    await teamModel.updateTeamRoleOfUser(teamId, updateUserData.user_id, updateUserData.role);
 
-    const members = await teamModel.getUsersByIds(memberIds);
-    return { members, membersCount: members.length };
-  } catch (error) {
-    throw new Error(error.message);
+    return teamId;
+  } catch (err) {
+    throw err;
   }
 };
-
-
-const deleteTeam = async (teamId, deleterId) => {
-  try {
-    const role = await teamModel.getRole(deleterId, teamId);
-    if (role != "owner" && role != "admin") {
-      throw new Error("Only owner can delete team");
-    }
-
-
-    const memberIds = await teamModel.getMembersByTeamId(teamId);
-    if (!memberIds || memberIds.length === 0) {
-      throw new Error("No members found for this team.");
-    }
-
-
-    const deletedMemberIds = await teamModel.deleteMembersFromTeam(
-      teamId,
-      memberIds
-    );
-    if (!deletedMemberIds || deletedMemberIds.length === 0) {
-      throw new Error("Failed to delete members from team.");
-    }
-
-
-    const deleteTeamId = await teamModel.deleteTeam(teamId);
-    if (!deleteTeamId) {
-      throw new Error("Failed to delete team.");
-    }
-    return deleteTeamId;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
-
-const addAdmin = async (teamId, userIds, adderId) => {
-  try {
-    const checkRole = await teamModel.getRole(adderId, teamId);
-    if (checkRole != "owner") {
-      throw new Error("Only owner can add admin to team");
-    }
-
-
-    const newAdminIds = await teamModel.addAdmin(teamId, userIds);
-    if (!newAdminIds || newAdminIds.length === 0) {
-      throw new Error("Failed to add admin to team.");
-    }
-
-
-    return userIds;
-  } catch (error) {
-    throw new Error(error.message);
-  }
-};
-
 
 export default {
   createOneTeam,
-  addAdmin,
-  deleteTeam,
+  getManyTeamsByUserId,
+  updateOneTeamById,
+  deleteOneTeamById,
   addMembersToTeam,
+  getMembersOfTeam,
   deleteMembersFromTeam,
-  getTeamsByUserId,
-  getMembersByTeamId
+  updateTeamRoleOfUser
 };

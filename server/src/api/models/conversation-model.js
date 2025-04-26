@@ -162,10 +162,10 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
         db.raw(
           `CASE
             WHEN v.type = 'direct' THEN (
-              SELECT u2.first_name || ' ' || u2.last_name
+              SELECT uv.full_name
               FROM conversation_participants cp2
-              JOIN users u2 ON cp2.user_id = u2.id
-              WHERE cp2.conversation_id = v.conversation_id AND u2.id <> ?
+              JOIN user_public_view uv ON cp2.user_id = uv.id
+              WHERE cp2.conversation_id = v.conversation_id AND uv.id <> ?
               LIMIT 1
             )
             WHEN v.type = 'team' THEN t.name
@@ -177,11 +177,11 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
           `
           CASE
             WHEN v.type = 'direct' THEN (
-              SELECT u2.avatar_url
+              SELECT uv.avatar_url
               FROM conversation_participants cp2
-              JOIN users u2 ON cp2.user_id = u2.id
+              JOIN user_public_view uv ON cp2.user_id = uv.id
               WHERE cp2.conversation_id = v.conversation_id
-                AND u2.id <> ?
+                AND uv.id <> ?
               LIMIT 1
             )
             ELSE NULL
@@ -204,7 +204,7 @@ const updateLastReadMessage = async (conversation_id, user_id, message_id) => {
   try {
     await db("conversation_participants").where({ conversation_id, user_id }).update({
       last_read_message_id: message_id,
-      last_read_at: new Date().toISOString()
+      last_read_at: db.fn.now()
     });
 
     return user_id;

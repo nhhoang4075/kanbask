@@ -25,8 +25,7 @@ const register = async (data) => {
     const userId = await userModel.createOneUser({
       email,
       password_hash: hashedPassword,
-      first_name: data.first_name,
-      last_name: data.last_name
+      full_name: data.full_name
     });
 
     if (!userId) {

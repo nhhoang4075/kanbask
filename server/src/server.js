@@ -1,9 +1,9 @@
 import "dotenv/config";
-import express, { json } from "express";
-import { createServer } from "https";
 import cors from "cors";
 import { StatusCodes } from "http-status-codes";
 import cookieParser from "cookie-parser";
+import express, { json } from "express";
+import { createServer } from "https";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -60,31 +60,7 @@ const startServer = () => {
       message: "Healthcheck passed!"
     });
   });
-  app.put("/api/users", (req, res) => {
-    const userId = req.params.id;
-    const updatedUser = req.body;
 
-    fs.readFile(USERS_FILE, "utf8", (err, data) => {
-      if (err) {
-        return res.status(500).json({ error: "Failed to read users file" });
-      }
-
-      let users = JSON.parse(data);
-      const userIndex = users.findIndex((user) => user.id === updatedUser.id);
-
-      if (userIndex === -1) {
-        return res.status(404).json({ error: "User not found" });
-      }
-      users[userIndex] = { ...users[userIndex], ...updatedUser };
-
-      fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2), (err) => {
-        if (err) {
-          return res.status(500).json({ error: "Failed to write users file" });
-        }
-        res.json({ message: "User updated successfully", user: users[userIndex] });
-      });
-    });
-  });
   server.listen(process.env.APP_PORT || 8080, () => {
     console.log(`Server is running at https://${process.env.APP_HOST}:${process.env.APP_PORT}`);
   });

@@ -17,7 +17,7 @@ const createOneConversation = async (req, res, next) => {
   }
 };
 
-const getManyConversationsByUserId = async (req, res, next) => {
+const getConversationsOfUser = async (req, res, next) => {
   try {
     const conversations = await conversationService.getManyConversationsByUserId(req.user.id);
 
@@ -60,7 +60,7 @@ const getParticipantsOfConversation = async (req, res, next) => {
 
 export default {
   createOneConversation,
-  getManyConversationsByUserId,
+  getConversationsOfUser,
   deleteOneConversation,
   getParticipantsOfConversation
 };

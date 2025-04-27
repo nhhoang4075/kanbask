@@ -5,7 +5,7 @@ const validateCreateProject = validate(
   z.object({
     body: z
       .object({
-        team_id: z.coerce.number().int(),
+        team_id: z.coerce.number().int().positive(),
         name: z.string().min(1).max(100),
         description: z.string().optional()
       })
@@ -15,59 +15,62 @@ const validateCreateProject = validate(
   })
 );
 
-const validateProjectIdParam = validate(
-  z.object({
-    params: z
-      .object({
-        project_id: z.coerce.number().int()
-      })
-      .strict(),
-    body: z.object({}).optional(),
-    query: z.object({}).optional()
-  })
-);
-
 const validateUpdateProject = validate(
   z.object({
-    params: z
-      .object({
-        project_id: z.coerce.number().int()
-      })
-      .strict(),
     body: z
       .object({
         name: z.string().min(1).max(100).optional(),
         description: z.string().optional()
       })
       .strict(),
+    params: z
+      .object({
+        id: z.coerce.number().int().positive()
+      })
+      .strict(),
     query: z.object({}).optional()
   })
 );
 
-const validateProjectMemberParams = validate(
+const validateUpdateProjectMembers = validate(
   z.object({
-    params: z
-      .object({
-        project_id: z.coerce.number().int(),
-        user_id: z.string().uuid()
-      })
-      .strict(),
-    body: z.object({}).optional(),
-    query: z.object({}).optional()
-  })
-);
-
-const validateUpdateUserProjectRole = validate(
-  z.object({
-    params: z
-      .object({
-        project_id: z.coerce.number().int(),
-        user_id: z.string().uuid()
-      })
-      .strict(),
     body: z
       .object({
-        role: z.enum(["member", "admin", "owner"])
+        user_ids: z.array(z.string().uuid())
+      })
+      .strict(),
+    params: z
+      .object({
+        id: z.coerce.number().int().positive()
+      })
+      .strict(),
+    query: z.object({}).optional()
+  })
+);
+
+const validateUpdateProjectRole = validate(
+  z.object({
+    body: z
+      .object({
+        user_id: z.string().uuid(),
+        role: z.enum(["member", "admin"])
+      })
+      .strict(),
+    params: z
+      .object({
+        id: z.coerce.number().int().positive()
+      })
+      .strict(),
+    query: z.object({}).optional()
+  })
+);
+
+const validateProjectIdParam = validate(
+  z.object({
+    body: z.object({}).optional(),
+    params: z
+      .object({
+        id: z.coerce.number().int().positive()
       })
       .strict(),
     query: z.object({}).optional()
@@ -76,8 +79,8 @@ const validateUpdateUserProjectRole = validate(
 
 export default {
   validateCreateProject,
-  validateProjectIdParam,
   validateUpdateProject,
-  validateProjectMemberParams,
-  validateUpdateUserProjectRole
+  validateUpdateProjectMembers,
+  validateUpdateProjectRole,
+  validateProjectIdParam
 };

@@ -25,8 +25,7 @@ const register = async (data) => {
     const userId = await userModel.createOneUser({
       email,
       password_hash: hashedPassword,
-      first_name: data.first_name,
-      last_name: data.last_name
+      full_name: data.full_name
     });
 
     if (!userId) {
@@ -62,6 +61,20 @@ const login = async (data) => {
     });
 
     const user = await userModel.getOneUserById(existedUser.id);
+
+    return sanitizeUser(user);
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getSession = async (userId) => {
+  try {
+    const user = await userModel.getOneUserById(userId);
+
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `User with id '${userId}' not found`);
+    }
 
     return sanitizeUser(user);
   } catch (err) {
@@ -130,9 +143,9 @@ const sendVerificationMail = async (userEmail) => {
   }
 };
 
-const verifyEmail = async (data) => {
+const verifyEmail = async (userEmail, verificationCode) => {
   try {
-    const user = await userModel.getOneUserByEmail(data.email);
+    const user = await userModel.getOneUserByEmail(userEmail);
 
     if (!user) {
       throw new ApiError(
@@ -154,7 +167,7 @@ const verifyEmail = async (data) => {
       throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "Verification code has expired");
     }
 
-    const isCodeMatched = await bcrypt.compare(data.verification_code, verification_code);
+    const isCodeMatched = await bcrypt.compare(verificationCode, verification_code);
 
     if (!isCodeMatched) {
       throw new ApiError(StatusCodes.FORBIDDEN, "Verification code is not matched");
@@ -233,6 +246,7 @@ const resetPassword = async (data) => {
 export default {
   register,
   login,
+  getSession,
   logout,
   sendVerificationMail,
   verifyEmail,

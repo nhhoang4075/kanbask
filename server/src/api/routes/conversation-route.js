@@ -3,14 +3,11 @@ import conversationController from "../controllers/conversation-controller.js";
 import authMiddleware from "../../middlewares/auth-middleware.js";
 
 const conversationRoute = (router) => {
-  // router.use("/conversations", authMiddleware.authenticate);
+  router.use("/conversations", authMiddleware.authenticate);
 
   router
     .route("/conversations")
-    .get(
-      conversationValidation.validateUserIdQuery,
-      conversationController.getManyConversationsByUserId
-    )
+    .get(conversationController.getConversationsOfUser)
     .post(
       conversationValidation.validateNewConversation,
       conversationController.createOneConversation

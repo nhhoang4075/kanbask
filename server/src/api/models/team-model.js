@@ -187,8 +187,8 @@ const isTeamJoinRequestPending = async (team_id, user_id) => {
 const updateTeamJoinRequestStatus = async (request_id, status) => {
   try {
     const [request] = await db("team_join_requests")
-      .where({ id: request_id })
       .update({ status, updated_at: db.fn.now() })
+      .where({ id: request_id })
       .returning("id");
 
     return request.id;
@@ -200,11 +200,11 @@ const updateTeamJoinRequestStatus = async (request_id, status) => {
 const updateTeamJoinRequestsOfTeam = async (team_id, status) => {
   try {
     const [request] = await db("team_join_requests")
-      .where({ team_id })
       .update({ status, updated_at: db.fn.now() })
+      .where({ team_id })
       .returning("id");
 
-    return request.id;
+    return request?.id;
   } catch (err) {
     throw new Error(err);
   }

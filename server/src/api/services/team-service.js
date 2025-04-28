@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 
 import teamModel from "../models/team-model.js";
+import conversationModel from "../models/conversation-model.js";
 import ApiError from "../../utils/api-error.js";
 import { sanitizeAllowedFields, generateTeamCode } from "../../utils/helper.js";
 
@@ -31,6 +32,12 @@ const createOneTeam = async (data, actorId) => {
 
     await teamModel.addMembersToTeam(teamId, [actorId]);
     await teamModel.updateTeamRoleOfUser(teamId, actorId, "owner");
+
+    const conversationId = await conversationModel.createOneConversation({
+      type: "team",
+      team_id: teamId
+    });
+    await conversationModel.addParticipantsToConversation(conversationId, [actorId]);
 
     const team = teamModel.getOneTeamById(teamId);
 
@@ -96,6 +103,9 @@ const deleteOneTeamById = async (teamId, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can delete team");
     }
 
+    const conversation = await conversationModel.getOneConversationByTeamId(teamId);
+    await conversationModel.deleteOneConversationById(conversation.id);
+
     await teamModel.deleteOneTeamById(teamId);
 
     return teamId;
@@ -137,6 +147,9 @@ const removeMembersFromTeam = async (teamId, userIds, actorId) => {
     if (userIds.includes(actorId)) {
       throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not delete self");
     }
+
+    const conversation = await conversationModel.getOneConversationByTeamId(teamId);
+    await conversationModel.removeParticipantsFromConversation(conversation.id, userIds);
 
     await teamModel.removeMembersFromTeam(teamId, userIds);
 
@@ -188,6 +201,9 @@ const joinOneTeamByCode = async (code, actorId) => {
 
     if (team.join_policy === "auto") {
       await teamModel.addMembersToTeam(team.id, [actorId]);
+
+      const conversation = await conversationModel.getOneConversationByTeamId(team.id);
+      await conversationModel.addParticipantsToConversation(conversation.id, [actorId]);
     }
 
     const isRequestPending = await teamModel.isTeamJoinRequestPending(team.id, actorId);
@@ -216,7 +232,10 @@ const leaveOneTeamById = async (teamId, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not leave team");
     }
 
-    await teamModel.deleteMembersFromTeam(teamId, [actorId]);
+    const conversation = await conversationModel.getOneConversationByTeamId(teamId);
+    await conversationModel.removeParticipantsFromConversation(conversation.id, [actorId]);
+
+    await teamModel.removeMembersFromTeam(teamId, [actorId]);
 
     return teamId;
   } catch (err) {
@@ -265,6 +284,9 @@ const approveTeamJoinRequest = async (requestId, actorId) => {
 
     await teamModel.updateTeamJoinRequestStatus(requestId, "approved");
     await teamModel.addMembersToTeam(request.team_id, [request.user_id]);
+
+    const conversation = await conversationModel.getOneConversationByTeamId(request.team_id);
+    await conversationModel.addParticipantsToConversation(conversation.id, [request.user_id]);
 
     return request.team_id;
   } catch (err) {

@@ -15,9 +15,9 @@ const createOneProject = async (req, res, next) => {
   }
 };
 
-const getProjectsOfUser = async (req, res, next) => {
+const getProjectsOfUserInTeam = async (req, res, next) => {
   try {
-    const projects = await projectService.getManyProjectsByUserId(req.user.id);
+    const projects = await projectService.getManyProjectsByTeamId(req.query.team_id, req.user.id);
 
     return res.status(StatusCodes.OK).json({
       success: true,
@@ -117,7 +117,7 @@ const updateProjectRoleOfMember = async (req, res, next) => {
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Updated successfully project role of user ${req.body.user_id} in project ${projectId}`
+      message: `Updated successfully role of user ${req.body.user_id} in project ${projectId}`
     });
   } catch (error) {
     next(error);
@@ -126,7 +126,7 @@ const updateProjectRoleOfMember = async (req, res, next) => {
 
 export default {
   createOneProject,
-  getProjectsOfUser,
+  getProjectsOfUserInTeam,
   updateOneProjectById,
   deleteOneProjectById,
   addMembersToProject,

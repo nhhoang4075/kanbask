@@ -7,7 +7,7 @@ const projectRoute = (router) => {
 
   router
     .route("/projects")
-    .get(projectController.getProjectsOfUser)
+    .get(projectValidation.validateTeamIdQuery, projectController.getProjectsOfUserInTeam)
     .post(projectValidation.validateCreateProject, projectController.createOneProject);
 
   router
@@ -17,6 +17,7 @@ const projectRoute = (router) => {
 
   router
     .route("/projects/:id/members")
+    .get(projectValidation.validateProjectIdParam, projectController.getMembersOfProject)
     .post(projectValidation.validateUpdateProjectMembers, projectController.addMembersToProject)
     .delete(
       projectValidation.validateUpdateProjectMembers,

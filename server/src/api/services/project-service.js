@@ -1,9 +1,10 @@
 import { StatusCodes } from "http-status-codes";
 
-import ApiError from "../../utils/api-err.js";
 import projectModel from "../models/project-model.js";
 import teamModel from "../models/team-model.js";
-import { sanitizeAllowedFields } from "../../utils/helper";
+import conversationModel from "../models/conversation-model.js";
+import ApiError from "../../utils/api-error.js";
+import { sanitizeAllowedFields } from "../../utils/helper.js";
 
 const createOneProject = async (data, actorId) => {
   try {
@@ -11,6 +12,18 @@ const createOneProject = async (data, actorId) => {
 
     if (Object.keys(allowedData).length === 0) {
       throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "No allowed field to update");
+    }
+
+    const isTeamMember = await teamModel.isUserInTeam(allowedData.team_id, actorId);
+
+    if (!isTeamMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of team can access this");
+    }
+
+    const teamRole = await teamModel.getTeamRoleOfUser(allowedData.team_id, actorId);
+
+    if (teamRole !== "owner" && teamRole !== "admin") {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only team owner or team admin can create project");
     }
 
     const projectId = await projectModel.createOneProject({
@@ -25,6 +38,12 @@ const createOneProject = async (data, actorId) => {
     await projectModel.addMembersToProject(projectId, [actorId]);
     await projectModel.updateProjectRoleOfUser(projectId, actorId, "owner");
 
+    const conversationId = await conversationModel.createOneConversation({
+      type: "project",
+      project_id: projectId
+    });
+    await conversationModel.addParticipantsToConversation(conversationId, [actorId]);
+
     const project = projectModel.getOneProjectById(projectId);
 
     return project;
@@ -33,9 +52,15 @@ const createOneProject = async (data, actorId) => {
   }
 };
 
-const getManyProjectsByUserId = async (userId) => {
+const getManyProjectsByTeamId = async (teamId, actorId) => {
   try {
-    const projects = await projectModel.getManyProjectsByUserId(userId);
+    const isTeamMember = await teamModel.isUserInTeam(teamId, actorId);
+
+    if (!isTeamMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of team can access this");
+    }
+
+    const projects = await projectModel.getManyProjectsByTeamId(teamId, actorId);
 
     return projects;
   } catch (err) {
@@ -85,6 +110,9 @@ const deleteOneProjectById = async (projectId, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can delete project");
     }
 
+    const conversation = await conversationModel.getOneConversationByProjectId(projectId);
+    await conversationModel.deleteOneConversationById(conversation.id);
+
     await projectModel.deleteOneProjectById(projectId);
 
     return projectId;
@@ -119,6 +147,9 @@ const addMembersToProject = async (projectId, userIds, actorId) => {
     }
 
     await projectModel.addMembersToProject(projectId, sanitizedUserIds);
+
+    const conversation = await conversationModel.getOneConversationByProjectId(projectId);
+    await conversationModel.addParticipantsToConversation(conversation.id, userIds);
 
     return projectId;
   } catch (err) {
@@ -160,6 +191,9 @@ const removeMembersFromProject = async (projectId, userIds, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not delete self");
     }
 
+    const conversation = await conversationModel.getOneConversationByProjectId(projectId);
+    await conversationModel.removeParticipantsFromConversation(conversation.id, userIds);
+
     await projectModel.removeMembersFromProject(projectId, userIds);
 
     return projectId;
@@ -196,7 +230,7 @@ const updateProjectRoleOfUser = async (projectId, updateData, actorId) => {
 
 export default {
   createOneProject,
-  getManyProjectsByUserId,
+  getManyProjectsByTeamId,
   updateOneProjectById,
   deleteOneProjectById,
   addMembersToProject,

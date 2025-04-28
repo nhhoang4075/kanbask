@@ -5,9 +5,13 @@ import ApiError from "../../utils/api-error.js";
 
 const createOneConversation = async (data) => {
   try {
-    const { type, team_id, project_id, user_ids } = data;
+    const { type, team_id = null, project_id = null, user_ids } = data;
 
-    const conversationId = await conversationModel.createOneConversation(type, team_id, project_id);
+    const conversationId = await conversationModel.createOneConversation({
+      type,
+      team_id,
+      project_id
+    });
 
     if (!conversationId) {
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the conversation");

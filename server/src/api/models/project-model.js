@@ -12,7 +12,7 @@ const createOneProject = async (data) => {
 
 const getOneProjectById = async (id) => {
   try {
-    const project = await db("projects").select("*").where({ id }).limit(1);
+    const [project] = await db("projects").select("*").where({ id }).limit(1);
 
     return project;
   } catch (err) {
@@ -20,12 +20,13 @@ const getOneProjectById = async (id) => {
   }
 };
 
-const getManyProjectsByUserId = async (user_id) => {
+const getManyProjectsByTeamId = async (team_id, user_id) => {
   try {
     const projects = await db("projects AS p")
-      .join("project_members AS pm", "pm.project_id", "=", "t.id")
-      .select("t.*", "pm.role")
-      .where("pm.user_id", user_id);
+      .join("project_members AS pm", "pm.project_id", "=", "p.id")
+      .select("p.*", "pm.role")
+      .where("p.team_id", team_id)
+      .andWhere("pm.user_id", user_id);
 
     return projects;
   } catch (err) {
@@ -149,7 +150,7 @@ const updateProjectRoleOfUser = async (project_id, user_id, role) => {
 export default {
   createOneProject,
   getOneProjectById,
-  getManyProjectsByUserId,
+  getManyProjectsByTeamId,
   isUserInProject,
   updateOneProjectById,
   deleteOneProjectById,

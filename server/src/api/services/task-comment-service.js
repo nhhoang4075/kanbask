@@ -37,14 +37,17 @@ const getCommentsByTaskId = async (taskId) => {
 };
 
 
-const updateOneComment = async (commentId, content) => {
+
+
+const updateOneComment = async (id,user_id, content) => {
   try {
-    if (!commentId) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, "Comment ID is required");
+    const userId = await taskCommentModel.getUserIdByCommentId(id);
+
+    if (userId !== user_id) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "You are not allowed to update this comment");
     }
 
-
-    const updatedId = await taskCommentModel.updateOneCommentById(commentId, content);
+    const updatedId = await taskCommentModel.updateOneCommentById(id, content);
 
 
     if (!updatedId) {
@@ -52,22 +55,22 @@ const updateOneComment = async (commentId, content) => {
     }
 
 
-    return await taskCommentModel.getOneCommentById(updatedId);
+    return await taskCommentModel.getOneCommentById(id);
   } catch (err) {
     throw err;
   }
 };
 
 
-const deleteOneComment = async (commentId) => {
+const deleteOneComment = async (id,user_id) => {
   try {
-    if (!commentId) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, "Comment ID is required");
+    const userId = await taskCommentModel.getUserIdByCommentId(id);
+    if (userId !== user_id) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "You are not allowed to delete this comment");
     }
 
-
-    await taskCommentModel.deleteOneCommentById(commentId);
-    return commentId;
+    await taskCommentModel.deleteOneCommentById(id);
+    return id;
   } catch (err) {
     throw err;
   }

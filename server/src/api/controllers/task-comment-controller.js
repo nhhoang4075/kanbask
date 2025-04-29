@@ -32,8 +32,8 @@ const getCommentsByTaskId = async (req, res, next) => {
 const updateOneComment = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { content } = req.body;
-    const updatedComment = await taskCommentService.updateOneComment(id, content);
+    const { user_id,content } = req.body;
+    const updatedComment = await taskCommentService.updateOneComment(id, user_id,content);
     res.status(StatusCodes.OK).json({
         success: true,
         messsage: "Update comment successfully"
@@ -47,7 +47,8 @@ const updateOneComment = async (req, res, next) => {
 const deleteOneComment = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const deletedId = await taskCommentService.deleteOneComment(id);
+    const user_id = req.body;
+    const deletedId = await taskCommentService.deleteOneComment(id,user_id);
     res.status(StatusCodes.OK).json({
         success: true,
         messsage: "Delete comment successfully"

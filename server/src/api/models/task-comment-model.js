@@ -1,8 +1,5 @@
 import {db }from "../../config/db.js";
 
-
-
-
 const createOneComment = async ({ task_id, user_id, content }) => {
   const [comment] = await db("task_comments")
     .insert({
@@ -22,6 +19,14 @@ const getOneCommentById = async (id) => {
   return db("task_comments").where({ id }).first();
 };
 
+const getUserIdByCommentId = async (id) => {
+  const result = await db("task_comments")
+    .select("user_id")
+    .where({ id})
+    .first();
+
+  return result?.user_id || null;
+};
 
 const getCommentsByTaskId = async (task_id) => {
   return db("task_comments")
@@ -51,5 +56,6 @@ export default {
   getOneCommentById,
   getCommentsByTaskId,
   updateOneCommentById,
-  deleteOneCommentById
+  deleteOneCommentById,
+  getUserIdByCommentId
 };

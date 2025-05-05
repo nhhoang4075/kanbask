@@ -44,6 +44,16 @@ const getManyMessagesByConversationId = async (conversation_id) => {
   }
 };
 
+const isUserMessageSender = async (message_id, user_id) => {
+  try {
+    const [record] = await db("messages").where({ id: message_id, sender_id: user_id }).limit(1);
+
+    return !!record;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const updateOneMessageById = async (id, data) => {
   try {
     const [message] = await db("messages")
@@ -74,6 +84,7 @@ export default {
   createOneMessage,
   getOneMessageById,
   getManyMessagesByConversationId,
+  isUserMessageSender,
   updateOneMessageById,
   deleteOneMessageById
 };

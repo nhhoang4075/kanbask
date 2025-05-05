@@ -2,7 +2,10 @@ import { StatusCodes } from "http-status-codes";
 
 import projectModel from "../models/project-model.js";
 import teamModel from "../models/team-model.js";
+import userModel from "../models/user-model.js";
 import conversationModel from "../models/conversation-model.js";
+import notificationModel from "../models/notification-model.js";
+import { emitNewNotification } from "../../socket/notification-socket.js";
 import ApiError from "../../utils/api-error.js";
 import { sanitizeAllowedFields } from "../../utils/helper.js";
 
@@ -151,6 +154,15 @@ const addMembersToProject = async (projectId, userIds, actorId) => {
     const conversation = await conversationModel.getOneConversationByProjectId(projectId);
     await conversationModel.addParticipantsToConversation(conversation.id, userIds);
 
+    const actor = await userModel.getOneUserById(actorId);
+    for (const userId of sanitizedUserIds) {
+      const user = await userModel.getOneUserById(userId);
+      await notifyMembersOfProject(
+        projectId,
+        `<@${user.full_name}> was added to the project by <@${actor.full_name}>.`
+      );
+    }
+
     return projectId;
   } catch (err) {
     throw err;
@@ -196,6 +208,15 @@ const removeMembersFromProject = async (projectId, userIds, actorId) => {
 
     await projectModel.removeMembersFromProject(projectId, userIds);
 
+    const actor = await userModel.getOneUserById(actorId);
+    for (const userId of userIds) {
+      const user = await userModel.getOneUserById(userId);
+      await notifyMembersOfProject(
+        projectId,
+        `<@${user.full_name}> was removed from the project by <@${actor.full_name}>.`
+      );
+    }
+
     return projectId;
   } catch (err) {
     throw err;
@@ -222,7 +243,36 @@ const updateProjectRoleOfUser = async (projectId, updateData, actorId) => {
 
     await projectModel.updateProjectRoleOfUser(projectId, updateData.user_id, updateData.role);
 
+    const actor = await userModel.getOneUserById(actorId);
+    const user = await userModel.getOneUserById(updateData.user_id);
+    await notifyMembersOfProject(
+      projectId,
+      `Role of <@${user.full_name}> in the project has been changed by <@${actor.full_name}>.`
+    );
+
     return projectId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const notifyMembersOfProject = async (projectId, content) => {
+  try {
+    const project = await projectModel.getOneProjectById(projectId);
+    const projectMembers = await projectModel.getMembersOfProject(projectId);
+
+    for (const member of projectMembers) {
+      const notificationId = await notificationModel.createOneNotification({
+        user_id: member.id,
+        title: project.name,
+        content,
+        reference_type: "project",
+        reference_id: projectId
+      });
+      const notification = await notificationModel.getOneNotificationById(notificationId);
+
+      emitNewNotification(member.id, notification);
+    }
   } catch (err) {
     throw err;
   }

@@ -5,12 +5,13 @@ import { emitNewNotification } from "../../socket/notification-socket.js";
 
 const createOneNotification = async (data) => {
   try {
-    const { user_id, content, type, reference_id } = data;
+    const { user_id, title, content, reference_type, reference_id } = data;
 
     const notificationData = {
       user_id,
+      title,
       content,
-      type,
+      reference_type,
       reference_id
     };
 

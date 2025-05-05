@@ -23,17 +23,21 @@ const createOneMessage = async (data) => {
   }
 };
 
-const getManyMessagesByConversationId = async (conersationId, userId) => {
+const getManyMessagesByConversationId = async (conversationId, actorId) => {
   try {
-    const participants = await conversationModel.getParticipantsOfConversation(conersationId);
+    const isConversationParticipant = await conversationModel.isUserInConversation(
+      conversationId,
+      actorId
+    );
 
-    const isParticipant = participants.some((p) => p.user_id === userId);
-
-    if (!isParticipant) {
-      throw new ApiError(StatusCodes.FORBIDDEN, "You are not a participant of this conversation");
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
     }
 
-    const messages = messageModel.getManyMessagesByConversationId(conersationId);
+    const messages = messageModel.getManyMessagesByConversationId(conversationId);
 
     return messages;
   } catch (err) {
@@ -41,8 +45,14 @@ const getManyMessagesByConversationId = async (conersationId, userId) => {
   }
 };
 
-const updateOneMessageById = async (id, data) => {
+const updateOneMessageById = async (id, data, actorId) => {
   try {
+    const isMessageSender = await messageModel.isUserMessageSender(id, actorId);
+
+    if (!isMessageSender) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only sender can access this");
+    }
+
     const allowedData = sanitizeAllowedFields(data, ["content"]);
 
     if (Object.keys(allowedData).length === 0) {

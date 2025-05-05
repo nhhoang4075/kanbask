@@ -24,7 +24,17 @@ const getManyProjectsByTeamId = async (team_id, user_id) => {
   try {
     const projects = await db("projects AS p")
       .join("project_members AS pm", "pm.project_id", "=", "p.id")
-      .select("p.*", "pm.role")
+      .select(
+        "p.*",
+        "pm.role",
+        db.raw(`
+          (
+            SELECT COUNT(*)
+            FROM project_members pm2
+            WHERE pm2.project_id = p.id
+          )::int AS member_count
+        `)
+      )
       .where("p.team_id", team_id)
       .andWhere("pm.user_id", user_id);
 
@@ -36,12 +46,12 @@ const getManyProjectsByTeamId = async (team_id, user_id) => {
 
 const isUserInProject = async (project_id, user_id) => {
   try {
-    const record = await db("project_members")
+    const [record] = await db("project_members")
       .where({
         project_id,
         user_id
       })
-      .first("user_id");
+      .limit(1);
 
     return !!record;
   } catch (err) {

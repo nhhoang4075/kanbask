@@ -79,8 +79,20 @@ const deleteOneConversation = async (conversationId) => {
   }
 };
 
-const getParticipantsOfConversation = async (conversationId) => {
+const getParticipantsOfConversation = async (conversationId, actorId) => {
   try {
+    const isConversationParticipant = await conversationModel.isUserInConversation(
+      conversationId,
+      actorId
+    );
+
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
+    }
+
     const participants = await conversationModel.getParticipantsOfConversation(conversationId);
 
     return participants;

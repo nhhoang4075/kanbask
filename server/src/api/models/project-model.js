@@ -44,6 +44,29 @@ const getManyProjectsByTeamId = async (team_id, user_id) => {
   }
 };
 
+const getManyProjectsByUserId = async (user_id) => {
+  try {
+    const projects = await db("projects AS p")
+      .join("project_members AS pm", "pm.project_id", "=", "p.id")
+      .select(
+        "p.*",
+        "pm.role",
+        db.raw(`
+          (
+            SELECT COUNT(*)
+            FROM project_members pm2
+            WHERE pm2.project_id = p.id
+          )::int AS member_count
+        `)
+      )
+      .where("pm.user_id", user_id);
+
+    return projects;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const isUserInProject = async (project_id, user_id) => {
   try {
     const [record] = await db("project_members")
@@ -161,6 +184,7 @@ export default {
   createOneProject,
   getOneProjectById,
   getManyProjectsByTeamId,
+  getManyProjectsByUserId,
   isUserInProject,
   updateOneProjectById,
   deleteOneProjectById,

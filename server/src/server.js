@@ -8,9 +8,10 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { handleApiError } from "./middlewares/error-middleware.js";
 import apiRouter from "./api/routes/index.js";
 import setupSocket from "./socket/index.js";
+import embeddingProvider from "./config/embedding-provider.js";
+import { handleApiError } from "./middlewares/error-middleware.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,7 +46,7 @@ const startServer = () => {
   );
 
   app.use("/api", apiRouter());
-  app.use(handleApiError);
+  //app.use(handleApiError);
 
   app.get("/", async (req, res) => {
     res.status(StatusCodes.OK).json({
@@ -66,8 +67,17 @@ const startServer = () => {
   });
 };
 
-(() => {
+(async () => {
   try {
+    await embeddingProvider
+      .initialize()
+      .then(() => {
+        console.log("Embedding service pre-initialization process started successfully.");
+      })
+      .catch((err) => {
+        throw err;
+      });
+
     startServer();
   } catch (error) {
     console.error(error);

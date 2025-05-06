@@ -5,9 +5,8 @@ import bcrypt from "bcryptjs";
 import userModel from "../models/user-model.js";
 import ApiError from "../../utils/api-error.js";
 import { sendMail } from "../../config/mail-provider.js";
+import { generateEmbedding } from "../../config/embedding-provider.js";
 import { sanitizeUser } from "../../utils/helper.js";
-
-import { generateEmbedding } from "../../config/embedding.js";
 
 const register = async (data) => {
   try {
@@ -23,7 +22,7 @@ const register = async (data) => {
     }
 
     const textToEmbed = `${data.full_name} ${data.email}`.trim();
-    let userEmbedding = await generateEmbedding(textToEmbed);
+    const userEmbedding = await generateEmbedding(textToEmbed);
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const userId = await userModel.createOneUser({

@@ -1,5 +1,6 @@
-import { db } from "../../config/db.js";
 import pgvector from "pgvector/knex";
+
+import { db } from "../../config/db.js";
 
 const createOneMessage = async ({ conversation_id, sender_id, content, embedding }) => {
   try {

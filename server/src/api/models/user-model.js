@@ -1,8 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
+import pgvector from "pgvector/knex";
 
 import { db } from "../../config/db.js";
-
-import pgvector from "pgvector/knex";
 
 const createOneUser = async (data) => {
   try {

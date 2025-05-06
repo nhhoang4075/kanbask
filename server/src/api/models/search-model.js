@@ -1,34 +1,31 @@
-import { db } from "../../config/db.js";
 import pgvector from "pgvector/knex";
 
-const searchUsersByVector = async (userId, searchTerm, queryVector, options = {}) => {
-  const { limit = 10, offset = 0 } = options;
-  const minSimilarity = 0.5;
+import { db } from "../../config/db.js";
 
+const searchUsersByVector = async (team_ids, search_term, query_vector, options = {}) => {
   try {
-    const userTeams = await db("team_members").select("team_id").where("user_id", userId);
-    const teamIds = userTeams.map((t) => t.team_id);
-    if (teamIds.length === 0) return [];
+    const { limit = 10, offset = 0 } = options;
+    const minSimilarity = 0.5;
 
-    const qLike = `%${searchTerm}%`;
-    const queryVectorSql = pgvector.toSql(queryVector);
+    const qLike = `%${search_term}%`;
+    const queryVectorSql = pgvector.toSql(query_vector);
 
     const users = await db("users")
       .select(
-        "users.id",
+        "id",
         "email",
         "full_name",
+        "avatar_url",
         db.raw("CASE WHEN full_name ILIKE ? OR email ILIKE ? THEN 1 ELSE 0 END AS fulltext", [
           qLike,
           qLike
         ]),
         db.raw("1 - (embedding <=> ?) AS similarity", [queryVectorSql])
       )
-      .whereIn("users.id", function () {
-        this.select("user_id").from("team_members").whereIn("team_id", teamIds);
+      .whereIn("id", function () {
+        this.select("user_id").from("team_members").whereIn("team_id", team_ids);
       })
-      .whereNot("users.id", userId)
-      .where(function () {
+      .andWhere(function () {
         this.where("full_name", "ILIKE", qLike)
           .orWhere("email", "ILIKE", qLike)
           .orWhere(db.raw("1 - (embedding <=> ?) >= ?", [queryVectorSql, minSimilarity]));
@@ -44,38 +41,38 @@ const searchUsersByVector = async (userId, searchTerm, queryVector, options = {}
   }
 };
 
-const searchMyTasksByVector = async (
-  userId,
-  searchTerm,
-  queryVector,
+const searchTasksByVector = async (
+  project_ids,
+  search_term,
+  query_vector,
   filters = {},
   options = {}
 ) => {
-  const { limit = 10, offset = 0 } = options;
-  const { status } = filters;
-  const minSimilarity = 0.5;
-
   try {
-    const queryVectorSql = pgvector.toSql(queryVector);
-    const qLike = `%${searchTerm}%`;
+    const { limit = 10, offset = 0 } = options;
+    const { status } = filters;
+    const minSimilarity = 0.5;
+
+    const qLike = `%${search_term}%`;
+    const queryVectorSql = pgvector.toSql(query_vector);
 
     const tasks = await db("tasks")
       .select(
-        "tasks.id",
-        "tasks.project_id",
-        "tasks.title",
-        "tasks.status",
-        "tasks.created_at",
-        db.raw("CASE WHEN title ILIKE ? THEN 1 ELSE 0 END AS fulltext", [qLike]),
-        db.raw("1 - (embedding <=> ?) as similarity", [queryVectorSql])
+        "id",
+        "project_id",
+        "title",
+        "status",
+        "created_at",
+        db.raw("CASE WHEN title ILIKE ? THEN 1 ELSE 0 END AS full_text", [qLike]),
+        db.raw("1 - (embedding <=> ?) AS similarity", [queryVectorSql])
       )
-      .whereIn("tasks.id", db("task_assignees").select("task_id").where("user_id", userId))
+      .whereIn("project_id", project_ids)
       .andWhere(function () {
         if (status && status !== "all") {
-          this.where("tasks.status", status);
+          this.where("status", status);
         }
       })
-      .where(function () {
+      .andWhere(function () {
         this.where("title", "ILIKE", qLike).orWhere(
           db.raw("1 - (embedding <=> ?) >= ?", [queryVectorSql, minSimilarity])
         );
@@ -91,33 +88,31 @@ const searchMyTasksByVector = async (
   }
 };
 
-const searchMessagesByVector = async (conversationId, searchTerm, queryVector, options = {}) => {
-  const { limit = 10, offset = 0 } = options;
-  const minSimilarity = 0.5;
-
+const searchMessagesByVector = async (conversation_id, search_term, query_vector, options = {}) => {
   try {
-    const qLike = `%${searchTerm}%`;
-    const queryVectorSql = pgvector.toSql(queryVector);
+    const { limit = 10, offset = 0 } = options;
+    const minSimilarity = 0.5;
 
-    const messages = await db("messages")
+    const qLike = `%${search_term}%`;
+    const queryVectorSql = pgvector.toSql(query_vector);
+
+    const messages = await db("messages AS m")
+      .leftJoin("user_public_view AS v", "m.sender_id", "=", "v.id")
       .select(
-        "messages.id",
-        "messages.conversation_id",
-        "messages.sender_id",
-        "messages.content",
-        "messages.created_at",
-        "messages.updated_at",
+        "m.id",
+        "m.conversation_id",
+        "m.sender_id",
+        "v.full_name AS sender_full_name",
+        "v.avatar_url AS sender_avatar_url",
+        "m.content",
+        "m.created_at",
         db.raw("CASE WHEN content ILIKE ? THEN 1 ELSE 0 END AS fulltext", [qLike]),
-        db.raw("1 - (embedding <=> ?) as similarity", [queryVectorSql])
+        db.raw("1 - (embedding <=> ?) AS similarity", [queryVectorSql])
       )
-      .whereIn(
-        "messages.sender_id",
-        db("conversation_participants").select("user_id").where("conversation_id", conversationId)
-      )
-      .andWhere("messages.conversation_id", conversationId)
-      .where(function () {
-        this.where("content", "ILIKE", qLike).orWhere(
-          db.raw("1 - (embedding <=> ?) >= ?", [queryVectorSql, minSimilarity])
+      .where({ conversation_id })
+      .andWhere(function () {
+        this.where("m.content", "ILIKE", qLike).orWhere(
+          db.raw("1 - (m.embedding <=> ?) >= ?", [queryVectorSql, minSimilarity])
         );
       })
       .orderBy("fulltext", "desc")
@@ -133,6 +128,6 @@ const searchMessagesByVector = async (conversationId, searchTerm, queryVector, o
 
 export default {
   searchUsersByVector,
-  searchMyTasksByVector,
+  searchTasksByVector,
   searchMessagesByVector
 };

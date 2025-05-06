@@ -11,7 +11,7 @@ const searchRoute = (router) => {
 
   router
     .route("/search/tasks")
-    .get(searchValidation.validateSearchTasksQuery, searchController.searchMyTasks);
+    .get(searchValidation.validateSearchTasksQuery, searchController.searchTasks);
 
   router
     .route("/search/messages")

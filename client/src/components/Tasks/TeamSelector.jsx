@@ -1,23 +1,24 @@
 "use client";
 
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
 import {
-  CommandList,
-  CommandGroup,
   Command,
   CommandEmpty,
+  CommandGroup,
   CommandInput,
-  CommandItem
-} from "../ui/command";
+  CommandItem,
+  CommandList
+} from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
-const ProjectSelector = ({ projects, selectedProjectId, onProjectChange }) => {
+export function TeamSelector({ teams, selectedTeamId, onTeamChange }) {
   const [open, setOpen] = useState(false);
 
-  const selectedProject = projects.filter((project) => project.id === selectedProjectId)[0];
+  const selectedTeam = teams.find((team) => team.id === selectedTeamId);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -29,31 +30,31 @@ const ProjectSelector = ({ projects, selectedProjectId, onProjectChange }) => {
           className="min-w-[200px] justify-between"
         >
           <div className="flex items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis">
-            {selectedProject?.name}
+            {selectedTeam.name}
           </div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent className="w-[200px] p-0">
         <Command>
-          <CommandInput placeholder="Search project..." />
+          <CommandInput placeholder="Search team..." />
           <CommandList>
-            <CommandEmpty>No project found.</CommandEmpty>
+            <CommandEmpty>No team found.</CommandEmpty>
             <CommandGroup>
-              {projects.map((project) => (
+              {teams.map((team) => (
                 <CommandItem
-                  key={project.id}
-                  value={project.name}
+                  key={team.id}
+                  value={team.id}
                   onSelect={() => {
-                    onProjectChange(project.id);
+                    onTeamChange(team.id);
                     setOpen(false);
                   }}
                 >
-                  <div className="flex items-center gap-2">{project.name}</div>
+                  <div className="flex items-center gap-2">{team.name}</div>
                   <Check
                     className={cn(
                       "ml-auto h-4 w-4",
-                      selectedProject.id === project.id ? "opacity-100" : "opacity-0"
+                      selectedTeamId === team.id ? "opacity-100" : "opacity-0"
                     )}
                   />
                 </CommandItem>
@@ -64,6 +65,4 @@ const ProjectSelector = ({ projects, selectedProjectId, onProjectChange }) => {
       </PopoverContent>
     </Popover>
   );
-};
-
-export default ProjectSelector;
+}

@@ -4,19 +4,78 @@ import KanbanBoard from "@/components/Tasks/Kanban/KanbanBoard";
 import { ListView } from "@/components/Tasks/List/ListView";
 import NewTasks from "@/components/Tasks/NewTasks";
 import ProjectSelector from "@/components/Tasks/ProjectSelector";
+import { TeamSelector } from "@/components/Tasks/TeamSelector";
 import ToggleView from "@/components/Tasks/ToggleView";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { initialData, projects } from "@/data/tasks";
+import { Separator } from "@/components/ui/separator";
+import { getProjectsByTeam, initialData } from "@/data/tasks";
+import { projectsData, teams } from "@/data/teams";
 import { Plus } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const page = () => {
   const [viewMode, setViewMode] = useState("kanban");
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = useState(false);
   const [tasks, setTasks] = useState(initialData);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProject, setSelectedProject] = useState(projects[0]);
+  const [selectedProject, setSelectedProject] = useState(projectsData[0]);
+
+  const [selectedTeamId, setSelectedTeamId] = useState(teams[0].id);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
+  const [filteredProjects, setFilteredProjects] = useState([]);
+  const [filteredTasks, setFilteredTasks] = useState([]);
+
+  // Update filtered projects when team changes
+  useEffect(() => {
+    const teamProjects = projectsData.filter((project) => project.teamId === selectedTeamId);
+    setFilteredProjects(() => teamProjects);
+
+    // Select the first project of the team by default
+    if (teamProjects.length > 0) {
+      setSelectedProjectId(() => teamProjects[0].id);
+    } else {
+      setSelectedProjectId(() => null);
+    }
+  }, [selectedTeamId]);
+  const selectedTeam = teams.find((team) => team.id === selectedTeamId);
+
+  useEffect(() => {
+    setFilteredTasks(() =>
+      tasks.filter(
+        (task) =>
+          task.projectId === selectedProjectId &&
+          (searchTerm
+            ? task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              task.description.toLowerCase().includes(searchTerm.toLowerCase())
+            : true)
+      )
+    );
+  }, [selectedProjectId]);
+
+  const handleSearchTerm = (term) => {
+    setSearchTerm(() => term);
+    setFilteredTasks(() =>
+      tasks.filter(
+        (task) =>
+          task.projectId === selectedProjectId &&
+          (term
+            ? task.title.toLowerCase().includes(term.toLowerCase()) ||
+              task.description.toLowerCase().includes(term.toLowerCase())
+            : true)
+      )
+    );
+  };
+
+  // Handle team change
+  const handleTeamChange = (teamId) => {
+    setSelectedTeamId(() => teamId);
+  };
+
+  // Handle project change
+  const handleProjectChange = (projectId) => {
+    setSelectedProjectId(() => projectsData.filter((project) => project.id == projectId)[0].id);
+  };
 
   const handleAddTask = (taskData) => {
     const newTask = {
@@ -71,25 +130,24 @@ const page = () => {
     );
   };
 
-  const filteredTasks = tasks.filter(
-    (task) =>
-      task.projectId === selectedProject.id &&
-      (searchTerm
-        ? task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          task.description.toLowerCase().includes(searchTerm.toLowerCase())
-        : true)
-  );
-
   return (
     <main className="w-full mx-auto px-4 py-1.5 overflow-hidden">
       <div className="w-full py-1.5 mb-3 flex flex-row gap-4 justify-between">
-        <div className="flex flex-row gap-2 flex-1">
+        <div className="flex flex-row gap-2 flex-4">
           <h1 className="text-3xl font-bold w-auto mr-3">Project Tasks</h1>
-          <ProjectSelector
-            projects={projects}
-            selectedProject={selectedProject}
-            onProjectChange={setSelectedProject}
-          />
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+            <TeamSelector
+              teams={teams}
+              selectedTeamId={selectedTeamId}
+              onTeamChange={handleTeamChange}
+            />
+
+            <ProjectSelector
+              projects={filteredProjects}
+              selectedProjectId={selectedProjectId}
+              onProjectChange={handleProjectChange}
+            />
+          </div>
         </div>
         <ToggleView viewMode={viewMode} setViewMode={setViewMode} />
       </div>
@@ -98,7 +156,7 @@ const page = () => {
           <Input
             placeholder="Search tasks..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchTerm(e.target.value)}
             className="max-w-sm"
           />
           <Button
@@ -124,23 +182,34 @@ const page = () => {
 					${searchTerm ? `filtered by "${searchTerm}"` : ""}`}
         </div>
       </div>
-      <div className="flex flex-col gap-4 overflow-y-scroll max-h-[500px]">
-        {viewMode === "kanban" ? (
-          <KanbanBoard
-            project={selectedProject}
-            tasks={filteredTasks}
-            setTasks={setTasks}
-            handleDeleteTask={handleDeleteTask}
-            handleEditTask={handleEditTask}
-          ></KanbanBoard>
+      <Separator />
+      <div className="flex flex-col gap-4 overflow-y-scroll max-h-[480px]">
+        {selectedProjectId ? (
+          viewMode === "kanban" ? (
+            <KanbanBoard
+              project={selectedProject}
+              tasks={filteredTasks}
+              setTasks={setFilteredTasks}
+              handleDeleteTask={handleDeleteTask}
+              handleEditTask={handleEditTask}
+            ></KanbanBoard>
+          ) : (
+            <ListView
+              project={selectedProject}
+              tasks={filteredTasks}
+              setTasks={setFilteredTasks}
+              handleDeleteTask={handleDeleteTask}
+              handleEditTask={handleEditTask}
+            ></ListView>
+          )
         ) : (
-          <ListView
-            project={selectedProject}
-            tasks={filteredTasks}
-            setTasks={setTasks}
-            handleDeleteTask={handleDeleteTask}
-            handleEditTask={handleEditTask}
-          ></ListView>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="text-muted-foreground mb-4">
+              {filteredProjects.length === 0
+                ? `No projects found in ${selectedTeam?.name} team`
+                : "Select a project to view tasks"}
+            </div>
+          </div>
         )}
       </div>
     </main>

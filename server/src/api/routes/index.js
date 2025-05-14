@@ -6,7 +6,7 @@ import teamRoute from "./team-route.js";
 import conversationRoute from "./conversation-route.js";
 import messageRoute from "./message-route.js";
 import notificationRoute from "./notification-route.js";
-import multimediaRoute from "./multimedia-route.js"; // Import mới
+import attachmentRoute from "./attachment-route.js";
 
 const router = Router();
 
@@ -17,7 +17,7 @@ function apiRouter() {
   conversationRoute(router);
   messageRoute(router);
   notificationRoute(router);
-  multimediaRoute(router);
+  attachmentRoute(router);
 
   return router;
 }

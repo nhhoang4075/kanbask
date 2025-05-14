@@ -33,6 +33,7 @@ export const sanitizeUser = (user) => {
   delete sanitized.verification_expires;
   delete sanitized.password_reset_code;
   delete sanitized.password_reset_expires;
+  delete sanitized.embedding;
 
   return sanitized;
 };

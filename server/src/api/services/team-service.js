@@ -1,7 +1,11 @@
 import { StatusCodes } from "http-status-codes";
 
 import teamModel from "../models/team-model.js";
+import userModel from "../models/user-model.js";
+import conversationModel from "../models/conversation-model.js";
+import notificationModel from "../models/notification-model.js";
 import ApiError from "../../utils/api-error.js";
+import { emitNewNotification } from "../../socket/notification-socket.js";
 import { sanitizeAllowedFields, generateTeamCode } from "../../utils/helper.js";
 
 const createOneTeam = async (data, actorId) => {
@@ -31,6 +35,12 @@ const createOneTeam = async (data, actorId) => {
 
     await teamModel.addMembersToTeam(teamId, [actorId]);
     await teamModel.updateTeamRoleOfUser(teamId, actorId, "owner");
+
+    const conversationId = await conversationModel.createOneConversation({
+      type: "team",
+      team_id: teamId
+    });
+    await conversationModel.addParticipantsToConversation(conversationId, [actorId]);
 
     const team = teamModel.getOneTeamById(teamId);
 
@@ -96,17 +106,10 @@ const deleteOneTeamById = async (teamId, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can delete team");
     }
 
+    const conversation = await conversationModel.getOneConversationByTeamId(teamId);
+    await conversationModel.deleteOneConversationById(conversation.id);
+
     await teamModel.deleteOneTeamById(teamId);
-
-    return teamId;
-  } catch (err) {
-    throw err;
-  }
-};
-
-const addMembersToTeam = async (teamId, userIds) => {
-  try {
-    await teamModel.addMembersToTeam(teamId, userIds);
 
     return teamId;
   } catch (err) {
@@ -130,7 +133,7 @@ const getMembersOfTeam = async (teamId, actorId) => {
   }
 };
 
-const deleteMembersFromTeam = async (teamId, userIds, actorId) => {
+const removeMembersFromTeam = async (teamId, userIds, actorId) => {
   try {
     const isTeamMember = await teamModel.isUserInTeam(teamId, actorId);
 
@@ -148,7 +151,19 @@ const deleteMembersFromTeam = async (teamId, userIds, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not delete self");
     }
 
-    await teamModel.deleteMembersFromTeam(teamId, userIds);
+    const conversation = await conversationModel.getOneConversationByTeamId(teamId);
+    await conversationModel.removeParticipantsFromConversation(conversation.id, userIds);
+
+    await teamModel.removeMembersFromTeam(teamId, userIds);
+
+    const actor = await userModel.getOneUserById(actorId);
+    for (const userId of userIds) {
+      const user = await userModel.getOneUserById(userId);
+      await notifyMembersOfTeam(
+        teamId,
+        `<@${user.full_name}> was removed from the team by <@${actor.full_name}>.`
+      );
+    }
 
     return teamId;
   } catch (err) {
@@ -156,7 +171,7 @@ const deleteMembersFromTeam = async (teamId, userIds, actorId) => {
   }
 };
 
-const updateTeamRoleOfUser = async (teamId, updateUserData, actorId) => {
+const updateTeamRoleOfUser = async (teamId, updateData, actorId) => {
   try {
     const isTeamMember = await teamModel.isUserInTeam(teamId, actorId);
 
@@ -170,11 +185,18 @@ const updateTeamRoleOfUser = async (teamId, updateUserData, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can update team member's role");
     }
 
-    if (actorId === updateUserData.user_id) {
+    if (actorId === updateData.user_id) {
       throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not update self");
     }
 
-    await teamModel.updateTeamRoleOfUser(teamId, updateUserData.user_id, updateUserData.role);
+    await teamModel.updateTeamRoleOfUser(teamId, updateData.user_id, updateData.role);
+
+    const actor = await userModel.getOneUserById(actorId);
+    const user = await userModel.getOneUserById(updateData.user_id);
+    await notifyMembersOfTeam(
+      teamId,
+      `Role of <@${user.full_name}> in the team has been changed by <@${actor.full_name}>.`
+    );
 
     return teamId;
   } catch (err) {
@@ -196,14 +218,23 @@ const joinOneTeamByCode = async (code, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "You are already member of this team");
     }
 
+    const user = await userModel.getOneUserById(actorId);
+
     if (team.join_policy === "auto") {
       await teamModel.addMembersToTeam(team.id, [actorId]);
+
+      const conversation = await conversationModel.getOneConversationByTeamId(team.id);
+      await conversationModel.addParticipantsToConversation(conversation.id, [actorId]);
+
+      await notifyMembersOfTeam(team.id, `<@${user.full_name}> has joined the team.`);
     }
 
     const isRequestPending = await teamModel.isTeamJoinRequestPending(team.id, actorId);
 
     if (!isRequestPending) {
       await teamModel.createOneTeamJoinRequest(team.id, actorId);
+
+      await notifyMembersOfTeam(team.id, `<@${user.full_name}> has requested to join the team.`);
     }
 
     return team.id;
@@ -226,7 +257,13 @@ const leaveOneTeamById = async (teamId, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not leave team");
     }
 
-    await teamModel.deleteMembersFromTeam(teamId, [actorId]);
+    const conversation = await conversationModel.getOneConversationByTeamId(teamId);
+    await conversationModel.removeParticipantsFromConversation(conversation.id, [actorId]);
+
+    await teamModel.removeMembersFromTeam(teamId, [actorId]);
+
+    const user = await userModel.getOneUserById(actorId);
+    await notifyMembersOfTeam(team.id, `<@${user.full_name}> has left the team.`);
 
     return teamId;
   } catch (err) {
@@ -276,6 +313,16 @@ const approveTeamJoinRequest = async (requestId, actorId) => {
     await teamModel.updateTeamJoinRequestStatus(requestId, "approved");
     await teamModel.addMembersToTeam(request.team_id, [request.user_id]);
 
+    const conversation = await conversationModel.getOneConversationByTeamId(request.team_id);
+    await conversationModel.addParticipantsToConversation(conversation.id, [request.user_id]);
+
+    const actor = await userModel.getOneUserById(actorId);
+    const user = await userModel.getOneUserById(request.user_id);
+    await notifyMembersOfTeam(
+      request.team_id,
+      `Request to join the team of <@${user.full_name}> was approved by <@${actor.full_name}>.`
+    );
+
     return request.team_id;
   } catch (err) {
     throw err;
@@ -303,7 +350,36 @@ const rejectTeamJoinRequest = async (requestId, actorId) => {
     }
     await teamModel.updateTeamJoinRequestStatus(requestId, "rejected");
 
+    const actor = await userModel.getOneUserById(actorId);
+    const user = await userModel.getOneUserById(request.user_id);
+    await notifyMembersOfTeam(
+      request.team_id,
+      `Request to join the team of <@${user.full_name}> was rejected by <@${actor.full_name}>.`
+    );
+
     return request.team_id;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const notifyMembersOfTeam = async (teamId, content) => {
+  try {
+    const team = await teamModel.getOneTeamById(teamId);
+    const teamMembers = await teamModel.getMembersOfTeam(teamId);
+
+    for (const member of teamMembers) {
+      const notificationId = await notificationModel.createOneNotification({
+        user_id: member.id,
+        title: team.name,
+        content,
+        reference_type: "team",
+        reference_id: teamId
+      });
+      const notification = await notificationModel.getOneNotificationById(notificationId);
+
+      emitNewNotification(member.id, notification);
+    }
   } catch (err) {
     throw err;
   }
@@ -314,9 +390,8 @@ export default {
   getManyTeamsByUserId,
   updateOneTeamById,
   deleteOneTeamById,
-  addMembersToTeam,
   getMembersOfTeam,
-  deleteMembersFromTeam,
+  removeMembersFromTeam,
   updateTeamRoleOfUser,
   joinOneTeamByCode,
   leaveOneTeamById,

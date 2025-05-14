@@ -36,7 +36,17 @@ const getManyTeamsByUserId = async (user_id) => {
   try {
     const teams = await db("teams AS t")
       .join("team_members AS tm", "tm.team_id", "=", "t.id")
-      .select("t.*", "tm.role")
+      .select(
+        "t.*",
+        "tm.role",
+        db.raw(`
+          (
+            SELECT COUNT(*)
+            FROM team_members tm2
+            WHERE tm2.team_id = t.id
+          )::int AS member_count
+        `)
+      )
       .where("tm.user_id", user_id);
 
     return teams;
@@ -46,7 +56,7 @@ const getManyTeamsByUserId = async (user_id) => {
 };
 
 const isUserInTeam = async (team_id, user_id) => {
-  const record = await db("team_members").where({ team_id, user_id }).first("user_id");
+  const [record] = await db("team_members").where({ team_id, user_id }).limit(1);
 
   return !!record;
 };
@@ -108,7 +118,7 @@ const getMembersOfTeam = async (team_id) => {
   }
 };
 
-const deleteMembersFromTeam = async (team_id, user_ids) => {
+const removeMembersFromTeam = async (team_id, user_ids) => {
   try {
     await db("team_members")
       .delete()
@@ -187,8 +197,8 @@ const isTeamJoinRequestPending = async (team_id, user_id) => {
 const updateTeamJoinRequestStatus = async (request_id, status) => {
   try {
     const [request] = await db("team_join_requests")
-      .where({ id: request_id })
       .update({ status, updated_at: db.fn.now() })
+      .where({ id: request_id })
       .returning("id");
 
     return request.id;
@@ -200,11 +210,11 @@ const updateTeamJoinRequestStatus = async (request_id, status) => {
 const updateTeamJoinRequestsOfTeam = async (team_id, status) => {
   try {
     const [request] = await db("team_join_requests")
-      .where({ team_id })
       .update({ status, updated_at: db.fn.now() })
+      .where({ team_id })
       .returning("id");
 
-    return request.id;
+    return request?.id;
   } catch (err) {
     throw new Error(err);
   }
@@ -220,7 +230,7 @@ export default {
   deleteOneTeamById,
   addMembersToTeam,
   getMembersOfTeam,
-  deleteMembersFromTeam,
+  removeMembersFromTeam,
   getTeamRoleOfUser,
   updateTeamRoleOfUser,
   createOneTeamJoinRequest,

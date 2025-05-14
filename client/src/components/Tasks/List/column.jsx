@@ -235,6 +235,21 @@ export const getTaskColumns = (handleDelete, handleEdit, handleViewDetails) => {
       }
     },
     {
+      accessorKey: "attachments",
+      header: "Files",
+      cell: ({ row }) => {
+        const attachments = row.getValue("attachments") || [];
+        return attachments.length > 0 ? (
+          <div className="flex items-center gap-1 text-sm">
+            <Paperclip className="h-4 w-4 text-muted-foreground" />
+            <span>{attachments.length}</span>
+          </div>
+        ) : (
+          <span className="text-sm text-muted-foreground">-</span>
+        );
+      }
+    },
+    {
       accessorKey: "status",
       header: ({ column }) => (
         <Button

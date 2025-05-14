@@ -1,68 +1,46 @@
 import { StatusCodes } from "http-status-codes";
 
-import ApiError from "../../utils/api-error.js";
 import conversationModel from "../models/conversation-model.js";
+import ApiError from "../../utils/api-error.js";
 
-const createOneConversation = async (reqBody) => {
+const createOneConversation = async (data) => {
   try {
-    const { type, userIds } = reqBody;
+    const { type, team_id = null, project_id = null, user_ids } = data;
 
-    const conversation = await conversationModel.createOneConversation(type);
+    const conversationId = await conversationModel.createOneConversation({
+      type,
+      team_id,
+      project_id
+    });
 
-    if (!conversation.id) {
-      throw new ApiError(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Failed to create the conversation"
-      );
+    if (!conversationId) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the conversation");
     }
 
-    const participants = await conversationModel.addParticipantsToConversation(
-      conversation.id,
-      userIds
-    );
+    await conversationModel.addParticipantsToConversation(conversationId, user_ids);
 
-    if (!participants.length) {
-      throw new ApiError(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Failed to add participants to the conversation"
-      );
-    }
+    const conversation = await conversationModel.getOneConversationById(conversationId);
+    const participants = await conversationModel.getParticipantsOfConversation(conversationId);
 
-    return { conversation, participants };
+    const formattedConversation = {
+      ...conversation,
+      participants: participants.map((p) => ({
+        user_id: p.user_id
+      }))
+    };
+
+    return formattedConversation;
   } catch (err) {
     throw err;
   }
 };
 
-const getManyConversationsByUserId = async (userId) => {
+const getOneConversationById = async (id, userId) => {
   try {
-    const conversations = await conversationModel.getManyConversationsByUserId(
-      userId
-    );
-
-    if (!conversations.length) {
-      throw new ApiError(StatusCodes.NOT_FOUND, "No conversations found");
-    }
-
-    return conversations;
-  } catch (err) {
-    throw err;
-  }
-};
-
-const updateOneConversation = async (conversationId, updateData) => {
-  try {
-    const conversation = await conversationModel.updateOneConversation(
-      conversationId,
-      reqBody
-    );
-
-    if (!conversation) {
-      throw new ApiError(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Failed to update the conversation"
-      );
-    }
+    const conversation = {
+      ...(await conversationModel.getOneConversationById(id)),
+      ...(await conversationModel.getDetailOfConversation(id, userId))
+    };
 
     return conversation;
   } catch (err) {
@@ -70,7 +48,80 @@ const updateOneConversation = async (conversationId, updateData) => {
   }
 };
 
+const getManyConversationsByUserId = async (userId) => {
+  try {
+    const conversations = await conversationModel.getManyConversationsByUserId(userId);
+
+    const formattedConversations = await Promise.all(
+      conversations.map(async (c) => ({
+        ...c,
+        ...(await conversationModel.getDetailOfConversation(c.id, userId))
+      }))
+    );
+
+    formattedConversations.sort(
+      (a, b) => new Date(b.latest_message_at) - new Date(a.latest_message_at)
+    );
+
+    return formattedConversations;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const deleteOneConversation = async (conversationId) => {
+  try {
+    await conversationModel.deleteOneConversationById(conversationId);
+
+    return conversationId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getParticipantsOfConversation = async (conversationId, actorId) => {
+  try {
+    const isConversationParticipant = await conversationModel.isUserInConversation(
+      conversationId,
+      actorId
+    );
+
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
+    }
+
+    const participants = await conversationModel.getParticipantsOfConversation(conversationId);
+
+    return participants;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const updateLastReadMessage = async (conversationId, userId) => {
+  try {
+    const conversation = await conversationModel.getDetailOfConversation(conversationId, userId);
+
+    await conversationModel.updateLastReadMessage(
+      conversationId,
+      userId,
+      conversation.latest_message_id
+    );
+
+    return conversationId;
+  } catch (err) {
+    throw err;
+  }
+};
+
 export default {
   createOneConversation,
+  getOneConversationById,
   getManyConversationsByUserId,
+  deleteOneConversation,
+  getParticipantsOfConversation,
+  updateLastReadMessage
 };

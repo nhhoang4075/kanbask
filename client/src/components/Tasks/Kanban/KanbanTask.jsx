@@ -1,5 +1,5 @@
 "use client";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, Paperclip } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +47,7 @@ const KanbanTask = ({ task, columnId, handleEditTask, handleDeleteTask }) => {
 
   const dueDate = formatDate(task.dueDate);
   const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !task.completedAt;
+  const attachmentCount = task.attachments?.length || 0;
 
   return (
     <>
@@ -77,30 +78,36 @@ const KanbanTask = ({ task, columnId, handleEditTask, handleDeleteTask }) => {
           {task.description}
         </CardContent>
         <CardFooter className="p-3 pt-0 flex justify-between items-center">
-          {task.assignedTo && task.assignedTo.length > 0 ? (
-            <AvatarGroup>
-              {task.assignedTo.slice(0, 3).map((assignee) => (
-                <Avatar key={assignee.id} className="h-6 w-6 border-2 border-background">
-                  <AvatarImage src={assignee.avatar || ""} alt={assignee.name} />
-                  <AvatarFallback className="text-xs">
-                    {assignee.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {task.assignedTo.length > 3 && (
-                <Avatar className="h-6 w-6 border-2 border-background">
-                  <AvatarFallback className="text-xs bg-muted">
-                    +{task.assignedTo.length - 3}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-            </AvatarGroup>
-          ) : (
-            <span className="h-6 w-6" />
-          )}
+          <div className="flex items-center gap-2">
+            {task.assignedTo && task.assignedTo.length > 0 ? (
+              <AvatarGroup>
+                {task.assignedTo.slice(0, 3).map((assignee) => (
+                  <Avatar key={assignee.id} className="h-6 w-6 border-2 border-background">
+                    <AvatarImage src={assignee.avatar || ""} alt={assignee.name} />
+                    <AvatarFallback className="text-xs">
+                      {assignee.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </AvatarFallback>
+                  </Avatar>
+                ))}
+                {task.assignedTo.length > 3 && (
+                  <Avatar className="h-6 w-6 border-2 border-background">
+                    <AvatarFallback className="text-xs bg-muted">
+                      +{task.assignedTo.length - 3}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
+              </AvatarGroup>
+            ) : (
+              <span className="h-6 w-6" />
+            )}
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Paperclip className="h-3 w-3" />
+              {attachmentCount}
+            </div>
+          </div>
 
           {dueDate && (
             <div

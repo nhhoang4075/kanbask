@@ -4,34 +4,66 @@ import conversationService from "../services/conversation-service.js";
 
 const createOneConversation = async (req, res, next) => {
   try {
-    const conversationId = await conversationService.createOneConversation(
-      req.body
-    );
+    const conversation = await conversationService.createOneConversation(req.body);
 
-    return res.status(StatusCodes.CREATED).json({
+    res.status(StatusCodes.CREATED).json({
       success: true,
-      conversationId,
+      data: {
+        conversation
+      }
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
-const getManyConversationsByUserId = async (req, res, next) => {
+const getConversationsOfUser = async (req, res, next) => {
   try {
-    const conversations =
-      await conversationService.getManyConversationsByUserId(req.params.userId);
+    const conversations = await conversationService.getManyConversationsByUserId(req.user.id);
 
-    return res.status(StatusCodes.OK).json({
+    res.status(StatusCodes.OK).json({
       success: true,
-      conversations,
+      data: { conversations }
     });
   } catch (error) {
-    return next(error);
+    next(error);
+  }
+};
+
+const deleteOneConversation = async (req, res, next) => {
+  try {
+    const conversation = await conversationService.deleteOneConversation(req.params.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Deleted successfully conversation with id ${conversation.id}`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getParticipantsOfConversation = async (req, res, next) => {
+  try {
+    const participants = await conversationService.getParticipantsOfConversation(
+      req.params.id,
+      req.user.id
+    );
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        participants
+      }
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
 export default {
   createOneConversation,
-  getManyConversationsByUserId,
+  getConversationsOfUser,
+  deleteOneConversation,
+  getParticipantsOfConversation
 };

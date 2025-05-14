@@ -231,6 +231,34 @@ export const initialData = [
         },
         createdAt: "2023-10-16T15:45:00Z"
       }
+    ],
+    attachments: [
+      {
+        id: "file-1",
+        name: "competitor-analysis.pdf",
+        type: "pdf",
+        size: 2457600, // 2.4 MB
+        url: "/placeholder.svg?height=400&width=300",
+        uploadedAt: "2023-10-16T11:30:00Z",
+        uploadedBy: {
+          id: "user-2",
+          name: "Alex Johnson",
+          avatar: "/placeholder.svg?height=40&width=40"
+        }
+      },
+      {
+        id: "file-2",
+        name: "market-share-graph.png",
+        type: "image",
+        size: 1048576, // 1 MB
+        url: "/placeholder.svg?height=400&width=300",
+        uploadedAt: "2023-10-17T09:15:00Z",
+        uploadedBy: {
+          id: "user-3",
+          name: "Emily Chen",
+          avatar: "/placeholder.svg?height=40&width=40"
+        }
+      }
     ]
   },
   {

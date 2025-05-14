@@ -94,23 +94,6 @@ const getAttachmentsForTask = async (taskId, userId) => {
     return await attachmentModel.getAttachmentsByTaskId(taskId);
 };
 
-const unlinkAttachmentFromTask = async (taskId, attachmentId, userId) => {
-    const links = await attachmentModel.getAttachmentsByTaskId(taskId);
-    const linkExists = links.some(link => link.id === attachmentId);
-
-    if (!linkExists && !(await attachmentModel.isAttachmentLinkedToTask(taskId, attachmentId))) {}
-
-    const deletedCount = await attachmentModel.unlinkAttachmentFromTask(taskId, attachmentId);
-    if (deletedCount === 0) {
-        const attachmentExists = await attachmentModel.getAttachmentById(attachmentId);
-        if (!attachmentExists) {
-            throw new ApiError(StatusCodes.NOT_FOUND, "Attachment not found.");
-        }
-        throw new ApiError(StatusCodes.NOT_FOUND, "Attachment link to this task not found or already unlinked.");
-    }
-    return { taskId, attachmentId };
-};
-
 const linkAttachmentToMessage = async (messageId, attachmentId, userId) => {
     const attachment = await attachmentModel.getAttachmentById(attachmentId);
     if (!attachment) throw new ApiError(StatusCodes.NOT_FOUND, "Attachment not found to link.");
@@ -129,26 +112,12 @@ const getAttachmentsForMessage = async (messageId, userId) => {
     return await attachmentModel.getAttachmentsByMessageId(messageId);
 };
 
-const unlinkAttachmentFromMessage = async (messageId, attachmentId, userId) => {
-    const deletedCount = await attachmentModel.unlinkAttachmentFromMessage(messageId, attachmentId);
-    if (deletedCount === 0) {
-        const attachmentExists = await attachmentModel.getAttachmentById(attachmentId);
-        if (!attachmentExists) {
-            throw new ApiError(StatusCodes.NOT_FOUND, "Attachment not found.");
-        }
-        throw new ApiError(StatusCodes.NOT_FOUND, "Attachment link to this message not found or already unlinked.");
-    }
-    return { messageId, attachmentId };
-};
-
 export default {
     uploadFileAndRecord,
     generateDownloadUrl,
     deleteAttachmentFromSystem,
     linkAttachmentToTask,
     getAttachmentsForTask,
-    unlinkAttachmentFromTask,
     linkAttachmentToMessage,
     getAttachmentsForMessage,
-    unlinkAttachmentFromMessage,
 };

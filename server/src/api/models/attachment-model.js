@@ -37,14 +37,6 @@ const linkAttachmentToTask = async (taskId, attachmentId, attachedBy) => {
   }
 };
 
-const unlinkAttachmentFromTask = async (taskId, attachmentId) => {
-  try {
-    return await db("task_attachments").where({ task_id: taskId, attachment_id: attachmentId }).delete();
-  } catch (err) {
-    throw err;
-  }
-};
-
 const getAttachmentsByTaskId = async (taskId) => {
   try {
     return await db("task_attachments as ta")
@@ -84,14 +76,6 @@ const linkAttachmentToMessage = async (messageId, attachmentId, attachedBy) => {
       .insert({ message_id: messageId, attachment_id: attachmentId, attached_by: attachedBy })
       .returning("*");
     return link;
-  } catch (err) {
-    throw err;
-  }
-};
-
-const unlinkAttachmentFromMessage = async (messageId, attachmentId) => {
-  try {
-    return await db("message_attachments").where({ message_id: messageId, attachment_id: attachmentId }).delete();
   } catch (err) {
     throw err;
   }
@@ -147,11 +131,9 @@ export default {
   getAttachmentById,
   deleteAttachmentRecord,
   linkAttachmentToTask,
-  unlinkAttachmentFromTask,
   getAttachmentsByTaskId,
   isAttachmentLinkedToTask,
   linkAttachmentToMessage,
-  unlinkAttachmentFromMessage,
   getAttachmentsByMessageId,
   isAttachmentLinkedToMessage,
   isAttachmentStillLinked,

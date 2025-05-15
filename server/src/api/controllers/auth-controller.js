@@ -72,6 +72,58 @@ const login = async (req, res, next) => {
   }
 };
 
+const getSession = async (req, res, next) => {
+  try {
+    const user = await authService.getSession(req.user.id);
+
+    res.status(StatusCodes.OK).json({ success: true, data: { user } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const refreshSession = async (req, res, next) => {
+  try {
+    const refreshToken = req.cookies?.refresh_token;
+
+    if (!refreshToken) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "No refresh token provided");
+    }
+
+    const decodedRefreshToken = jwtProvider.verifyToken(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    if (!decodedRefreshToken) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
+    }
+
+    const payload = {
+      id: decodedRefreshToken.id,
+      email: decodedRefreshToken.email,
+      role: decodedRefreshToken.role,
+      email_verified: decodedRefreshToken.email_verified
+    };
+
+    const accessToken = jwtProvider.generateToken(payload, process.env.ACCESS_TOKEN_SECRET, "1h");
+
+    res.cookie("access_token", accessToken, {
+      maxAge: ms("1h"),
+      httpOnly: true,
+      secure: true,
+      sameSite: "none"
+    });
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "Refreshed session successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const logout = async (req, res, next) => {
   try {
     res.clearCookie("access_token");
@@ -90,7 +142,7 @@ const logout = async (req, res, next) => {
 
 const sendVerificationMail = async (req, res, next) => {
   try {
-    const userId = await authService.sendVerificationMail(req.query.email);
+    const userId = await authService.sendVerificationMail(req.user.email);
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -103,7 +155,7 @@ const sendVerificationMail = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
   try {
-    const userId = await authService.verifyEmail(req.body);
+    const userId = await authService.verifyEmail(req.user.email, req.query.code);
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -140,55 +192,14 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-const refreshAccessToken = async (req, res, next) => {
-  try {
-    const refreshToken = req.cookies?.refresh_token;
-
-    if (!refreshToken) {
-      throw new ApiError(StatusCodes.UNAUTHORIZED, "No refresh token provided");
-    }
-
-    const decodedRefreshToken = jwtProvider.verifyToken(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET
-    );
-
-    if (!decodedRefreshToken) {
-      throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
-    }
-
-    const payload = {
-      id: decodedRefreshToken.id,
-      email: decodedRefreshToken.email,
-      role: decodedRefreshToken.role,
-      email_verified: decodedRefreshToken.email_verified
-    };
-
-    const accessToken = jwtProvider.generateToken(payload, process.env.ACCESS_TOKEN_SECRET, "1h");
-
-    res.cookie("access_token", accessToken, {
-      maxAge: ms("1h"),
-      httpOnly: true,
-      secure: true,
-      sameSite: "none"
-    });
-
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: "Refreshed access token successfully"
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export default {
   register,
   login,
+  getSession,
+  refreshSession,
   logout,
   verifyEmail,
   sendVerificationMail,
   sendPasswordResetMail,
-  resetPassword,
-  refreshAccessToken
+  resetPassword
 };

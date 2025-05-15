@@ -43,6 +43,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
+
 @theme {
   --color-prussian-blue: #023047ff;
   --color-blue-green: #219ebcff;
@@ -55,7 +56,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: var(--color-ghost-white);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -78,8 +79,10 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
+  /* --sidebar: oklch(0.985 0 0); */
+  /* --sidebar-foreground: oklch(0.145 0 0); */
+  --sidebar: var(--color-prussian-blue);
+  --sidebar-foreground: var(--color-ghost-white);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
@@ -126,7 +129,15 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    @apply bg-prussian-blue text-foreground;
+  }
   body {
     @apply bg-background text-foreground;
   }
+}
+
+html,
+body {
+  overscroll-behavior: none;
 }

@@ -43,16 +43,11 @@ const validateEmailQuery = validate(
   })
 );
 
-const validateVerification = validate(
+const validateVerificationCodeQuery = validate(
   z.object({
-    body: z
-      .object({
-        email: z.string().email().max(100),
-        verification_code: z.string().length(6)
-      })
-      .strict(),
+    body: z.object({}).optional(),
     params: z.object({}).optional(),
-    query: z.object({}).optional()
+    query: z.object({ code: z.string().length(6) }).strict()
   })
 );
 
@@ -72,7 +67,7 @@ const validatePasswordReset = validate(
 export default {
   validateRegister,
   validateLogin,
-  validateVerification,
-  validatePasswordReset,
-  validateEmailQuery
+  validateEmailQuery,
+  validateVerificationCodeQuery,
+  validatePasswordReset
 };

@@ -2,8 +2,10 @@ import conversationService from "../api/services/conversation-service.js";
 import messageService from "../api/services/message-service.js";
 
 const registerMessageHandlers = (io, socket) => {
-  socket.on("send_message", async ({ conversation_id, sender_id, content }) => {
+  socket.on("send_message", async ({ conversation_id, content }) => {
     try {
+      const { id: sender_id } = socket.data.user;
+
       const message = await messageService.createOneMessage({
         conversation_id,
         sender_id,
@@ -16,12 +18,12 @@ const registerMessageHandlers = (io, socket) => {
 
       await Promise.all(
         roomSockets.map(async (sock) => {
-          const { conversation_room } = sock.data;
-          if (conversation_room.user_id && conversation_room.conversation_id === conversation_id) {
-            await conversationService.updateLastReadMessage(
-              conversation_id,
-              conversation_room.user_id
-            );
+          const {
+            user: { id: user_id },
+            conversation_id: current_conversation_id
+          } = sock.data;
+          if (user_id && current_conversation_id === conversation_id) {
+            await conversationService.updateLastReadMessage(conversation_id, user_id);
           }
         })
       );

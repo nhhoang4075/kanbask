@@ -1,32 +1,38 @@
 import { Server } from "socket.io";
 
+import authMiddleware from "../middlewares/auth-middleware.js";
 import registerConversationHandlers from "./conversation-socket.js";
 import registerMessageHandlers from "./message-socket.js";
-import registerNotificationHandlers from "./notification-socket.js";
 
 let ioInstance = null;
 
 const setupSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_ORIGIN || "*",
-      methods: ["GET", "POST"]
+      origin: [process.env.CLIENT_ORIGIN, "https://localhost:3000"],
+      methods: ["GET", "POST"],
+      credentials: true
     }
   });
 
   ioInstance = io;
 
+  io.use(authMiddleware.socketAuthenticate);
+
   io.on("connection", (socket) => {
     console.log("A client connected: " + socket.id);
 
-    socket.on("setup", ({ user_id }) => {
-      socket.join(`user_${user_id}`);
-      // console.log(`User ${user_id} joined personal room`);
+    socket.on("setup", () => {
+      const userId = socket.data.user.id;
+
+      if (userId) {
+        socket.join(`user_${userId}`);
+        console.log(`User ${userId} joined personal room`);
+      }
     });
 
     registerConversationHandlers(io, socket);
     registerMessageHandlers(io, socket);
-    registerNotificationHandlers(io, socket);
 
     socket.on("disconnect", (reason) => {
       console.log(`Client disconnected: ${socket.id}, Reason: ${reason}`);
@@ -36,8 +42,8 @@ const setupSocket = (server) => {
       console.error("Socket Error on connection:", error);
     });
 
-    socket.on("connect_error", (err) => {
-      console.log(`connect_error due to ${err.message}`);
+    socket.on("connect_error", (error) => {
+      console.log(`connect_error due to ${error.message}`);
     });
   });
 };

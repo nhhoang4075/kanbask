@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 
 import messageModel from "../models/message-model.js";
+import conversationModel from "../models/conversation-model.js";
 import ApiError from "../../utils/api-error.js";
 import { sanitizeAllowedFields } from "../../utils/helper.js";
 
@@ -22,8 +23,16 @@ const createOneMessage = async (data) => {
   }
 };
 
-const getManyMessagesByConversationId = async (conersationId) => {
+const getManyMessagesByConversationId = async (conersationId, userId) => {
   try {
+    const participants = await conversationModel.getParticipantsOfConversation(conersationId);
+
+    const isParticipant = participants.some((p) => p.user_id === userId);
+
+    if (!isParticipant) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "You are not a participant of this conversation");
+    }
+
     const messages = messageModel.getManyMessagesByConversationId(conersationId);
 
     return messages;

@@ -10,7 +10,7 @@ export default function NavConversation() {
     <Card className="h-full shadow-lg rounded-none overflow-hidden bg-ghost-white">
       <CardContent className="p-0 flex flex-col h-full">
         <div className="px-6 py-4 bg-ghost-white border-b">
-          <h2 className="text-xl font-semibold text-gray-800">Messages</h2>
+          <h2 className="text-3xl font-bold tracking-tight">Messages</h2>
         </div>
         {(loading) ? (
           <div className="flex-1 flex items-center justify-center">

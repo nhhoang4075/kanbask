@@ -8,6 +8,7 @@ import conversationRoute from "./conversation-route.js";
 import messageRoute from "./message-route.js";
 import notificationRoute from "./notification-route.js";
 import searchRoute from "./search-route.js";
+import activityLogRoute from "./activityLog-route.js";
 
 const router = Router();
 
@@ -20,6 +21,7 @@ function apiRouter() {
   messageRoute(router);
   notificationRoute(router);
   searchRoute(router);
+  activityLogRoute(router);
 
   return router;
 }

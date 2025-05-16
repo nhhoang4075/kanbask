@@ -1,26 +1,21 @@
 import { db } from "../../config/db.js";
+import pgvector from "pgvector/knex";
 
-const createOneTask = async (
-  project_id,
-  title,
-  status,
-  priority,
-  due_date,
-  position,
-  created_by,
-  assignees
-) => {
+import embeddingProvider from "../../config/embedding-provider.js";
+
+const createOneTask = async (user_id, data, position, assignees) => {
   try {
     return await db.transaction(async (trx) => {
+      const textToEmbed = data.title.trim();
+      const taskEmbedding = await embeddingProvider.generateEmbedding(textToEmbed);
+      const embedding = pgvector.toSql(taskEmbedding);
+
       const [task] = await trx("tasks")
         .insert({
-          project_id,
-          title,
-          status,
-          priority,
-          due_date,
+          ...data,
+          created_by: user_id,
           position,
-          created_by
+          embedding
         })
         .returning("*");
 
@@ -63,21 +58,17 @@ const getMaxTaskPosition = async (project_id) => {
   return max || 0;
 };
 
-const updateOneTaskInfo = async (task_id, title, status, priority, due_date, assignees) => {
+const updateOneTaskById = async (task_id, data, assignees) => {
   try {
     return await db.transaction(async (trx) => {
-      const updateData = {
-        updated_at: trx.fn.now()
-      };
-      if (title !== undefined) updateData.title = title;
-      if (status !== undefined) updateData.status = status;
-      if (priority !== undefined) updateData.priority = priority;
-      if (due_date !== undefined) updateData.due_date = due_date;
-      if (status === "done") updateData.completed_at = trx.fn.now();
+      const updated_at = trx.fn.now();
+
+      if (data.status === "done") data.completed_at = trx.fn.now();
+      else if (data.status != null) data.completed_at = null;
 
       const [updatedTask] = await trx("tasks")
         .where({ id: task_id })
-        .update(updateData)
+        .update({ ...data, updated_at })
         .returning("*");
 
       if (assignees) {
@@ -85,8 +76,7 @@ const updateOneTaskInfo = async (task_id, title, status, priority, due_date, ass
         if (assignees.length) {
           const rows = assignees.map((user_id) => ({
             user_id,
-            task_id,
-            assigned_at: trx.fn.now()
+            task_id
           }));
           await trx("task_assignees").insert(rows);
         }
@@ -99,9 +89,9 @@ const updateOneTaskInfo = async (task_id, title, status, priority, due_date, ass
   }
 };
 
-const updateOneTaskPosition = async (id, project_id, old_position, new_position) => {
+const moveTask = async (id, project_id, old_position, new_position) => {
   try {
-    await db.transaction(async (trx) => {
+    return await db.transaction(async (trx) => {
       if (old_position < new_position) {
         await trx("tasks")
           .where({ project_id })
@@ -116,7 +106,11 @@ const updateOneTaskPosition = async (id, project_id, old_position, new_position)
           .increment("position", 1);
       }
 
-      await trx("tasks").where({ id }).update({ position: new_position });
+      const [updated] = await trx("tasks")
+        .where({ id })
+        .update({ position: new_position })
+        .returning("*");
+      return updated;
     });
   } catch (err) {
     throw new Error(err);
@@ -143,7 +137,7 @@ export default {
   getProjectTasks,
   getOneTaskById,
   getMaxTaskPosition,
-  updateOneTaskInfo,
-  updateOneTaskPosition,
+  updateOneTaskById,
+  moveTask,
   deleteOneTaskById
 };

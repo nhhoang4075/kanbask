@@ -13,12 +13,8 @@ const taskRoute = (router) => {
   router
     .route("/tasks/:task_id")
     .get(taskValidation.validateGetTaskById, taskController.getOneTaskById)
-    .put(taskValidation.validateUpdateTaskInfo, taskController.updateOneTaskInfo)
+    .put(taskValidation.validateUpdateTask, taskController.updateOneTaskById)
     .delete(taskValidation.validateDeleteTask, taskController.deleteOneTaskById);
-
-  router
-    .route("/tasks/:task_id/position/:position")
-    .put(taskValidation.validateUpdateTaskPosition, taskController.updateOneTaskPosition);
 };
 
 export default taskRoute;

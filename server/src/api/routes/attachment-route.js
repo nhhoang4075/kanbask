@@ -5,7 +5,7 @@ import uploadMiddleware from "../../middlewares/upload-middleware.js";
 
 const attachmentRoute = (router) => {
   router.get(
-    "/attachments/:attachmentId/download",
+    "/attachments/:attachment_id/download",
     authMiddleware.authenticate,
     attachmentValidation.validateAttachmentIdParam,
     attachmentController.downloadAttachment
@@ -22,8 +22,8 @@ const attachmentRoute = (router) => {
     "/tasks/:taskId/attachments",
     authMiddleware.authenticate,
     attachmentValidation.validateParentIdParam("taskId"),
-    uploadMiddleware.uploadAttachment.single('attachmentFile'),
-    attachmentController.UploadToTask
+    uploadMiddleware.uploadAttachment.array("files"),
+    attachmentController.uploadAttachmentsToTask
   );
 
   router.get(
@@ -37,7 +37,7 @@ const attachmentRoute = (router) => {
     "/messages/:messageId/attachments",
     authMiddleware.authenticate,
     attachmentValidation.validateParentIdParam("messageId"),
-    uploadMiddleware.uploadAttachment.single('attachmentFile'),
+    uploadMiddleware.uploadAttachment.array("files"),
     attachmentController.UploadToMessage
   );
 

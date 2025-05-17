@@ -1,140 +1,131 @@
 import { db } from "../../config/db.js";
 
-const createAttachment = async (attachmentData) => {
+const createOneAttachment = async (data) => {
   try {
-    const [newAttachment] = await db("storage_attachments").insert(attachmentData).returning("*");
-    return newAttachment;
+    const [attachment] = await db("storage_attachments").insert(data).returning("id");
+
+    return attachment.id;
   } catch (err) {
-    throw err;
+    throw new Error(err);
   }
 };
 
-const getAttachmentById = async (id) => {
+const getOneAttachmentById = async (id) => {
   try {
-    return await db("storage_attachments").where({ id }).first();
+    const [attachment] = await db("storage_attachments").where({ id }).limit(1);
+
+    return attachment;
   } catch (err) {
-    throw err;
+    throw new Error(err);
   }
 };
 
-const deleteAttachmentRecord = async (id) => {
+const getManyAttachmentsByTaskId = async (task_id) => {
   try {
-    const deletedCount = await db("storage_attachments").where({ id }).delete();
-    return deletedCount;
-  } catch (err) {
-    throw err;
-  }
-};
-
-const linkAttachmentToTask = async (taskId, attachmentId, attachedBy) => {
-  try {
-    const [link] = await db("task_attachments")
-      .insert({ task_id: taskId, attachment_id: attachmentId, attached_by: attachedBy })
-      .returning("*");
-    return link;
-  } catch (err) {
-    throw err;
-  }
-};
-
-const getAttachmentsByTaskId = async (taskId) => {
-  try {
-    return await db("task_attachments as ta")
-      .join("storage_attachments as sa", "ta.attachment_id", "sa.id")
-      .where("ta.task_id", taskId)
+    const attachments = await db("task_attachments AS ta")
+      .join("storage_attachments AS sa", "ta.attachment_id", "sa.id")
+      .where("ta.task_id", task_id)
       .select(
         "sa.id",
         "sa.supabase_path",
         "sa.original_name",
         "sa.mime_type",
         "sa.size_bytes",
-        "sa.uploaded_by as attachment_uploader",
-        "sa.created_at as attachment_created_at",
-        "ta.attached_by as task_linker",
-        "ta.attached_at as task_linked_at"
+        "ta.attached_by",
+        "ta.attached_at"
       )
       .orderBy("ta.attached_at", "asc");
+
+    return attachments;
   } catch (err) {
-    throw err;
+    throw new Error(err);
   }
 };
 
-const isAttachmentLinkedToTask = async (taskId, attachmentId) => {
+const getManyAttachmentsByMessageId = async (message_id) => {
   try {
-    const link = await db("task_attachments")
-      .where({ task_id: taskId, attachment_id: attachmentId })
-      .first();
-    return !!link;
-  } catch (err) {
-    throw err;
-  }
-};
-
-const linkAttachmentToMessage = async (messageId, attachmentId, attachedBy) => {
-  try {
-    const [link] = await db("message_attachments")
-      .insert({ message_id: messageId, attachment_id: attachmentId, attached_by: attachedBy })
-      .returning("*");
-    return link;
-  } catch (err) {
-    throw err;
-  }
-};
-
-const getAttachmentsByMessageId = async (messageId) => {
-  try {
-    return await db("message_attachments as ma")
-      .join("storage_attachments as sa", "ma.attachment_id", "sa.id")
-      .where("ma.message_id", messageId)
+    const attachments = await db("message_attachments AS ma")
+      .join("storage_attachments AS sa", "ma.attachment_id", "sa.id")
+      .where("ma.message_id", message_id)
       .select(
         "sa.id",
         "sa.supabase_path",
         "sa.original_name",
         "sa.mime_type",
         "sa.size_bytes",
-        "sa.uploaded_by as attachment_uploader",
-        "sa.created_at as attachment_created_at",
-        "ma.attached_by as message_linker",
-        "ma.attached_at as message_linked_at"
+        "ma.attached_by",
+        "ma.attached_at"
       )
       .orderBy("ma.attached_at", "asc");
+
+    return attachments;
   } catch (err) {
-    throw err;
+    throw new Error(err);
   }
 };
 
-const isAttachmentLinkedToMessage = async (messageId, attachmentId) => {
+const deleteOneAttachmentById = async (id) => {
   try {
-    const link = await db("message_attachments")
-      .where({ message_id: messageId, attachment_id: attachmentId })
-      .first();
-    return !!link;
+    const [attachment] = await db("storage_attachments").delete().where({ id }).returning("id");
+
+    return attachment.id;
   } catch (err) {
-    throw err;
+    throw new Error(err);
   }
 };
 
-const isAttachmentStillLinked = async (attachmentId) => {
+const linkOneAttachmentToTask = async (task_id, attachment_id, attached_by) => {
   try {
-    const taskLink = await db("task_attachments").where({ attachment_id: attachmentId }).first();
-    if (taskLink) return true;
-    const messageLink = await db("message_attachments").where({ attachment_id: attachmentId }).first();
-    if (messageLink) return true;
-    return false;
+    await db("task_attachments").insert({ task_id, attachment_id, attached_by });
+
+    return attachment_id;
   } catch (err) {
-    throw err;
+    throw new Error(err);
+  }
+};
+
+const isOneAttachmentLinkedToTask = async (task_id, attachment_id) => {
+  try {
+    const record = await db("task_attachments").where({ task_id, attachment_id }).first();
+
+    return !!record;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const linkOneAttachmentToMessage = async (message_id, attachment_id, attached_by) => {
+  try {
+    await db("message_attachments").insert({
+      message_id,
+      attachment_id,
+      attached_by
+    });
+
+    return attachment_id;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const isOneAttachmentLinkedToMessage = async (message_id, attachment_id) => {
+  try {
+    const record = await db("message_attachments").where({ message_id, attachment_id }).first();
+
+    return !!record;
+  } catch (err) {
+    throw new Error(err);
   }
 };
 
 export default {
-  createAttachment,
-  getAttachmentById,
-  deleteAttachmentRecord,
-  linkAttachmentToTask,
-  getAttachmentsByTaskId,
-  isAttachmentLinkedToTask,
-  linkAttachmentToMessage,
-  getAttachmentsByMessageId,
-  isAttachmentLinkedToMessage,
-  isAttachmentStillLinked,
+  createOneAttachment,
+  getOneAttachmentById,
+  getManyAttachmentsByTaskId,
+  getManyAttachmentsByMessageId,
+  deleteOneAttachmentById,
+  linkOneAttachmentToTask,
+  isOneAttachmentLinkedToTask,
+  linkOneAttachmentToMessage,
+  isOneAttachmentLinkedToMessage
 };

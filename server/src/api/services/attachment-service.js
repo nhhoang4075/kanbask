@@ -1,123 +1,198 @@
 import { StatusCodes } from "http-status-codes";
-import { v4 as uuidv4 } from 'uuid';
-import path from 'path';
+import slugify from "slugify";
+import path from "path";
 
-import { supabase } from "../../config/supabaseClient.js";
 import attachmentModel from "../models/attachment-model.js";
+import { supabase } from "../../config/supabase.js";
 import ApiError from "../../utils/api-error.js";
 
-const BUCKET_NAME = process.env.SUPABASE_BUCKET_FILES || 'user-files';
+const BUCKET_NAME = process.env.SUPABASE_BUCKET_FILES || "user-files";
 
-const uploadFileAndRecord = async (fileBuffer, originalName, mimeType, sizeBytes, userId) => {
-    if (!fileBuffer) throw new ApiError(StatusCodes.BAD_REQUEST, "No file buffer provided.");
+const uploadOneAttachmentToStorage = async (file, actorId) => {
+  try {
+    const { buffer, originalname, mimetype, size } = file;
 
-    const fileExtension = path.extname(originalName);
-    const uniqueFileName = `${uuidv4()}${fileExtension}`;
-    const supabaseFilePath = `general/${userId}/${uniqueFileName}`;
+    if (!buffer) throw new ApiError(StatusCodes.BAD_REQUEST, "No file buffer provided");
 
-    try {
-        const { data, error } = await supabase.storage.from(BUCKET_NAME)
-            .upload(supabaseFilePath, fileBuffer, { contentType: mimeType, upsert: false });
+    const ext = path.extname(file.originalname);
+    const name = path.basename(file.originalname, ext);
+    const safeName = slugify(name, {
+      lower: true,
+      strict: true
+    });
+    const uniqueFileName = `${Date.now()}-${safeName}${ext}`;
+    const supabaseFilePath = `general/${actorId}/${uniqueFileName}`;
 
-        if (error) throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Supabase upload failed: ${error.message}`);
-        if (!data?.path) throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Supabase upload incomplete: No path returned.");
-
-        const attachmentRecordData = {
-            supabase_path: data.path,
-            original_name: originalName,
-            mime_type: mimeType,
-            size_bytes: sizeBytes,
-            uploaded_by: userId,
-        };
-
-        return await attachmentModel.createAttachment(attachmentRecordData);
-    } catch (err) {
-        if (err instanceof ApiError) throw err;
-        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to upload and record file.");
-    }
-};
-
-const generateDownloadUrl = async (attachmentId, userId) => {
-    const attachmentRecord = await attachmentModel.getAttachmentById(attachmentId);
-    if (!attachmentRecord) throw new ApiError(StatusCodes.NOT_FOUND, "Attachment not found.");
-
-    const { data, error: supabaseError } = await supabase.storage.from(BUCKET_NAME)
-        .createSignedUrl(attachmentRecord.supabase_path, 60 * 5);
+    const { data, error: supabaseError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(supabaseFilePath, buffer, { contentType: mimetype, upsert: false });
 
     if (supabaseError) {
-        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Supabase sign URL failed: ${supabaseError.message}`);
+      throw new ApiError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        `Supabase error: ${supabaseError.message}`
+      );
     }
+
+    if (!data?.path)
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Supabase error: No path returned.");
+
+    const attachmentData = {
+      supabase_path: data.path,
+      original_name: originalname,
+      mime_type: mimetype,
+      size_bytes: size,
+      uploaded_by: actorId
+    };
+
+    const attachmentId = await attachmentModel.createOneAttachment(attachmentData);
+
+    const attachment = await attachmentModel.getOneAttachmentById(attachmentId);
+
+    return attachment;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const generateDownloadUrlOfAttachment = async (attachmentId) => {
+  try {
+    const attachment = await attachmentModel.getOneAttachmentById(attachmentId);
+
+    if (!attachment) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Attachment not found");
+    }
+
+    const { data, error: supabaseError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .createSignedUrl(attachment.supabase_path, 60 * 5);
+
+    if (supabaseError) {
+      throw new ApiError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        `Supabase error: ${supabaseError.message}`
+      );
+    }
+
     if (!data || !data.signedUrl) {
-        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to generate signed URL.");
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to generate download URL");
     }
+
     return data.signedUrl;
+  } catch (err) {
+    throw err;
+  }
 };
 
-const deleteAttachmentFromSystem = async (attachmentId, userId) => {
-    const attachmentRecord = await attachmentModel.getAttachmentById(attachmentId);
-    if (!attachmentRecord) throw new ApiError(StatusCodes.NOT_FOUND, "Attachment not found.");
+const deleteAttachmentFromSystem = async (attachmentId, actorId) => {
+  try {
+    const attachment = await attachmentModel.getOneAttachmentById(attachmentId);
 
-    if (attachmentRecord.uploaded_by !== userId) {
-        throw new ApiError(StatusCodes.FORBIDDEN, "You do not have permission to delete this attachment.");
+    if (!attachment) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Attachment not found");
     }
 
-    try {
-        const { error: deleteError } = await supabase.storage.from(BUCKET_NAME).remove([attachmentRecord.supabase_path]);
-
-        if (deleteError && deleteError.message !== 'The resource was not found' && deleteError.name !== 'StorageManagementApiError') {
-            console.error(`Supabase delete warning (attachmentId: ${attachmentId}): ${deleteError.message}`);
-        }
-
-        await attachmentModel.deleteAttachmentRecord(attachmentId);
-        return attachmentId;
-    } catch (err) {
-        if (err instanceof ApiError) throw err;
-        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to delete attachment from system.");
+    if (attachment.uploaded_by !== actorId) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "You do not have permission to delete this attachment"
+      );
     }
-};
 
-const linkAttachmentToTask = async (taskId, attachmentId, userId) => {
-    const attachment = await attachmentModel.getAttachmentById(attachmentId);
-    if (!attachment) throw new ApiError(StatusCodes.NOT_FOUND, "Attachment not found to link.");
+    const { error: supabaseError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .remove([attachment.supabase_path]);
 
-    try {
-        return await attachmentModel.linkAttachmentToTask(taskId, attachmentId, userId);
-    } catch (err) {
-        if (err.message && err.message.includes('duplicate key value violates unique constraint')) {
-            throw new ApiError(StatusCodes.CONFLICT, "This attachment is already linked to the task.");
-        }
-        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to link attachment to task.");
+    if (supabaseError) {
+      throw new ApiError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        `Supabase error: ${supabaseError.message}`
+      );
     }
+
+    await attachmentModel.deleteOneAttachmentById(attachmentId);
+
+    return attachmentId;
+  } catch (err) {
+    throw err;
+  }
 };
 
-const getAttachmentsForTask = async (taskId, userId) => {
-    return await attachmentModel.getAttachmentsByTaskId(taskId);
-};
+const linkAttachmentToTask = async (taskId, attachmentId, actorId) => {
+  try {
+    const attachment = await attachmentModel.getOneAttachmentById(attachmentId);
 
-const linkAttachmentToMessage = async (messageId, attachmentId, userId) => {
-    const attachment = await attachmentModel.getAttachmentById(attachmentId);
-    if (!attachment) throw new ApiError(StatusCodes.NOT_FOUND, "Attachment not found to link.");
-
-    try {
-        return await attachmentModel.linkAttachmentToMessage(messageId, attachmentId, userId);
-    } catch (err) {
-        if (err.message && err.message.includes('duplicate key value violates unique constraint')) {
-            throw new ApiError(StatusCodes.CONFLICT, "This attachment is already linked to the message.");
-        }
-        throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to link attachment to message.");
+    if (!attachment) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Attachment not found");
     }
+
+    await attachmentModel.linkAttachmentToTask(taskId, attachmentId, actorId);
+
+    return attachmentModel;
+  } catch (err) {
+    throw err;
+  }
 };
 
-const getAttachmentsForMessage = async (messageId, userId) => {
-    return await attachmentModel.getAttachmentsByMessageId(messageId);
+const getAttachmentsForTask = async (taskId, actorId) => {
+  try {
+    return await attachmentModel.getManyAttachmentsByTaskId(taskId);
+  } catch (err) {
+    throw err;
+  }
+};
+
+const linkAttachmentToMessage = async (messageId, attachmentId, actorId) => {
+  try {
+    const attachment = await attachmentModel.getOneAttachmentById(attachmentId);
+
+    if (!attachment) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Attachment not found");
+    }
+
+    await attachmentModel.linkAttachmentToMessage(messageId, attachmentId, actorId);
+
+    return attachmentId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getAttachmentsForMessage = async (messageId, actorId) => {
+  try {
+    return await attachmentModel.getManyAttachmentsByMessageId(messageId);
+  } catch (err) {
+    throw err;
+  }
+};
+
+const uploadAttachmentsToTask = async (taskId, files, actorId) => {
+  try {
+    if (!files || files.length == 0) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Files not found");
+    }
+
+    await Promise.all(
+      files.map(async (file) => {
+        const attachment = await uploadOneAttachmentToStorage(file, actorId);
+
+        await attachmentModel.linkOneAttachmentToTask(taskId, attachment.id, actorId);
+      })
+    );
+
+    return taskId;
+  } catch (err) {
+    throw err;
+  }
 };
 
 export default {
-    uploadFileAndRecord,
-    generateDownloadUrl,
-    deleteAttachmentFromSystem,
-    linkAttachmentToTask,
-    getAttachmentsForTask,
-    linkAttachmentToMessage,
-    getAttachmentsForMessage,
+  uploadOneAttachmentToStorage,
+  generateDownloadUrlOfAttachment,
+  deleteAttachmentFromSystem,
+  linkAttachmentToTask,
+  getAttachmentsForTask,
+  linkAttachmentToMessage,
+  getAttachmentsForMessage,
+  uploadAttachmentsToTask
 };

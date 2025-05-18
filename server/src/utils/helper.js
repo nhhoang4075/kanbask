@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 /**
  * Filters an object to only include allowed fields.
  *
@@ -31,8 +33,25 @@ export const sanitizeUser = (user) => {
   delete sanitized.verification_expires;
   delete sanitized.password_reset_code;
   delete sanitized.password_reset_expires;
+  delete sanitized.embedding;
 
   return sanitized;
+};
+
+/**
+ * Randomly generate 8 character code
+ * @returns {string}  A–Z and 0–9
+ */
+export const generateTeamCode = () => {
+  const length = 8;
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const randomBytes = crypto.randomBytes(length);
+  let code = "";
+  for (let i = 0; i < length; i++) {
+    code += chars[randomBytes[i] % chars.length];
+  }
+
+  return code;
 };
 
 export const replaceQueryParams = (query, values) => {

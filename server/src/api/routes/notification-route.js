@@ -9,11 +9,7 @@ const notificationRoute = (router) => {
     .route("/notifications")
     .get(
       notificationValidation.validateNotificationsOptionsQuery,
-      notificationController.getManyNotificationsByUserId
-    )
-    .post(
-      notificationValidation.validateNewNotification,
-      notificationController.createOneNotification
+      notificationController.getNotificationsOfUser
     )
     .put(notificationController.markAllNotificationsAsRead)
     .delete(notificationController.deleteAllNotifications);

@@ -11,5 +11,4 @@
 # misc
 .DS_Store
 
-/certificates/
-
+certificates

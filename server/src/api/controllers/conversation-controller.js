@@ -17,7 +17,7 @@ const createOneConversation = async (req, res, next) => {
   }
 };
 
-const getManyConversationsByUserId = async (req, res, next) => {
+const getConversationsOfUser = async (req, res, next) => {
   try {
     const conversations = await conversationService.getManyConversationsByUserId(req.user.id);
 
@@ -45,7 +45,10 @@ const deleteOneConversation = async (req, res, next) => {
 
 const getParticipantsOfConversation = async (req, res, next) => {
   try {
-    const participants = await conversationService.getParticipantsOfConversation(req.params.id);
+    const participants = await conversationService.getParticipantsOfConversation(
+      req.params.id,
+      req.user.id
+    );
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -60,7 +63,7 @@ const getParticipantsOfConversation = async (req, res, next) => {
 
 export default {
   createOneConversation,
-  getManyConversationsByUserId,
+  getConversationsOfUser,
   deleteOneConversation,
   getParticipantsOfConversation
 };

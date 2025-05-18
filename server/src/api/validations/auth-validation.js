@@ -8,8 +8,7 @@ const validateRegister = validate(
       .object({
         email: z.string().email().max(100),
         password: z.string().min(8).max(255),
-        first_name: z.string().min(1).max(100),
-        last_name: z.string().min(1).max(100)
+        full_name: z.string().min(1).max(100)
       })
       .strict(),
     params: z.object({}).optional(),

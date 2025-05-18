@@ -38,4 +38,4 @@ const sendMail = async (options) => {
   await transporter.sendMail(mailOptions);
 };
 
-export { sendMail };
+export default { sendMail };

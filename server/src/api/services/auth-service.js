@@ -4,7 +4,8 @@ import bcrypt from "bcryptjs";
 
 import userModel from "../models/user-model.js";
 import ApiError from "../../utils/api-error.js";
-import { sendMail } from "../../config/mail-provider.js";
+import mailProvider from "../../config/mail-provider.js";
+import embeddingProvider from "../../config/embedding-provider.js";
 import { sanitizeUser } from "../../utils/helper.js";
 
 const register = async (data) => {
@@ -20,13 +21,15 @@ const register = async (data) => {
       );
     }
 
+    const textToEmbed = `${data.full_name} ${data.email}`.trim();
+    const userEmbedding = await embeddingProvider.generateEmbedding(textToEmbed);
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     const userId = await userModel.createOneUser({
       email,
       password_hash: hashedPassword,
-      first_name: data.first_name,
-      last_name: data.last_name
+      full_name: data.full_name,
+      embedding: userEmbedding
     });
 
     if (!userId) {
@@ -131,7 +134,7 @@ const sendVerificationMail = async (userEmail) => {
 
     const data = { user: { name: user.last_name }, verificationCode: code };
 
-    await sendMail({
+    await mailProvider.sendMail({
       email: user.email,
       subject: "Verify your account",
       template: "verification-mail.ejs",
@@ -205,7 +208,7 @@ const sendPasswordResetMail = async (userEmail) => {
 
     const data = { user: { name: user.last_name }, passwordResetUrl };
 
-    await sendMail({
+    await mailProvider.sendMail({
       email: user.email,
       subject: "Forgot your password",
       template: "password-reset-mail.ejs",

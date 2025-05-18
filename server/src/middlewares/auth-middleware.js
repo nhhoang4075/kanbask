@@ -41,7 +41,7 @@ const authorizeAdmin = (req, res, next) => {
   }
 };
 
-const socketAuthenticate = async (socket, next) => {
+const authenticateSocket = async (socket, next) => {
   try {
     const rawCookies = socket.request.headers.cookie;
     const { access_token: token } = parse(rawCookies);
@@ -67,5 +67,5 @@ const socketAuthenticate = async (socket, next) => {
 export default {
   authenticate,
   authorizeAdmin,
-  socketAuthenticate
+  authenticateSocket
 };

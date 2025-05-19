@@ -10,6 +10,7 @@ import notificationRoute from "./notification-route.js";
 import taskRoute from "./task-route.js";
 import taskCommentRoute from "./task-comment-route.js";
 import searchRoute from "./search-route.js";
+import activityLogRoute from "./activityLog-route.js";
 
 const router = Router();
 
@@ -24,6 +25,7 @@ function apiRouter() {
   taskRoute(router);
   taskCommentRoute(router);
   searchRoute(router);
+  activityLogRoute(router);
 
   return router;
 }

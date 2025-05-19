@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS tasks (
     title VARCHAR(200) NOT NULL,
     status VARCHAR(30) NOT NULL DEFAULT 'todo' CHECK (status IN ('todo','in_progress','review','done','canceled')),
     priority VARCHAR(30),
+    description TEXT,
     position INT NOT NULL DEFAULT 0,
     created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     due_date DATE,
@@ -106,11 +107,32 @@ CREATE INDEX IF NOT EXISTS idx_task_assignees_task ON task_assignees(task_id);
 CREATE TABLE IF NOT EXISTS task_comments (
     id SERIAL PRIMARY KEY,
     task_id INT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
+    created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS task_activity_logs (
+    id SERIAL PRIMARY KEY,
+    task_id INT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
+    action VARCHAR(30) NOT NULL
+        CHECK (action IN (
+            'create',
+            'delete',
+            'change_title',
+            'change_due_date'
+            'change_status',
+            'assign',
+            'comment',
+            'attach'
+        )),
+    details JSONB DEFAULT '{}' NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_task_log_task ON task_activity_logs(task_id);
 
 CREATE TABLE IF NOT EXISTS conversations (
     id SERIAL PRIMARY KEY,
@@ -151,14 +173,6 @@ CREATE TABLE IF NOT EXISTS notifications (
         CHECK (reference_type IN ('team','project','task')),
     reference_id INT,
     is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS activity_logs (
-    id SERIAL PRIMARY KEY,
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    action VARCHAR(100),
-    description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

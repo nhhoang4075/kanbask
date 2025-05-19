@@ -7,8 +7,9 @@ import projectRoute from "./project-route.js";
 import conversationRoute from "./conversation-route.js";
 import messageRoute from "./message-route.js";
 import notificationRoute from "./notification-route.js";
-import searchRoute from "./search-route.js";
 import taskRoute from "./task-route.js";
+import taskCommentRoute from "./task-comment-route.js";
+import searchRoute from "./search-route.js";
 
 const router = Router();
 
@@ -20,9 +21,10 @@ function apiRouter() {
   conversationRoute(router);
   messageRoute(router);
   notificationRoute(router);
+  taskRoute(router);
+  taskCommentRoute(router);
   searchRoute(router);
 
-  taskRoute(router);
   return router;
 }
 

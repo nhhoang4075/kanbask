@@ -1,67 +1,64 @@
 import taskCommentService from "../services/task-comment-service.js";
 import { StatusCodes } from "http-status-codes";
 
-
-const createOneComment = async (req, res, next) => {
+const createOneTaskComment = async (req, res, next) => {
   try {
-    const comment = await taskCommentService.createOneComment(req.body);
+    const comment = await taskCommentService.createOneTaskComment(req.body);
+
     res.status(StatusCodes.CREATED).json({
-        success: true,
-        messsage: "Comment created successfully"
-      });
+      success: true,
+      data: { comment }
+    });
   } catch (err) {
     next(err);
   }
 };
 
-
-const getCommentsByTaskId = async (req, res, next) => {
+const getCommentsOfTask = async (req, res, next) => {
   try {
-    const { taskId } = req.params;
-    const comments = await taskCommentService.getCommentsByTaskId(taskId);
+    const comments = await taskCommentService.getManyTaskCommentsByTaskId(req.query.task_id);
+
     res.status(StatusCodes.OK).json({
-        success: true,
-        data: { comments }
-      });
+      success: true,
+      data: { comments }
+    });
   } catch (err) {
     next(err);
   }
 };
 
-
-const updateOneComment = async (req, res, next) => {
+const updateOneTaskCommentById = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const { user_id,content } = req.body;
-    const updatedComment = await taskCommentService.updateOneComment(id, user_id,content);
+    const commentId = await taskCommentService.updateOneTaskCommentById(
+      req.params,
+      req.body,
+      req.user.id
+    );
     res.status(StatusCodes.OK).json({
-        success: true,
-        messsage: "Update comment successfully"
-  });
-    }catch (err) {
-    next(err);
-  }
-};
-
-
-const deleteOneComment = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const user_id = req.body;
-    const deletedId = await taskCommentService.deleteOneComment(id,user_id);
-    res.status(StatusCodes.OK).json({
-        success: true,
-        messsage: "Delete comment successfully"
-      });
+      success: true,
+      message: `Updated successfully comment with id ${commentId}`
+    });
   } catch (err) {
     next(err);
   }
 };
 
+const deleteOneTaskCommentById = async (req, res, next) => {
+  try {
+    const commentId = await taskCommentService.deleteOneTaskCommentById(req.params.id, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Deleted successfully comment with id ${commentId}`
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export default {
-  createOneComment,
-  getCommentsByTaskId,
-  updateOneComment,
-  deleteOneComment
+  createOneTaskComment,
+  getCommentsOfTask,
+  updateOneTaskCommentById,
+  deleteOneTaskCommentById
 };

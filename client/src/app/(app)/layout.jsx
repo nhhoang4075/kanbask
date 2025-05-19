@@ -2,22 +2,30 @@ import { cookies } from "next/headers";
 
 import { SessionProvider } from "@/hooks/use-session";
 import { SocketProvider } from "@/hooks/use-socket";
+import { SearchProvider } from "@/hooks/use-search";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { ChatProvider } from "@/hooks/use-chat";
+import { getConversations } from "@/actions/conversation-actions";
 import AppSidebar from "@/components/app/app-sidebar";
 
 export default async function Layout({ children }) {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+  const data = await getConversations();
 
   return (
     <SessionProvider>
-      <SocketProvider>
-        <SidebarProvider defaultOpen={defaultOpen}>
-          <AppSidebar variant="inset" />
-          <SidebarInset>
-            <main className="flex-1 min-h-[95dvh] bg-prussian-blue">{children}</main>
-          </SidebarInset>
-        </SidebarProvider>
+      <SocketProvider>    
+        <ChatProvider initialConversations={data.conversations}>      
+          <SidebarProvider defaultOpen={defaultOpen}>
+            <SearchProvider>
+              <AppSidebar variant="inset" />
+              <SidebarInset>
+                <main className="flex-1 min-h-[95dvh] bg-prussian-blue">{children}</main>
+              </SidebarInset>
+            </SearchProvider>
+          </SidebarProvider>  
+        </ChatProvider>
       </SocketProvider>
     </SessionProvider>
   );

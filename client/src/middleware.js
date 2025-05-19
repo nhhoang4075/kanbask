@@ -24,7 +24,7 @@ export async function middleware(request) {
 
   const access_token = cookies.get("access_token")?.value;
   const refresh_token = cookies.get("refresh_token")?.value;
-  const isAutheticated = access_token || refresh_token;
+  const isAutheticated = access_token && refresh_token;
 
   if (!isAutheticated && !isAuthRoute) {
     url.pathname = "/auth/login";

@@ -16,6 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from "@/components/ui/sidebar";
+import SearchButton from "../search/search-button";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -52,6 +53,7 @@ export default function NavMain() {
   return (
     <SidebarGroup>
       <SidebarMenu>
+        <SearchButton />
         {items.map((item) => {
           const isActive = item.url === pathname;
           return (

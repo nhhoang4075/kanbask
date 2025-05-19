@@ -8,13 +8,13 @@
     "start": "node src/server.js"
   },
   "engines": {
-    "node": "22.14.0"
+    "node": "^22.14.0"
   },
   "type": "module",
   "dependencies": {
-    "@xenova/transformers": "^2.17.2",
     "@neondatabase/serverless": "^1.0.0",
     "@supabase/supabase-js": "^2.49.4",
+    "@xenova/transformers": "^2.17.2",
     "bcryptjs": "^3.0.2",
     "cookie": "^1.0.2",
     "cookie-parser": "^1.4.7",
@@ -29,6 +29,7 @@
     "nodemailer": "^6.10.0",
     "pg": "^8.14.1",
     "pgvector": "^0.2.0",
+    "sharp": "^0.34.1",
     "slugify": "^1.6.6",
     "socket.io": "^4.8.1",
     "uuid": "^11.1.0",

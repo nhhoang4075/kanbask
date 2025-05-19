@@ -1,6 +1,6 @@
 async function getMessagesOfConversation(conversationId) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/messages/${conversationId}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/messages?conversation_id=${conversationId}`, {
       method: "GET",
       credentials: "include"
     });

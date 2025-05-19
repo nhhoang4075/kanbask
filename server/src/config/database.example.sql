@@ -108,15 +108,15 @@ CREATE TABLE IF NOT EXISTS task_comments (
     id SERIAL PRIMARY KEY,
     task_id INT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
     content TEXT NOT NULL,
-    created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS task_activity_logs (
     id SERIAL PRIMARY KEY,
-    task_id INT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
+    task_id INT REFERENCES tasks(id) ON DELETE SET NULL,
+    user_id UUID REFERENCES users(id) ON DELETE SET NULL,
     action VARCHAR(30) NOT NULL
         CHECK (action IN (
             'create',
@@ -124,7 +124,6 @@ CREATE TABLE IF NOT EXISTS task_activity_logs (
             'change_title',
             'change_due_date'
             'change_status',
-            'assign',
             'comment',
             'attach'
         )),

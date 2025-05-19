@@ -3,7 +3,7 @@ import { StatusCodes } from "http-status-codes";
 
 const createOneTaskComment = async (req, res, next) => {
   try {
-    const comment = await taskCommentService.createOneTaskComment(req.body);
+    const comment = await taskCommentService.createOneTaskComment(req.body, req.user.id);
 
     res.status(StatusCodes.CREATED).json({
       success: true,

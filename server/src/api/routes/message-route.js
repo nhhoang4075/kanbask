@@ -9,7 +9,7 @@ const messageRoute = (router) => {
     .route("/messages")
     .get(
       messageValidation.validateConversationIdQuery,
-      messageController.getManyMessagesByConversationId
+      messageController.getMessagesOfConversation
     );
 };
 

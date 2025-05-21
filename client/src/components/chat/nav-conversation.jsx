@@ -1,30 +1,70 @@
 "use client";
 
+import NavConversationItem from "@/components/chat/nav-conversation-item";
+import NotFound from "@/components/app/not-found";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChat } from "@/hooks/use-chat";
-import ChatTabs from "./chat-tabs";
 
 export default function NavConversation() {
-  const { conversations, loading } = useChat();
+  const { conversations } = useChat();
+  const unreadConversations = conversations.filter((conv) => conv.unread_count > 0);
+
   return (
-    <Card className="h-full shadow-lg rounded-none overflow-hidden bg-ghost-white">
-      <CardContent className="p-0 flex flex-col h-full">
-        <div className="px-6 py-4 bg-ghost-white border-b">
-          <h2 className="text-3xl font-bold tracking-tight">Messages</h2>
-        </div>
-        {(loading) ? (
-          <div className="flex-1 flex items-center justify-center">
-              <p className="text-gray-500">Loading conversations...</p>
-          </div>
-        ) : null}
-        {(!loading && !conversations?.length) ? (
-          <div className="flex-1 flex items-center justify-center">
-              <p className="text-gray-500">No conversations available</p>
-          </div>
-        ) : null}
-        {(!loading && conversations?.length) ? (
-          <ChatTabs />
-        ) : null}
+    <Card className="h-full p-0 shadow-lg rounded-none overflow-hidden bg-ghost-white">
+      <CardContent className="flex flex-col h-full p-0">
+        <Tabs defaultValue="all" className="w-full h-full gap-0 bg-ghost-white">
+          <TabsList className="flex gap-1 my-1 px-4 rounded-none bg-ghost-white">
+            <TabsTrigger
+              value="all"
+              className="text-md bg-ghost-white text-gray-500 rounded-none shadow-none data-[state=active]:text-black data-[state=active]:shadow-none"
+            >
+              All
+            </TabsTrigger>
+            <div className="w-px h-1/2 bg-black" />
+            <TabsTrigger
+              value="unread"
+              className="text-md bg-ghost-white text-gray-500 rounded-none shadow-none data-[state=active]:text-black data-[state=active]:shadow-none"
+            >
+              Unread
+            </TabsTrigger>
+          </TabsList>
+          <div className="h-px bg-border" />
+          <TabsContent value="all">
+            {conversations.length ? (
+              <ScrollArea className="flex-1">
+                <ul className="divide-y divide-border">
+                  {conversations.map((conversation) => {
+                    return (
+                      <NavConversationItem key={conversation.id} conversation={conversation} />
+                    );
+                  })}
+                </ul>
+              </ScrollArea>
+            ) : (
+              <NotFound message="No conversations found" description="Start a new conversation!" />
+            )}
+          </TabsContent>
+          <TabsContent value="unread">
+            {unreadConversations.length ? (
+              <ScrollArea className="flex-1">
+                <ul className="divide-y divide-border">
+                  {unreadConversations.map((conversation) => {
+                    return (
+                      <NavConversationItem key={conversation.id} conversation={conversation} />
+                    );
+                  })}
+                </ul>
+              </ScrollArea>
+            ) : (
+              <NotFound
+                message="No conversations found"
+                description="All conversations are read!"
+              />
+            )}
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "@/hooks/use-session";
 import { useSocket } from "@/hooks/use-socket";
 import { getMessagesOfConversation } from "@/actions/message-actions";
@@ -14,6 +15,8 @@ export function useChat() {
 export function ChatProvider({ initialConversations = [], children }) {
   const { loading: sessionLoading } = useSession();
   const { socket, connected: socketConnected } = useSocket();
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Conversations list and currently selected conversation
   const [conversations, setConversations] = useState(initialConversations);
@@ -22,82 +25,97 @@ export function ChatProvider({ initialConversations = [], children }) {
   );
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [scrollTargetId, setScrollTargetId] = useState(null);
+  const [highlightId, setHighlightId] = useState(null);
 
-  // Ref to avoid stale selectedConversationId
   const selectedIdRef = useRef(selectedConversationId);
-
   useEffect(() => {
     selectedIdRef.current = selectedConversationId;
   }, [selectedConversationId]);
 
-  // Send new message via socket
+  useEffect(() => {
+    const m = pathname.match(/^\/app\/message\/([a-zA-Z0-9_-]+)$/);
+    if (!m) {
+      return;
+    }
+
+    const cid = parseInt(m[1]);
+    if (!conversations.some((c) => c.id === cid)) {
+      router.push("/app/message");
+    }
+
+    if (cid !== selectedConversationId) {
+      setSelectedConversationId(cid);
+      setHighlightId(null);
+    }
+  }, [pathname]);
+
+  const changeConversation = (conversationId) => {
+    if (conversationId && conversationId !== selectedConversationId) {
+      router.push(`/app/message/${conversationId}`);
+    }
+  };
+
   const sendMessage = useCallback(
     (content) => {
-      const trimmedContent = content.trim();
+      const trimmed = content.trim();
       const cid = selectedIdRef.current;
-      if (!socketConnected || !cid || !trimmedContent) return;
-      socket.emit("send_message", { conversation_id: cid, content });
+      if (!socketConnected || !cid || !trimmed) return;
+      socket.emit("send_message", { conversation_id: cid, content: trimmed });
     },
     [socket, socketConnected]
   );
 
-  // Handle real-time updates to conversation list
   useEffect(() => {
     if (!socket || !socketConnected) return;
-
-    const handleUpdateConversation = (updatedConversation) => {
+    const handleUpdate = (updated) => {
       setConversations((prev) => {
-        const idx = prev.findIndex((c) => c.id === updatedConversation.id);
+        const idx = prev.findIndex((c) => c.id === updated.id);
         if (idx !== -1) {
-          const newConvs = [...prev];
-          newConvs[idx] = updatedConversation;
-          return newConvs.sort(
-            (a, b) => new Date(b.latest_message_at) - new Date(a.latest_message_at)
-          );
-        } else {
-          return [updatedConversation, ...prev];
+          const arr = [...prev];
+          arr[idx] = updated;
+          return arr.sort((a, b) => new Date(b.latest_message_at) - new Date(a.latest_message_at));
         }
+        return [updated, ...prev];
       });
     };
-
-    socket.on("update_conversation", handleUpdateConversation);
-    return () => socket.off("update_conversation", handleUpdateConversation);
+    socket.on("update_conversation", handleUpdate);
+    return () => socket.off("update_conversation", handleUpdate);
   }, [socket, socketConnected]);
 
-  // Load messages and join room whenever selection changes
   useEffect(() => {
-    if (!socket || !socketConnected || !selectedConversationId || sessionLoading) return;
-
+    if (!socketConnected || !selectedConversationId || sessionLoading) return;
     setLoading(true);
-
     getMessagesOfConversation(selectedConversationId)
       .then((data) => setMessages(data.messages))
-      .catch((err) => console.error("Failed to load messages:", err));
+      .catch((err) => setError(err))
+      .finally(() => setLoading(false));
 
-    setLoading(false);
-
-    // Join conversation room (server reads userId from cookie)
     socket.emit("join_conversation", { conversation_id: selectedConversationId });
-
-    const handleNewMessage = (msg) => {
+    const handleNewMsg = (msg) => {
       if (msg.conversation_id === selectedConversationId) {
         setMessages((prev) => [...prev, msg]);
       }
     };
-
-    socket.on("new_message", handleNewMessage);
-    return () => socket.off("new_message", handleNewMessage);
-  }, [selectedConversationId, socket, socketConnected, sessionLoading]);
+    socket.on("new_message", handleNewMsg);
+    return () => socket.off("new_message", handleNewMsg);
+  }, [selectedConversationId, socketConnected, sessionLoading]);
 
   return (
     <ChatContext.Provider
       value={{
         conversations,
         selectedConversationId,
-        setSelectedConversationId,
         messages,
+        loading,
+        error,
+        changeConversation,
         sendMessage,
-        loading
+        scrollTargetId,
+        setScrollTargetId,
+        highlightId,
+        setHighlightId
       }}
     >
       {children}

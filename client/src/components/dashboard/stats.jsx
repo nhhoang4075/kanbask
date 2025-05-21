@@ -3,7 +3,7 @@ import StatsCard from "@/components/dashboard/stats-card";
 
 export default function Stats({tasks, projects}){
     return (
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
         <StatsCard
           title="Total Projects"
           value={projects.length}

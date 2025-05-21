@@ -2,14 +2,7 @@ import { db } from "../../config/db.js";
 
 const createOneNotification = async (data) => {
   try {
-    const [notification] = await db("notifications")
-      .insert({
-        user_id: data.user_id,
-        content: data.content,
-        type: data.type,
-        reference_id: data.reference_id
-      })
-      .returning("id");
+    const [notification] = await db("notifications").insert(data).returning("id");
 
     return notification.id;
   } catch (err) {
@@ -48,7 +41,7 @@ const getManyNotificationsByUserId = async (user_id, options = {}) => {
 const countUnreadNotificationsByUserId = async (user_id) => {
   try {
     const result = await db("notifications")
-      .count("id as unread_count")
+      .count("id AS unread_count")
       .where({ user_id, is_read: false })
       .first();
 

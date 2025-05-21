@@ -11,15 +11,15 @@ export default function Tasks({ tasks }) {
   );
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+    <Card className="w-full h-full flex flex-col overflow-hidden">
+      <CardHeader className="flex-shrink-0 flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle>Upcoming Tasks</CardTitle>
         <Link href="/app/tasks" className="text-sm text-blue-500 hover:underline">
           View All
         </Link>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3 overflow-y-auto max-h-[300px]">
+      <CardContent className="flex-1 overflow-hidden">
+        <div className="h-full overflow-y-auto pr-1 space-y-3">
           {sortedTasks.map(task => (
             <div key={task.id} className="p-3 border rounded hover:bg-accent transition-colors">
               <div className="flex justify-between">

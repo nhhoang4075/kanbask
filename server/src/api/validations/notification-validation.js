@@ -2,21 +2,6 @@ import { z } from "zod";
 
 import { validate } from "../../config/validator.js";
 
-const validateNewNotification = validate(
-  z.object({
-    body: z
-      .object({
-        user_id: z.string().uuid(),
-        content: z.string().min(1),
-        type: z.string().min(1).max(50),
-        reference_id: z.coerce.number().int().positive().optional()
-      })
-      .strict(),
-    params: z.object({}).optional(),
-    query: z.object({}).optional()
-  })
-);
-
 const validateNotificationsOptionsQuery = validate(
   z.object({
     body: z.object({}).optional(),
@@ -44,7 +29,6 @@ const validateNotificationIdParam = validate(
 );
 
 export default {
-  validateNewNotification,
   validateNotificationsOptionsQuery,
   validateNotificationIdParam
 };

@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import authMiddleware from "../middlewares/auth-middleware.js";
 import registerConversationHandlers from "./conversation-socket.js";
 import registerMessageHandlers from "./message-socket.js";
+import registerTaskCommentHandlers from "./task-comment-socket.js";
 
 let ioInstance = null;
 
@@ -17,7 +18,7 @@ const setupSocket = (server) => {
 
   ioInstance = io;
 
-  io.use(authMiddleware.socketAuthenticate);
+  io.use(authMiddleware.authenticateSocket);
 
   io.on("connection", (socket) => {
     console.log("A client connected: " + socket.id);
@@ -33,6 +34,7 @@ const setupSocket = (server) => {
 
     registerConversationHandlers(io, socket);
     registerMessageHandlers(io, socket);
+    registerTaskCommentHandlers(io, socket);
 
     socket.on("disconnect", (reason) => {
       console.log(`Client disconnected: ${socket.id}, Reason: ${reason}`);

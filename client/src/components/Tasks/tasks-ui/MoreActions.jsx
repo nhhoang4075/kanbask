@@ -4,11 +4,13 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from "../ui/dropdown-menu";
-import { Button } from "../ui/button";
-import { Edit, Eye, MoreVertical, Trash2 } from "lucide-react";
+} from "../../ui/dropdown-menu";
+import { Button } from "../../ui/button";
+import { Eye, MoreVertical, Trash2 } from "lucide-react";
+import { useTask } from "@/hooks/use-tasks";
 
-const MoreActions = ({ handleViewDetails, handleEdit, handleDelete }) => {
+const MoreActions = ({ task }) => {
+  const { setSelectedTask, setIsTaskDetailsOpen, deleteTask } = useTask();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -22,15 +24,16 @@ const MoreActions = ({ handleViewDetails, handleEdit, handleDelete }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={handleViewDetails}>
+        <DropdownMenuItem
+          onClick={() => {
+            setSelectedTask(() => task);
+            setIsTaskDetailsOpen(true);
+          }}
+        >
           <Eye className="mr-2 h-4 w-4" />
           View Details
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleEdit}>
-          <Edit className="mr-2 h-4 w-4" />
-          Edit
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDelete} className="text-red-600">
+        <DropdownMenuItem onClick={() => deleteTask(task.id)} className="text-red-600">
           <Trash2 className="mr-2 h-4 w-4" />
           Delete
         </DropdownMenuItem>

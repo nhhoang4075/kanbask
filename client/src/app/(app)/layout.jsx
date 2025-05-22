@@ -4,6 +4,7 @@ import { SessionProvider } from "@/hooks/use-session";
 import { SocketProvider } from "@/hooks/use-socket";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/app/app-sidebar";
+import Header from "@/components/app/header";
 
 export default async function Layout({ children }) {
   const cookieStore = await cookies();
@@ -15,7 +16,10 @@ export default async function Layout({ children }) {
         <SidebarProvider defaultOpen={defaultOpen}>
           <AppSidebar variant="inset" />
           <SidebarInset>
-            <main className="flex-1 min-h-[95dvh] bg-prussian-blue">{children}</main>
+            <main className="flex-1 min-h-[90dvh] bg-prussian-blue">
+              <Header />
+              {children}
+            </main>
           </SidebarInset>
         </SidebarProvider>
       </SocketProvider>

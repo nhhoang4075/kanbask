@@ -9,8 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger
-} from "../ui/alert-dialog";
-import { Button } from "../ui/button";
+} from "@/components/ui/alert-dialog";
 
 const DeleteAlert = ({ manage, row }) => {
   const handleDelete = () => {

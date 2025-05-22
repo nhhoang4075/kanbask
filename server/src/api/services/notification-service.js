@@ -1,35 +1,4 @@
-import { StatusCodes } from "http-status-codes";
 import notificationModel from "../models/notification-model.js";
-import ApiError from "../../utils/api-error.js";
-import { emitNewNotification } from "../../socket/notification-socket.js";
-
-const createOneNotification = async (data) => {
-  try {
-    const { user_id, title, content, reference_type, reference_id } = data;
-
-    const notificationData = {
-      user_id,
-      title,
-      content,
-      reference_type,
-      reference_id
-    };
-
-    const notificationId = await notificationModel.createOneNotification(notificationData);
-
-    if (!notificationId) {
-      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the notification");
-    }
-
-    const notification = await notificationModel.getOneNotificationById(notificationId);
-
-    emitNewNotification(user_id, notification);
-
-    return notification;
-  } catch (err) {
-    throw err;
-  }
-};
 
 const getManyNotificationsByUserId = async (userId, options) => {
   try {
@@ -86,7 +55,6 @@ const deleteAllNotifications = async (userId) => {
 };
 
 export default {
-  createOneNotification,
   getManyNotificationsByUserId,
   markOneNotificationAsRead,
   markAllNotificationsAsRead,

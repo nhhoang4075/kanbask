@@ -1,3 +1,4 @@
+import { getJoinRequests } from "@/actions/teams-actions";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -7,16 +8,28 @@ import {
   SheetTitle,
   SheetTrigger
 } from "@/components/ui/sheet";
+import { useTeamContext } from "@/hooks/use-teams";
 import { Users } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-const TeamsQueue = ({ team, handleApprove, handleDecline }) => {
+const TeamsQueue = ({ handleApprove, handleDecline }) => {
+  const { selectedTeam, selectedProject } = useTeamContext();
+  const [teamQueue, setTeamQueue] = useState([]);
+
+  useEffect(() => {
+    getJoinRequests(selectedTeam.id)
+      .then((data) => {
+        setTeamQueue(() => data.requests);
+      })
+      .catch((err) => console.log("Get request failed: " + err));
+  }, [selectedTeam, selectedProject]);
+
   return (
     <Sheet>
       <SheetTrigger asChild>
         <Button className="gap-1 bg-blue-500 hover:bg-blue-700">
           <Users className="h-4 w-4" />
-          Join Queue {team?.queue?.length > 0 && `(${team.queue.length})`}
+          Join Queue {teamQueue?.length}
         </Button>
       </SheetTrigger>
       <SheetContent>
@@ -25,9 +38,9 @@ const TeamsQueue = ({ team, handleApprove, handleDecline }) => {
           <SheetDescription>People waiting to join this team.</SheetDescription>
         </SheetHeader>
         <div className="py-4">
-          {team?.queue?.length > 0 ? (
+          {teamQueue?.length > 0 ? (
             <div className="space-y-4">
-              {team.queue.map((person) => (
+              {teamQueue.map((person) => (
                 <div
                   key={person.id}
                   className="flex items-center justify-between rounded-md border w-fit py-3 px-2"

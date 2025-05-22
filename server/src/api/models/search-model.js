@@ -62,8 +62,9 @@ const searchTasksByVector = async (
         "project_id",
         "title",
         "status",
+        "priority",
         "created_at",
-        db.raw("CASE WHEN title ILIKE ? THEN 1 ELSE 0 END AS full_text", [qLike]),
+        db.raw("CASE WHEN title ILIKE ? THEN 1 ELSE 0 END AS fulltext", [qLike]),
         db.raw("1 - (embedding <=> ?) AS similarity", [queryVectorSql])
       )
       .whereIn("project_id", project_ids)

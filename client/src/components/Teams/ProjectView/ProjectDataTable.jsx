@@ -23,9 +23,8 @@ import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import DeleteAlert from "../DeleteAlert";
+import DeleteAlert from "../teams-ui/DeleteAlert";
 import AddProject from "./AddProject";
-import TeamsQueue from "../MemberView/TeamsQueue";
 import { ProjectDetailSheet } from "./ProjectDetailSheet";
 import { getProjectColumns } from "./column";
 

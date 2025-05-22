@@ -4,7 +4,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { flexRender } from "@tanstack/react-table";
 import React from "react";
 
-const DragTableRow = ({ row, reorderRow, handleViewDetails }) => {
+const DragTableRow = ({ row, reorderRow }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: row.original.id
   });

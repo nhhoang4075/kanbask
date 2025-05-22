@@ -1,18 +1,35 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { projectsData } from "@/data/teams";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../ui/card";
 import { ProjectDataTable } from "./ProjectDataTable";
-import MoreButton from "../MoreButton";
-import { TeamDetailSheet } from "../TeamDetailSheet";
-import { ProjectDetailSheet } from "./ProjectDetailSheet";
+import MoreButton from "../teams-ui/MoreButton";
+import { useTeamContext } from "@/hooks/use-teams";
 
-const ProjectsTable = ({ props, view }) => {
-  const { teamShow, showData } = props;
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [isOpenTeamDetails, setIsOpenTeamDetails] = useState(false);
-  const [isOpenProjectDetails, setIsOpenProjectDetails] = useState(false);
+const ProjectsTable = ({ view }) => {
+  const {
+    selectedTeam,
+    selectedProject,
+    setSelectedProject,
+    isOpenTeamDetails,
+    isOpenProjectDetails,
+    showData,
+    projectsData,
+    setIsOpenProjectDetails,
+    setIsOpenTeamDetails
+  } = useTeamContext();
+
+  const [teamShow, setTeamShow] = useState(selectedTeam);
+
+  useEffect(() => {
+    setTeamShow(() => {
+      if (showData == "team") {
+        return selectedTeam;
+      } else if (showData == "project") {
+        return selectedProject;
+      }
+    });
+  });
 
   const [filterProjectsData, setFilterProjectsData] = useState(() => {
     if (view === "all") return projectsData;
@@ -114,20 +131,8 @@ const ProjectsTable = ({ props, view }) => {
           </Card>
         </>
       )}
-      <TeamDetailSheet
-        isOpen={isOpenTeamDetails}
-        onOpenChange={setIsOpenTeamDetails}
-        team={teamShow}
-        edit={true}
-      />
-      <ProjectDetailSheet
-        isOpen={isOpenProjectDetails}
-        onOpenChange={setIsOpenProjectDetails}
-        project={selectedProject}
-        edit={true}
-      />
       {/* Display Project Table */}
-      {showData == "team" && (
+      {(showData == "team" || view == "all") && (
         <div>
           <ProjectDataTable
             data={filterProjectsData}

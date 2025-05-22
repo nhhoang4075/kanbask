@@ -13,7 +13,7 @@ import {
 import { Button } from "../../ui/button";
 import KanbanTask from "./KanbanTask";
 
-const KanbanColumn = ({ column, handleTaskMove, handleEditTask, handleDeleteTask }) => {
+const KanbanColumn = ({ column, handleTaskMove }) => {
   const [isOver, setIsOver] = useState(false);
   const [sortBy, setSortBy] = useState(null);
 
@@ -34,7 +34,7 @@ const KanbanColumn = ({ column, handleTaskMove, handleEditTask, handleDeleteTask
     const sourceColumnId = e.dataTransfer.getData("columnId");
 
     if (sourceColumnId !== column.id) {
-      handleTaskMove(taskId, sourceColumnId, column.id);
+      handleTaskMove(taskId, column.id);
     }
   };
 
@@ -96,13 +96,7 @@ const KanbanColumn = ({ column, handleTaskMove, handleEditTask, handleDeleteTask
 
       <div className="flex flex-col gap-2 flex-1">
         {sortedTasks.map((task) => (
-          <KanbanTask
-            key={task.id}
-            task={task}
-            columnId={column.id}
-            handleDeleteTask={handleDeleteTask}
-            handleEditTask={handleEditTask}
-          />
+          <KanbanTask key={task.id} task={task} columnId={column.id} />
         ))}
       </div>
     </div>

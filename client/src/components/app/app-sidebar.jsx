@@ -45,7 +45,6 @@ export default function AppSidebar({ ...props }) {
       <SidebarFooter>
         <NavUser user={data.user} />
       </SidebarFooter>
-      <SidebarRail />
     </Sidebar>
   );
 }

@@ -31,16 +31,18 @@ import { cn } from "@/lib/utils";
 import { columnDefinitions, users } from "@/data/tasks";
 import { FileAttachmentList } from "../FileAttachment/FileAttachmentList";
 import { FileUpload } from "../FileAttachment/FileUpload";
+import { useTask } from "@/hooks/use-tasks";
 
 export function TaskEditDetails({ task, onSave, onCancel }) {
+  const { selectedTask } = useTask();
   const [formData, setFormData] = useState({
-    title: task.title || "",
-    description: task.description || "",
-    status: task.status || "To Do",
-    priority: task.priority || "medium",
-    dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
-    assignedTo: task.assignedTo || [],
-    attachments: task.attachments || []
+    title: selectedTask.title || "",
+    description: selectedTask.description || "",
+    status: selectedTask.status || "To Do",
+    priority: selectedTask.priority || "medium",
+    dueDate: selectedTask.dueDate ? new Date(selectedTask.dueDate) : undefined,
+    assignedTo: selectedTask.assignedTo || [],
+    attachments: selectedTask.attachments || []
   });
   const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
 

@@ -3,7 +3,7 @@ import { Button } from "../../ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "../../ui/checkbox";
 
-import MoreButton from "../MoreButton";
+import MoreButton from "../teams-ui/MoreButton";
 
 export const getProjectColumns = (setIsOpenProjectDetails, setSelectedProject) => [
   {

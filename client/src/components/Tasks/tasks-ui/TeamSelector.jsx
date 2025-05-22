@@ -15,7 +15,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-export function TeamSelector({ teams, selectedTeamId, onTeamChange }) {
+export function TeamSelector({ teams, selectedTeamId, setSelectedTeamId }) {
   const [open, setOpen] = useState(false);
 
   const selectedTeam = teams.find((team) => team.id === selectedTeamId);
@@ -32,7 +32,7 @@ export function TeamSelector({ teams, selectedTeamId, onTeamChange }) {
           <div className="flex items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis">
             {selectedTeam.name}
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
@@ -46,7 +46,7 @@ export function TeamSelector({ teams, selectedTeamId, onTeamChange }) {
                   key={team.id}
                   value={team.id}
                   onSelect={() => {
-                    onTeamChange(team.id);
+                    setSelectedTeamId(() => team.id);
                     setOpen(false);
                   }}
                 >

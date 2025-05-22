@@ -7,21 +7,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SheetFooter } from "@/components/ui/sheet";
-import { cn, formatDateTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { FileAttachmentList } from "../FileAttachment/FileAttachmentList";
+import { formatDateTime, priorityColors } from "@/lib/tasks-utils";
+import { useTask } from "@/hooks/use-tasks";
 
-export function TaskViewDetails({ task, onEdit, onClose }) {
-  const priorityColors = {
-    low: "bg-green-100 text-green-800",
-    medium: "bg-yellow-100 text-yellow-800",
-    high: "bg-red-100 text-red-800"
-  };
-
-  const dueDate = formatDateTime(task.dueDate);
-  const createdAt = formatDateTime(task.createdAt);
-  const updatedAt = formatDateTime(task.updatedAt);
-  const completedAt = formatDateTime(task.completedAt);
-  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date() && !task.completedAt;
+export function TaskViewDetails({ onEdit, onClose }) {
+  const { selectedTask } = useTask();
+  const dueDate = formatDateTime(selectedTask.dueDate);
+  const createdAt = formatDateTime(selectedTask.createdAt);
+  const updatedAt = formatDateTime(selectedTask.updatedAt);
+  const completedAt = formatDateTime(selectedTask.completedAt);
+  const isOverdue =
+    selectedTask.dueDate &&
+    new Date(selectedTask.dueDate) < new Date() &&
+    !selectedTask.completedAt;
 
   return (
     <>
@@ -29,10 +29,10 @@ export function TaskViewDetails({ task, onEdit, onClose }) {
         {/* Status and Priority */}
         <div className="flex flex-wrap gap-2">
           <Badge variant="outline" className="text-sm">
-            {task.status}
+            {selectedTask.status}
           </Badge>
-          <Badge variant="outline" className={cn("text-sm", priorityColors[task.priority])}>
-            {task.priority} priority
+          <Badge variant="outline" className={cn("text-sm", priorityColors[selectedTask.priority])}>
+            {selectedTask.priority} priority
           </Badge>
         </div>
 
@@ -42,7 +42,7 @@ export function TaskViewDetails({ task, onEdit, onClose }) {
             <AlignLeft className="mr-2 h-4 w-4" />
             Description
           </div>
-          <p className="text-sm">{task.description || "No description provided."}</p>
+          <p className="text-sm">{selectedTask.description || "No description provided."}</p>
         </div>
 
         {/* File Attachments */}
@@ -51,7 +51,7 @@ export function TaskViewDetails({ task, onEdit, onClose }) {
             <Paperclip className="mr-2 h-4 w-4" />
             Attachments
           </div>
-          <FileAttachmentList files={task.attachments || []} readOnly={true} />
+          <FileAttachmentList files={selectedTask.attachments || []} readOnly={true} />
         </div>
 
         {/* Assignees */}
@@ -60,9 +60,9 @@ export function TaskViewDetails({ task, onEdit, onClose }) {
             <User className="mr-2 h-4 w-4" />
             Assignees
           </div>
-          {task.assignedTo && task.assignedTo.length > 0 ? (
+          {selectedTask.assignedTo && task.assignedTo.length > 0 ? (
             <div className="flex flex-col gap-2">
-              {task.assignedTo.map((assignee) => (
+              {selectedTask.assignedTo.map((assignee) => (
                 <div key={assignee.id} className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
                     <AvatarImage src={assignee.avatar || "/placeholder.svg"} alt={assignee.name} />
@@ -91,17 +91,17 @@ export function TaskViewDetails({ task, onEdit, onClose }) {
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
               <AvatarImage
-                src={task.createdBy.avatar || "/placeholder.svg"}
-                alt={task.createdBy.name}
+                src={selectedTask.createdBy.avatar || "/placeholder.svg"}
+                alt={selectedTask.createdBy.name}
               />
               <AvatarFallback className="text-xs">
-                {task.createdBy.name
+                {selectedTask.createdBy.name
                   .split(" ")
                   .map((n) => n[0])
                   .join("")}
               </AvatarFallback>
             </Avatar>
-            <span className="text-sm">{task.createdBy.name}</span>
+            <span className="text-sm">{selectedTask.createdBy.name}</span>
           </div>
         </div>
 
@@ -125,7 +125,7 @@ export function TaskViewDetails({ task, onEdit, onClose }) {
           </div>
 
           {/* Completed Date */}
-          {task.completedAt && (
+          {selectedTask.completedAt && (
             <div className="space-y-2">
               <div className="flex items-center text-sm text-muted-foreground">
                 <Clock className="mr-2 h-4 w-4" />

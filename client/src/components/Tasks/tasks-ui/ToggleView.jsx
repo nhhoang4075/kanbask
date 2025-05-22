@@ -1,5 +1,5 @@
 import React from "react";
-import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
+import { ToggleGroup, ToggleGroupItem } from "../../ui/toggle-group";
 import { LayoutGrid, List } from "lucide-react";
 
 const ToggleView = ({ viewMode, setViewMode }) => {

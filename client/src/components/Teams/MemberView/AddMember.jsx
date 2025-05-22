@@ -26,33 +26,37 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { SheetClose } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { useTeamContext } from "@/hooks/use-teams";
 
-const AddMember = ({ project, onMembersUpdate, isOpen, onOpenChange, projectMembers }) => {
+const AddMember = ({ onMembersUpdate, isOpen, onOpenChange, projectMembers }) => {
+  const { selectedProject } = useTeamContext();
   const [searchQuery, setSearchQuery] = useState("");
   const [teamMembers, setTeamMembers] = useState(
     users.filter((user) =>
-      teamsMember.some((row) => row.teamId === project.teamId && row.userId === user.id)
+      teamsMember.some((row) => row.teamId === selectedProject.teamId && row.userId === user.id)
     )
   );
   const [assignedMembers, setAssignedMembers] = useState(
     users.filter((user) =>
-      projectMembers.some((row) => row.projectId === project.id && user.id === row.userId)
+      projectMembers.some((row) => row.projectId === selectedProject.id && user.id === row.userId)
     )
   );
   const [selectedMembers, setSelectedMembers] = useState([]);
 
   // Reset state when project changes
   useEffect(() => {
-    if (project) {
+    if (selectedProject) {
       setAssignedMembers(() =>
         users.filter((user) =>
-          projectMembers.some((row) => row.projectId === project.id && user.id === row.userId)
+          projectMembers.some(
+            (row) => row.projectId === selectedProject.id && user.id === row.userId
+          )
         )
       );
       setSelectedMembers(() => []);
       setSearchQuery("");
     }
-  }, [project, projectMembers]);
+  }, [selectedProject, projectMembers]);
 
   // Filter team members based on search query and exclude already assigned members
   const filteredMembers = teamMembers.filter((member) => {
@@ -89,7 +93,7 @@ const AddMember = ({ project, onMembersUpdate, isOpen, onOpenChange, projectMemb
             Search and add team members to collaborate on this project.
           </DialogDescription>
         </DialogHeader>
-        <div>
+        {/* <div>
           <ScrollArea className="h-fit max-h-[200px] rounded-md border p-2">
             {assignedMembers.length > 0 ? (
               <div className="space-y-2">
@@ -100,7 +104,7 @@ const AddMember = ({ project, onMembersUpdate, isOpen, onOpenChange, projectMemb
                       className={`flex items-center bg-gray-100 justify-between rounded-md p-2 cursor-pointer hover:bg-secondary`}
                     >
                       <div className="flex items-center gap-2">
-                        {/* <Avatar className="h-8 w-8">
+                        <Avatar className="h-8 w-8">
                           <AvatarImage
                             src={`/placeholder.svg?height=32&width=32`}
                             alt={member.name}
@@ -111,7 +115,7 @@ const AddMember = ({ project, onMembersUpdate, isOpen, onOpenChange, projectMemb
                               .map((n) => n[0])
                               .join("")}
                           </AvatarFallback>
-                        </Avatar> */}
+                        </Avatar>
                         <div>
                           <p className="text-base text-black font-medium">{member.name}</p>
                         </div>
@@ -127,7 +131,7 @@ const AddMember = ({ project, onMembersUpdate, isOpen, onOpenChange, projectMemb
               </div>
             )}
           </ScrollArea>
-        </div>
+        </div> */}
         <div className="grid gap-4 py-4">
           {/* Search input */}
           <div className="relative">
@@ -150,8 +154,8 @@ const AddMember = ({ project, onMembersUpdate, isOpen, onOpenChange, projectMemb
                     <div
                       key={member.id}
                       className={cn(
-                        `flex items-center justify-between rounded-md p-2 cursor-pointer hover:bg-secondary`,
-                        isSelected && "bg-gray-100"
+                        `flex items-center justify-between rounded-md p-2 cursor-pointer hover:bg-gray-100`,
+                        isSelected && "bg-gray-200"
                       )}
                       onClick={() => toggleMemberSelection(member)}
                     >

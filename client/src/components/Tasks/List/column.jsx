@@ -1,16 +1,18 @@
 "use client";
 
-import { ArrowUpDown, Calendar, Clock, GripVertical } from "lucide-react";
-import MoreActions from "../MoreActions";
+import { ArrowUpDown, Calendar, Clock, GripVertical, Paperclip } from "lucide-react";
+import MoreActions from "../tasks-ui/MoreActions";
 import { Badge } from "@/components/ui/badge";
 import { AvatarGroup } from "@/components/ui/avatar-group";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn, formatDate, priorityColors } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
+import { formatDate, priorityColors } from "@/lib/tasks-utils";
+import { useTask } from "@/hooks/use-tasks";
 
-export const getTaskColumns = (handleDelete, handleEdit, handleViewDetails) => {
+export const getTaskColumns = () => {
   return [
     {
       id: "drag",
@@ -273,13 +275,7 @@ export const getTaskColumns = (handleDelete, handleEdit, handleViewDetails) => {
       id: "actions",
       cell: ({ row }) => {
         const task = row.original;
-        return (
-          <MoreActions
-            handleDelete={() => handleDelete(task)}
-            handleEdit={() => handleEdit(task)}
-            handleViewDetails={() => handleViewDetails(task)}
-          />
-        );
+        return <MoreActions task={task} />;
       }
     }
   ];

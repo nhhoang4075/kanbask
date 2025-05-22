@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpCircleIcon } from "lucide-react";
+import NotificationButton from "@/components/ui/NotificationButton";
 
 import {
   Sidebar,
@@ -41,6 +42,7 @@ export default function AppSidebar({ ...props }) {
         <NavMain />
       </SidebarContent>
       <SidebarFooter>
+        <NotificationButton />
         <NavUser user={data.user} />
       </SidebarFooter>
       <SidebarRail />

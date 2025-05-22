@@ -21,14 +21,14 @@ const setupSocket = (server) => {
   io.use(authMiddleware.authenticateSocket);
 
   io.on("connection", (socket) => {
-    console.log("A client connected: " + socket.id);
+    // console.log("A client connected: " + socket.id);
 
     socket.on("setup", () => {
       const userId = socket.data.user.id;
 
       if (userId) {
         socket.join(`user_${userId}`);
-        console.log(`User ${userId} joined personal room`);
+        // console.log(`User ${userId} joined personal room`);
       }
     });
 
@@ -36,23 +36,23 @@ const setupSocket = (server) => {
     registerMessageHandlers(io, socket);
     registerTaskCommentHandlers(io, socket);
 
-    socket.on("disconnect", (reason) => {
-      console.log(`Client disconnected: ${socket.id}, Reason: ${reason}`);
-    });
+    // socket.on("disconnect", (reason) => {
+    //   console.log(`Client disconnected: ${socket.id}, Reason: ${reason}`);
+    // });
 
-    socket.on("error", (error) => {
-      console.error("Socket Error on connection:", error);
-    });
+    // socket.on("error", (error) => {
+    //   console.error("Socket Error on connection:", error);
+    // });
 
-    socket.on("connect_error", (error) => {
-      console.log(`connect_error due to ${error.message}`);
-    });
+    // socket.on("connect_error", (error) => {
+    //   console.log(`connect_error due to ${error.message}`);
+    // });
   });
 };
 
 export const getIoInstance = () => {
   if (!ioInstance) {
-    console.error("Socket.IO instance has not been initialized yet.");
+    // console.error("Socket.IO instance has not been initialized yet.");
   }
   return ioInstance;
 };

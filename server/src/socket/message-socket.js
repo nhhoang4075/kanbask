@@ -6,6 +6,16 @@ const registerMessageHandlers = (io, socket) => {
     try {
       const { id: sender_id } = socket.data.user;
 
+      // Check if this is the first message in a pending conversation
+      const messages = await messageService.getManyMessagesByConversationId(
+        conversation_id,
+        sender_id
+      );
+
+      if (!messages.length) {
+        await conversationService.updateConversationPendingStatus(conversation_id, sender_id);
+      }
+
       const message = await messageService.createOneMessage({
         conversation_id,
         sender_id,
@@ -37,10 +47,10 @@ const registerMessageHandlers = (io, socket) => {
         participants.map(async (p) => {
           const conversation = await conversationService.getOneConversationById(
             conversation_id,
-            p.user_id
+            p.id
           );
 
-          io.to(`user_${p.user_id}`).emit("update_conversation", conversation);
+          io.to(`user_${p.id}`).emit("update_conversation", conversation);
         })
       );
     } catch (error) {
@@ -66,10 +76,10 @@ const registerMessageHandlers = (io, socket) => {
         participants.map(async (p) => {
           const conversation = await conversationService.getOneConversationById(
             conversation_id,
-            p.user_id
+            p.id
           );
 
-          io.to(`user_${p.user_id}`).emit("update_conversation", conversation);
+          io.to(`user_${p.id}`).emit("update_conversation", conversation);
         })
       );
     } catch (error) {

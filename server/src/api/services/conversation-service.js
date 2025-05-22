@@ -35,11 +35,20 @@ const createOneConversation = async (data) => {
   }
 };
 
-const getOneConversationById = async (id, userId) => {
+const getOneConversationById = async (id, actorId) => {
   try {
+    const isConversationParticipant = await conversationModel.isUserInConversation(id, actorId);
+
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
+    }
+
     const conversation = {
       ...(await conversationModel.getOneConversationById(id)),
-      ...(await conversationModel.getDetailOfConversation(id, userId))
+      ...(await conversationModel.getDetailOfConversation(id, actorId))
     };
 
     return conversation;
@@ -69,8 +78,20 @@ const getManyConversationsByUserId = async (userId) => {
   }
 };
 
-const deleteOneConversation = async (conversationId) => {
+const deleteOneConversation = async (conversationId, actorId) => {
   try {
+    const isConversationParticipant = await conversationModel.isUserInConversation(
+      conversationId,
+      actorId
+    );
+
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
+    }
+
     await conversationModel.deleteOneConversationById(conversationId);
 
     return conversationId;
@@ -101,13 +122,51 @@ const getParticipantsOfConversation = async (conversationId, actorId) => {
   }
 };
 
-const updateLastReadMessage = async (conversationId, userId) => {
+const updateConversationPendingStatus = async (conversationId, actorId) => {
   try {
-    const conversation = await conversationModel.getDetailOfConversation(conversationId, userId);
+    const isConversationParticipant = await conversationModel.isUserInConversation(
+      conversationId,
+      actorId
+    );
+
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
+    }
+
+    const conversation = await conversationModel.getOneConversationById(conversationId);
+
+    if (conversation.is_pending) {
+      await conversationModel.updateConversationPendingStatus(conversationId, false);
+    }
+
+    return conversationId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const updateLastReadMessage = async (conversationId, actorId) => {
+  try {
+    const isConversationParticipant = await conversationModel.isUserInConversation(
+      conversationId,
+      actorId
+    );
+
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
+    }
+
+    const conversation = await conversationModel.getDetailOfConversation(conversationId, actorId);
 
     await conversationModel.updateLastReadMessage(
       conversationId,
-      userId,
+      actorId,
       conversation.latest_message_id
     );
 
@@ -123,5 +182,6 @@ export default {
   getManyConversationsByUserId,
   deleteOneConversation,
   getParticipantsOfConversation,
+  updateConversationPendingStatus,
   updateLastReadMessage
 };

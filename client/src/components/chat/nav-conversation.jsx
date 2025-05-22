@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import NavConversationItem from "@/components/chat/nav-conversation-item";
 import NotFound from "@/components/app/not-found";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +11,15 @@ import { useChat } from "@/hooks/use-chat";
 
 export default function NavConversation() {
   const { conversations } = useChat();
-  const unreadConversations = conversations.filter((conv) => conv.unread_count > 0);
+
+  const notPendingConversations = useMemo(
+    () => conversations.filter((conv) => !conv.is_pending),
+    [conversations]
+  );
+  const unreadConversations = useMemo(
+    () => conversations.filter((conv) => conv.unread_count > 0),
+    [conversations]
+  );
 
   return (
     <Card className="h-full p-0 shadow-lg rounded-none overflow-hidden bg-ghost-white">
@@ -32,10 +42,10 @@ export default function NavConversation() {
           </TabsList>
           <div className="h-px bg-border" />
           <TabsContent value="all">
-            {conversations.length ? (
+            {notPendingConversations.length ? (
               <ScrollArea className="flex-1">
                 <ul className="divide-y divide-border">
-                  {conversations.map((conversation) => {
+                  {notPendingConversations.map((conversation) => {
                     return (
                       <NavConversationItem key={conversation.id} conversation={conversation} />
                     );

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/hooks/use-session";
-import { getInitials } from "@/lib/user-utils";
+import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 
 export default function NavUser() {
   const { isMobile, open } = useSidebar();
@@ -44,7 +44,7 @@ export default function NavUser() {
                     alt={user?.full_name}
                     className="object-cover"
                   />
-                  <AvatarFallback className="rounded-md bg-mustard text-prussian-blue">
+                  <AvatarFallback className="rounded-md" style={pickAvatarColor(user?.full_name)}>
                     {getInitials(user?.full_name)}
                   </AvatarFallback>
                 </Avatar>
@@ -80,7 +80,7 @@ export default function NavUser() {
                     alt={user?.full_name}
                     className="object-cover"
                   />
-                  <AvatarFallback className="rounded-md bg-mustard text-prussian-blue">
+                  <AvatarFallback className="rounded-md" style={pickAvatarColor(user?.full_name)}>
                     {getInitials(user?.full_name)}
                   </AvatarFallback>
                 </Avatar>

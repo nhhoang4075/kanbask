@@ -6,28 +6,44 @@ const registerMessageHandlers = (io, socket) => {
     try {
       const { id: sender_id } = socket.data.user;
 
+      // Check if this is the first message in a pending conversation
+      const messages = await messageService.getManyMessagesByConversationId(
+        conversation_id,
+        sender_id
+      );
+
+      if (!messages.length) {
+        await conversationService.updateConversationPendingStatus(conversation_id, sender_id);
+      }
+
       const message = await messageService.createOneMessage({
         conversation_id,
         sender_id,
         content
       });
 
+      // Emit new message to all users in the conversation
       io.to(`conversation_${conversation_id}`).emit("new_message", message);
 
+      // Get all sockets in the conversation room
       const roomSockets = await io.in(`conversation_${conversation_id}`).fetchSockets();
 
+      // Update last_read_message_id for all users currently in the conversation
       await Promise.all(
         roomSockets.map(async (sock) => {
           const {
             user: { id: user_id },
             conversation_id: current_conversation_id
           } = sock.data;
+
+          // Only update if user is actively in this conversation
           if (user_id && current_conversation_id === conversation_id) {
             await conversationService.updateLastReadMessage(conversation_id, user_id);
           }
         })
       );
 
+      // Get participants and send updated conversation state
       const participants = await conversationService.getParticipantsOfConversation(
         conversation_id,
         sender_id
@@ -37,10 +53,10 @@ const registerMessageHandlers = (io, socket) => {
         participants.map(async (p) => {
           const conversation = await conversationService.getOneConversationById(
             conversation_id,
-            p.user_id
+            p.id
           );
 
-          io.to(`user_${p.user_id}`).emit("update_conversation", conversation);
+          io.to(`user_${p.id}`).emit("update_conversation", conversation);
         })
       );
     } catch (error) {
@@ -66,10 +82,10 @@ const registerMessageHandlers = (io, socket) => {
         participants.map(async (p) => {
           const conversation = await conversationService.getOneConversationById(
             conversation_id,
-            p.user_id
+            p.id
           );
 
-          io.to(`user_${p.user_id}`).emit("update_conversation", conversation);
+          io.to(`user_${p.id}`).emit("update_conversation", conversation);
         })
       );
     } catch (error) {

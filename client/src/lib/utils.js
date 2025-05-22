@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { format, isSameDay, isSameYear, parseISO, differenceInMinutes } from "date-fns";
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -11,4 +12,34 @@ export function capitalCase(str) {
     .split("_")
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
     .join(" ");
+}
+
+export function formatTimestampHour(isoString) {
+  return format(isoString, "HH:mm");
+}
+
+export function formatFullTimestamp(isoString) {
+  const date = parseISO(isoString);
+  const now = new Date();
+
+  if (isSameDay(date, now)) {
+    return format(date, "HH:mm");
+  } else if (isSameYear(date, now)) {
+    return format(date, "MMM d, HH:mm");
+  } else {
+    return format(date, "MMM d yyyy, HH:mm");
+  }
+}
+
+export function formatShortTimestamp(isoString) {
+  const date = parseISO(isoString);
+  const now = new Date();
+
+  if (isSameDay(date, now)) {
+    return format(date, "HH:mm");
+  } else if (isSameYear(date, now)) {
+    return format(date, "MMM d");
+  } else {
+    return format(date, "MMM d, yyyy");
+  }
 }

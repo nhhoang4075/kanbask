@@ -3,9 +3,8 @@ import { Users, FolderKanban } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useChat } from "@/hooks/use-chat";
-import { cn, capitalCase } from "@/lib/utils";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
-import { formatShortTimestamp } from "@/lib/chat-utils";
+import { cn, capitalCase, formatShortTimestamp } from "@/lib/utils";
 
 export default function NavConversationItem({ conversation }) {
   const { selectedConversationId, changeConversation } = useChat();
@@ -38,7 +37,7 @@ export default function NavConversationItem({ conversation }) {
           </AvatarFallback>
         </Avatar>
         {conversation.unread_count > 0 && (
-          <Badge className="text-xs bg-prussian-blue absolute h-5 w-5 top-11 left-11 transform -translate-y-0.5 z-10">
+          <Badge className="text-xs bg-prussian-blue absolute h-5 w-5 -bottom-1 -right-1 transform -translate-y-0.5 z-10">
             {conversation.unread_count < 10 ? conversation.unread_count : "9+"}
           </Badge>
         )}

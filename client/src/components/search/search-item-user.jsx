@@ -1,19 +1,21 @@
-import { useRouter } from "next/navigation";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 import { useSearch } from "@/hooks/use-search";
+import { useChat } from "@/hooks/use-chat";
 
 export default function SearchItemUser({ user }) {
   const { setOpen } = useSearch();
-  const router = useRouter();
+  const { changeConversation } = useChat();
+
+  const openDirectConversation = (conversationId) => {
+    changeConversation(conversationId);
+    setOpen(false);
+  };
 
   return (
     <li
-      className="flex items-center gap-4 mx-6 my-2 py-2 px-4 text-left text-md rounded-md bg-white hover:bg-prussian-blue/5 cursor-pointer"
-      onClick={() => {
-        setOpen(false);
-      }}
+      className="flex items-center justify-between gap-4 mx-6 my-2 py-2 px-4 text-left text-md rounded-md bg-white hover:bg-prussian-blue/5 cursor-pointer transition-colors duration-200 ease-in-out"
+      onClick={() => openDirectConversation(user.direct_conversation_id)}
     >
       <Avatar className="h-10 w-10 rounded-full overflow-hidden">
         <AvatarImage src={user.avatar_url} alt={user.full_name} className="object-cover" />

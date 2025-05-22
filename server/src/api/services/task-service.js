@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 
 import taskModel from "../models/task-model.js";
+import taskActivityLogModel from "../models/task-activity-log-model.js";
 import projectModel from "../models/project-model.js";
 import attachmentModel from "../models/attachment-model.js";
 import ApiError from "../../utils/api-error.js";
@@ -38,6 +39,13 @@ const createOneTask = async (data, actorId) => {
     if (!taskId) {
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the task");
     }
+
+    await taskActivityLogModel.createOneTaskActivityLog({
+      task_id: taskId,
+      user_id: actorId,
+      action: "create",
+      details: {}
+    });
 
     const task = await taskModel.getOneTaskById(taskId);
     const taskAssignees = await taskModel.getAssigneesOfTask(taskId);
@@ -97,6 +105,10 @@ const updateOneTaskById = async (id, data, actorId) => {
   try {
     const task = await taskModel.getOneTaskById(id);
 
+    if (!task) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
+    }
+
     const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
 
     if (!isProjectMember) {
@@ -121,6 +133,33 @@ const updateOneTaskById = async (id, data, actorId) => {
       await taskModel.moveTask(task.id, task.project_id, task.position, data.position);
     }
 
+    if (allowedData.title && allowedData.title !== task.title) {
+      await taskActivityLogModel.createOneTaskActivityLog({
+        task_id: task.id,
+        user_id: actorId,
+        action: "change_title",
+        details: { old: task.title, new: allowedData.title }
+      });
+    }
+
+    if (allowedData.due_date && allowedData.due_date !== task.status) {
+      await taskActivityLogModel.createOneTaskActivityLog({
+        task_id: task.id,
+        user_id: actorId,
+        action: "change_due_date",
+        details: { old: task.due_date, new: allowedData.due_date }
+      });
+    }
+
+    if (allowedData.status && allowedData.status !== task.status) {
+      await taskActivityLogModel.createOneTaskActivityLog({
+        task_id: task.id,
+        user_id: actorId,
+        action: "change_status",
+        details: { old: task.status, new: allowedData.status }
+      });
+    }
+
     return task.id;
   } catch (err) {
     throw err;
@@ -131,12 +170,22 @@ const deleteOneTaskById = async (id, actorId) => {
   try {
     const task = await taskModel.getOneTaskById(id);
 
+    if (!task) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
+    }
+
     const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
 
     if (!isProjectMember) {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
     }
 
+    await taskActivityLogModel.createOneTaskActivityLog({
+      task_id: task.id,
+      user_id: actorId,
+      action: "delete",
+      details: { deleted_task_title: task.title }
+    });
     await taskModel.deleteOneTaskById(task.id);
 
     return task.id;
@@ -148,6 +197,10 @@ const deleteOneTaskById = async (id, actorId) => {
 const uploadAttachmentsToTask = async (taskId, files, actorId) => {
   try {
     const task = await taskModel.getOneTaskById(taskId);
+
+    if (!task) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
+    }
 
     const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
 
@@ -173,6 +226,13 @@ const uploadAttachmentsToTask = async (taskId, files, actorId) => {
       })
     );
 
+    await taskActivityLogModel.createOneTaskActivityLog({
+      task_id: taskId,
+      user_id: actorId,
+      action: "attach",
+      details: {}
+    });
+
     return task.id;
   } catch (err) {
     throw err;
@@ -182,6 +242,10 @@ const uploadAttachmentsToTask = async (taskId, files, actorId) => {
 const deleteAttachmentsFromTask = async (taskId, attachmentIds, actorId) => {
   try {
     const task = await taskModel.getOneTaskById(taskId);
+
+    if (!task) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
+    }
 
     const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
 

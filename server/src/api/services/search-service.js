@@ -15,9 +15,35 @@ const searchUsers = async (searchTerm, options, actorId) => {
     const teamIds = userTeams.map((t) => t.id);
     const queryVector = await embeddingProvider.generateEmbedding(searchTerm);
 
-    const users = await searchModel.searchUsersByVector(teamIds, searchTerm, queryVector, options);
+    const users = await searchModel.searchUsersByVector(
+      teamIds,
+      searchTerm,
+      queryVector,
+      options,
+      actorId
+    );
 
-    return users.map((u) => sanitizeUser(u));
+    // Create pending conversations for users without direct conversation
+    const usersWithConversations = await Promise.all(
+      users.map(async (user) => {
+        if (!user.direct_conversation_id && user.id !== actorId) {
+          const conversationId = await conversationModel.createOneConversation({
+            type: "direct",
+            is_pending: true
+          });
+
+          await conversationModel.addParticipantsToConversation(conversationId, [actorId, user.id]);
+
+          return {
+            ...user,
+            direct_conversation_id: conversationId
+          };
+        }
+        return user;
+      })
+    );
+
+    return usersWithConversations.map((u) => sanitizeUser(u));
   } catch (err) {
     throw err;
   }

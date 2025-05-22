@@ -1,12 +1,18 @@
 import { db } from "../../config/db.js";
 
-const createOneConversation = async ({ type, team_id = null, project_id = null }) => {
+const createOneConversation = async ({
+  type,
+  team_id = null,
+  project_id = null,
+  is_pending = false
+}) => {
   try {
     const [conversation] = await db("conversations")
       .insert({
         type,
         team_id,
-        project_id
+        project_id,
+        is_pending
       })
       .returning("id");
 
@@ -206,12 +212,13 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
           END AS avatar_url`,
           [user_id]
         ),
-        // Unread count
-        db.raw("COALESCE(um.unread_count, 0) AS unread_count"),
-        // Participant count
         db.raw(
-          `(SELECT COUNT(*) FROM conversation_participants cp3 WHERE cp3.conversation_id = v.conversation_id) AS participant_count`
-        )
+          `(SELECT COUNT(*) 
+            FROM conversation_participants cp3 
+            WHERE cp3.conversation_id = v.conversation_id
+          ) AS participant_count`
+        ),
+        db.raw("COALESCE(um.unread_count, 0) AS unread_count")
       ])
       .where("v.conversation_id", conversation_id)
       .limit(1);
@@ -219,6 +226,19 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
     return conversation;
   } catch (err) {
     throw err;
+  }
+};
+
+const updateConversationPendingStatus = async (conversation_id, is_pending) => {
+  try {
+    const [conversation] = await db("conversations")
+      .where({ id: conversation_id })
+      .update({ is_pending })
+      .returning("id");
+
+    return conversation.id;
+  } catch (err) {
+    throw new Error(err);
   }
 };
 
@@ -247,5 +267,6 @@ export default {
   getParticipantsOfConversation,
   removeParticipantsFromConversation,
   getDetailOfConversation,
+  updateConversationPendingStatus,
   updateLastReadMessage
 };

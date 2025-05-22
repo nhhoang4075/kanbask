@@ -37,6 +37,7 @@ const getOneTaskById = async (id) => {
         "title",
         "status",
         "priority",
+        "description",
         "due_date",
         "completed_at",
         "position",
@@ -61,6 +62,7 @@ const getManyTasksByProjectId = async (project_id) => {
         "title",
         "status",
         "priority",
+        "description",
         "due_date",
         "completed_at",
         "position",
@@ -129,7 +131,8 @@ const getAssigneesOfTask = async (task_id) => {
   try {
     const assignees = await db("task_assignees AS ta")
       .join("tasks AS t", "t.id", "=", "ta.task_id")
-      .select("ta.user_id", "ta.assigned_at")
+      .join("user_public_view AS v", "v.id", "=", "ta.user_id")
+      .select("ta.user_id", "v.full_name", "v.avatar_url", "ta.assigned_at")
       .where({ task_id });
 
     return assignees;

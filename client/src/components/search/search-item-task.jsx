@@ -10,7 +10,7 @@ export default function SearchItemTask({ task }) {
 
   return (
     <li
-      className="flex items-center gap-4 mx-6 my-2 py-2 px-4 text-left text-md rounded-md bg-white hover:bg-prussian-blue/5 cursor-pointer"
+      className="flex items-center justify-between gap-4 mx-6 my-2 py-2 px-4 text-left text-md rounded-md bg-white hover:bg-prussian-blue/5 cursor-pointer transition-colors duration-200 ease-in-out"
       onClick={() => {
         setOpen(false);
       }}

@@ -1,8 +1,8 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { useChat } from "@/hooks/use-chat";
-import { formatTimestampHour, formatFullTimestamp, linkifyMessage } from "@/lib/chat-utils";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
-import { cn } from "@/lib/utils";
+import { linkifyMessage } from "@/lib/chat-utils";
+import { cn, formatTimestampHour, formatFullTimestamp } from "@/lib/utils";
 
 function messageBubbleStyle(curIdx, msgGroupLength, isMe) {
   if (msgGroupLength === 1) {
@@ -16,7 +16,7 @@ function messageBubbleStyle(curIdx, msgGroupLength, isMe) {
   }
 }
 
-export default function MessageBubble({ msgGroup, isMe, curConversation }) {
+export default function MessageBubble({ msgGroup, isMe }) {
   const { highlightId } = useChat();
 
   return (
@@ -66,15 +66,6 @@ export default function MessageBubble({ msgGroup, isMe, curConversation }) {
                 {formatTimestampHour(msg.created_at)}
               </span>
             </div>
-
-            {msg.id === curConversation?.last_read_message_id &&
-              msg.id !== curConversation.latest_message_id && (
-                <div className="flex items-center my-4" key={`divider-${msg.id}`}>
-                  <div className="flex-grow h-px bg-gray-400" />
-                  <span className="px-2 text-xs text-gray-500 whitespace-nowrap">Last Read</span>
-                  <div className="flex-grow h-px bg-gray-400" />
-                </div>
-              )}
           </div>
         ))}
       </div>

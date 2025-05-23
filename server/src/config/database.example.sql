@@ -162,6 +162,10 @@ CREATE TABLE IF NOT EXISTS messages (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE INDEX IF NOT EXISTS idx_messages_embedding_hnsw ON messages USING hnsw (embedding vector_cosine_ops) WITH (M = 16, ef_construction = 64);
+CREATE INDEX IF NOT EXISTS idx_messages_conversation_id ON messages (conversation_id);
+CREATE INDEX IF NOT EXISTS idx_messages_sender_id ON messages (sender_id);
+
 CREATE TABLE IF NOT EXISTS conversation_participants (
   conversation_id INT NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

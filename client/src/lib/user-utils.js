@@ -5,6 +5,9 @@
 export function getInitials(fullName) {
   if (!fullName) return "";
   const parts = fullName.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return parts[0].charAt(0).toUpperCase();
+  }
   const first = parts[0];
   const last = parts[parts.length - 1];
   return (last.charAt(0) + first.charAt(0)).toUpperCase();

@@ -46,7 +46,7 @@ const startServer = () => {
   );
 
   app.use("/api", apiRouter());
-  //app.use(handleApiError);
+  app.use(handleApiError);
 
   app.get("/", async (req, res) => {
     res.status(StatusCodes.OK).json({

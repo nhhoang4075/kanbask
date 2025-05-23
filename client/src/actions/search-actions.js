@@ -1,93 +1,26 @@
-async function searchUsers(params) {
-  try {
-    const queryString = new URLSearchParams({
-      q: params.query || "",
-      limit: params.limit || 10,
-      offset: params.offset || 0
-    }).toString();
+import { get } from "@/actions/fetch-client";
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/search/users?${queryString}`, {
-      method: "GET",
-      credentials: "include"
-    });
+function buildQueryString(params = {}, defaults = {}) {
+  const { query = "", limit = 10, offset = 0, ...rest } = params;
 
-    if (res.ok) {
-      const json = await res.json();
-
-      if (!json.success) {
-        throw new Error(json.message);
-      }
-
-      return json.data;
-    } else {
-      throw new Error("searchUsers API Error");
-    }
-  } catch (err) {
-    throw err;
-  }
+  return new URLSearchParams({
+    q: query,
+    limit,
+    offset,
+    ...defaults,
+    ...rest
+  }).toString();
 }
 
-async function searchTasks(params) {
-  try {
-    const queryString = new URLSearchParams({
-      q: params.query || "",
-      status: params.status || "all",
-      limit: params.limit || 10,
-      offset: params.offset || 0
-    }).toString();
-
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/search/tasks?${queryString}`, {
-      method: "GET",
-      credentials: "include"
-    });
-
-    if (res.ok) {
-      const json = await res.json();
-
-      if (!json.success) {
-        throw new Error(json.message);
-      }
-
-      return json.data;
-    } else {
-      throw new Error("searchTasks API Error");
-    }
-  } catch (err) {
-    throw err;
-  }
+export async function searchUsers(params) {
+  return get(`/search/users?${buildQueryString(params)}`);
 }
 
-async function searchMessages(params) {
-  try {
-    const queryString = new URLSearchParams({
-      q: params.query || "",
-      conversation_id: params.conversationId,
-      limit: params.limit || 10,
-      offset: params.offset || 0
-    }).toString();
-
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/search/messages?${queryString}`,
-      {
-        method: "GET",
-        credentials: "include"
-      }
-    );
-
-    if (res.ok) {
-      const json = await res.json();
-
-      if (!json.success) {
-        throw new Error(json.message);
-      }
-
-      return json.data;
-    } else {
-      throw new Error("searchMessages API Error");
-    }
-  } catch (err) {
-    throw err;
-  }
+export async function searchTasks(params) {
+  return get(`/search/tasks?${buildQueryString(params, { status: "all" })}`);
 }
 
-export { searchUsers, searchTasks, searchMessages };
+export async function searchMessages(params) {
+  const { conversationId, ...rest } = params;
+  return get(`/search/messages?${buildQueryString(rest, { conversation_id: conversationId })}`);
+}

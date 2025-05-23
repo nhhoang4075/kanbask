@@ -204,7 +204,7 @@ const sendPasswordResetMail = async (userEmail) => {
       password_reset_expires: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
     });
 
-    const passwordResetUrl = `${process.env.CLIENT_ORIGIN}/auth/reset-password?code=${code}`;
+    const passwordResetUrl = `${process.env.CLIENT_ORIGIN}/auth/forgot-password?code=${code}`;
 
     const data = { user: { name: user.last_name }, passwordResetUrl };
 

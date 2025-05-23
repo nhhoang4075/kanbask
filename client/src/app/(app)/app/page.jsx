@@ -1,7 +1,10 @@
-'use client';
-
 import Dashboard from "@/components/dashboard/dashboard";
 import DashboardHeader from "@/components/dashboard/dashboard-header";
+
+export const metadata = {
+  title: "Dashboard",
+  description: "Your Kanbask dashboard"
+};
 
 export default function DashboardPage() {
   return (

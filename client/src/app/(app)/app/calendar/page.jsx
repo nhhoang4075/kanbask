@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function CalendarPage() {
   return (
-    <div className="h-[97dvh] bg-ghost-white">
+    <div className="h-[97dvh] bg-prussian-blue">
       <CalendarHeader />
       <Calendar />
     </div>

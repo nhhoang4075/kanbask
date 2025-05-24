@@ -117,12 +117,13 @@ export default function CalendarTooltip(info, externalEvent = false) {
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${
         info.event.extendedProps.priority === 'high' ? 'text-red-600' : 
         info.event.extendedProps.priority === 'medium' ? 'text-amber-500' : 
-        'text-blue-500'
+        info.event.extendedProps.priority === 'low' ? 'text-blue-500' :
+        'text-gray-600'
       }">
         <path d="M4 15s1-1 4-1 5 2.5 8 2.5 4-1 4-1V3s-1 1-4 1-5-2.5-8-2.5-4 1-4 1z"/>
         <path d="M4 22v-7"/>
       </svg>
-      <span>Priority: ${info.event.extendedProps.priority.charAt(0).toUpperCase() + info.event.extendedProps.priority.slice(1)}</span>
+      <span>Priority: ${info.event.extendedProps.priority?.charAt(0).toUpperCase() + info.event.extendedProps.priority?.slice(1)}</span>
     </div>
     `;
     // Add description
@@ -139,7 +140,8 @@ export default function CalendarTooltip(info, externalEvent = false) {
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${
         status === 'Done' ? 'text-green-600' : 
         status === 'In Progress' ? 'text-blue-600' : 
-        status === 'Blocked' ? 'text-red-600' : 
+        status === 'To Do' ? 'text-amber-600' :
+        status === 'Cancelled' ? 'text-red-600' : 
         'text-gray-600'
       }">
         <circle cx="12" cy="12" r="10"/>

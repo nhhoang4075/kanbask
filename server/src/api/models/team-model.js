@@ -174,7 +174,15 @@ const getOneTeamJoinRequestById = async (id) => {
 
 const getManyTeamJoinRequestsOfTeam = async (team_id) => {
   try {
-    const requests = await db("team_join_requests").select("*").where({ team_id });
+    const requests = await db("team_join_requests AS tjr")
+      .join("user_public_view AS v", "v.id", "=", "tjr.user_id")
+      .select(
+        "tjr.*",
+        "v.full_name AS requester_full_name",
+        "v.email AS requester_email",
+        "v.avatar_url AS requester_avatar_url"
+      )
+      .where({ team_id });
 
     return requests;
   } catch (err) {

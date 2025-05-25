@@ -4,7 +4,7 @@ export async function createTask(data) {
   return post("/tasks", data);
 }
 
-export async function getProjectTasks(projectId) {
+export async function getTaskOfProject(projectId) {
   return get(`/tasks?project_id=${projectId}`);
 }
 
@@ -18,9 +18,11 @@ export async function deleteTask(taskId) {
 
 export async function uploadTaskAttachments(taskId, files) {
   const formData = new FormData();
+
   for (const file of files) {
     formData.append("files", file);
   }
+
   return post(`/tasks/${taskId}/attachments`, formData);
 }
 

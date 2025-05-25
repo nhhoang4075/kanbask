@@ -46,6 +46,7 @@ const searchUsersByVector = async (team_ids, search_term, query_vector, options 
       })
       .orderBy("fulltext", "desc")
       .orderBy("similarity", "desc")
+      .orderBy("created_at", "desc")
       .limit(limit)
       .offset(offset);
 
@@ -94,6 +95,7 @@ const searchTasksByVector = async (
       })
       .orderBy("fulltext", "desc")
       .orderBy("similarity", "desc")
+      .orderBy("created_at", "desc")
       .limit(limit)
       .offset(offset);
 
@@ -132,6 +134,7 @@ const searchMessagesByVector = async (conversation_id, search_term, query_vector
       })
       .orderBy("fulltext", "desc")
       .orderBy("similarity", "desc")
+      .orderBy("created_at", "desc")
       .limit(limit)
       .offset(offset);
 

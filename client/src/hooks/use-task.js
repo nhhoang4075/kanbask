@@ -1,140 +1,95 @@
-import { useState } from 'react';
-import { 
-  createTask, 
-  getProjectTasks, 
-  updateTask, 
-  deleteTask,
-  uploadTaskAttachments,
-  getTaskAttachmentUrl,
-  deleteTaskAttachments 
-} from '../actions/task-action.js';
+"use client";
 
-export function useTasks(projectId) {
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
+
+import { getTaskOfProject, createTask, updateTask, deleteTask } from "@/actions/task-actions";
+import { useSocket } from "@/hooks/use-socket";
+
+const TaskContext = createContext();
+
+export function useTask() {
+  return useContext(TaskContext);
+}
+
+export function TaskProvider({ children }) {
   const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [filter, setFilter] = useState("all"); // all, active, completed
 
-  const fetchProjectTasks = async () => {
+  const { socket, connected: socketConnected } = useSocket();
+
+  const filterOptions = [
+    { value: "all", label: "All Tasks" },
+    { value: "active", label: "Active Tasks" },
+    { value: "completed", label: "Completed Tasks" }
+  ];
+
+  // Fetch tasks
+  const fetchTasks = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const tasks = await getProjectTasks(projectId);
-      setTasks(tasks);
-      return tasks;
+      const data = await getTaskOfProject();
+      setTasks(data.tasks || []);
     } catch (err) {
-      setError(err.message);
-      throw err;
+      setError(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const addTask = async (taskData) => {
+  // Create a new task
+  const create = useCallback(async (taskData) => {
     try {
-      setLoading(true);
-      setError(null);
-      const newTask = await createTask({
-        project_id: projectId,
-        ...taskData
-      });
-      setTasks(prev => [...prev, newTask]);
+      const newTask = await createTask(taskData);
+      setTasks((prev) => [newTask, ...prev]);
       return newTask;
     } catch (err) {
-      setError(err.message);
+      setError(err);
       throw err;
-    } finally {
-      setLoading(false);
     }
-  };
+  }, []);
 
-  const editTask = async (taskId, taskData) => {
+  // Update a task
+  const update = useCallback(async (taskId, updates) => {
     try {
-      setLoading(true);
-      setError(null);
-      const message = await updateTask(taskId, taskData);
-      setTasks(prev => prev.map(task => 
-        task.id === taskId ? { ...task, ...taskData } : task
-      ));
-      return message;
+      const updatedTask = await updateTask(taskId, updates);
+      setTasks((prev) => prev.map((task) => (task.id === taskId ? updatedTask : task)));
+      return updatedTask;
     } catch (err) {
-      setError(err.message);
+      setError(err);
       throw err;
-    } finally {
-      setLoading(false);
     }
-  };
+  }, []);
 
-  const removeTask = async (taskId) => {
+  // Delete a task
+  const remove = useCallback(async (taskId) => {
     try {
-      setLoading(true);
-      setError(null);
-      const message = await deleteTask(taskId);
-      setTasks(prev => prev.filter(task => task.id !== taskId));
-      return message;
+      await deleteTask(taskId);
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
     } catch (err) {
-      setError(err.message);
+      setError(err);
       throw err;
-    } finally {
-      setLoading(false);
     }
-  };
+  }, []);
 
-  const uploadAttachments = async (taskId, files) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const message = await uploadTaskAttachments(taskId, files);
-      // Refresh task list to get updated attachments
-      await fetchProjectTasks();
-      return message;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Initial fetch
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
 
-  const getAttachmentUrl = async (taskId, attachmentId) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const url = await getTaskAttachmentUrl(taskId, attachmentId);
-      return url;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const removeAttachments = async (taskId, attachmentIds) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const message = await deleteTaskAttachments(taskId, attachmentIds);
-      // Refresh task list to get updated attachments
-      await fetchProjectTasks();
-      return message;
-    } catch (err) {
-      setError(err.message);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return {
+  const contextValue = {
     tasks,
     loading,
     error,
-    fetchProjectTasks,
-    addTask,
-    editTask,
-    removeTask,
-    uploadAttachments,
-    getAttachmentUrl,
-    removeAttachments
+    filterOptions,
+    filter,
+    setFilter,
+    create,
+    update,
+    remove
   };
+
+  return <TaskContext.Provider value={contextValue}>{children}</TaskContext.Provider>;
 }

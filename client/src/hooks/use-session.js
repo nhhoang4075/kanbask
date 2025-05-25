@@ -10,11 +10,7 @@ const SessionContext = createContext();
 
 // Hook for components to consume session data
 export function useSession() {
-  const context = useContext(SessionContext);
-  if (!context) {
-    throw new Error("useSession must be used within a SessionProvider");
-  }
-  return context;
+  return useContext(SessionContext);
 }
 
 // Provider component encapsulates logic for session lifecycle
@@ -56,10 +52,10 @@ export function SessionProvider({ children }) {
 
         setUser(sessionData.user);
 
-        // Calculate next refresh time (5 seconds before expiration)
+        // Calculate next refresh time (60 seconds before expiration)
         const now = Date.now();
         const expiresAt = sessionData.expires_at;
-        const refreshIn = Math.max(expiresAt - now - 5_000, 0);
+        const refreshIn = Math.max(expiresAt - now - 60_000, 0);
 
         // Clear any existing timer
         if (refreshTimerRef.current) {

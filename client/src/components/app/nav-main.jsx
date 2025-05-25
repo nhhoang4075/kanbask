@@ -53,7 +53,7 @@ export default function NavMain() {
   return (
     <SidebarGroup>
       <SidebarMenu>
-        <SearchButton />
+        {/* <SearchButton /> */}
         {items.map((item) => {
           const isActive = item.url === pathname;
           return (

@@ -1,8 +1,16 @@
+"use client";
+
 import { useState, useEffect, useMemo } from "react";
 import { SearchIcon } from "lucide-react";
 
 import SearchDialog from "@/components/search/search-dialog";
-import { SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
+import {
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  useSidebar
+} from "@/components/ui/sidebar";
 import { Dialog, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useSearch } from "@/hooks/use-search";
 
@@ -50,29 +58,33 @@ export default function SearchButton({ className, ...props }) {
   }, [isMac]);
 
   return (
-    <SidebarMenuItem>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTitle />
-        <DialogTrigger asChild>
-          <SidebarMenuButton
-            tooltip="Search"
-            {...props}
-            isActive={open}
-            onClick={() => setOpen((prev) => !prev)}
-            className="my-2 h-8 text-xs font-medium border-ring bg-ghost-white text-prussian-blue/70"
-          >
-            {sidebarOpen ? (
-              <div className="flex items-center gap-1.5">
-                <SearchIcon className="h-4 w-4 shrink-0" />
-                <span className="shrink-0">{`Search (${shortcutLabel})`}</span>
-              </div>
-            ) : (
-              <SearchIcon className="h-4 w-4" />
-            )}
-          </SidebarMenuButton>
-        </DialogTrigger>
-        <SearchDialog />
-      </Dialog>
-    </SidebarMenuItem>
+    <SidebarGroup>
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTitle />
+            <DialogTrigger asChild>
+              <SidebarMenuButton
+                tooltip="Search"
+                {...props}
+                isActive={open}
+                onClick={() => setOpen((prev) => !prev)}
+                className="mt-4 h-8 text-xs font-medium border-ring bg-ghost-white text-prussian-blue/70"
+              >
+                {sidebarOpen ? (
+                  <div className="flex items-center gap-1.5">
+                    <SearchIcon className="h-4 w-4 shrink-0" />
+                    <span className="shrink-0">{`Search (${shortcutLabel})`}</span>
+                  </div>
+                ) : (
+                  <SearchIcon className="h-4 w-4" />
+                )}
+              </SidebarMenuButton>
+            </DialogTrigger>
+            <SearchDialog />
+          </Dialog>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarGroup>
   );
 }

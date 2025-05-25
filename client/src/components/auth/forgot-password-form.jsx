@@ -190,7 +190,7 @@ export default function ForgotPasswordForm() {
                 control={emailForm.control}
                 render={({ field }) => (
                   <FormItem className="relative pb-5">
-                    <FormLabel className="text-gray-700 text-xs !text-black">Email</FormLabel>
+                    <FormLabel className="text-xs !text-black">Email</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -229,7 +229,7 @@ export default function ForgotPasswordForm() {
               control={passwordForm.control}
               render={({ field }) => (
                 <FormItem className="relative pb-5">
-                  <FormLabel className="text-gray-700 text-xs !text-black">New Password</FormLabel>
+                  <FormLabel className="text-xs !text-black">New Password</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -248,9 +248,7 @@ export default function ForgotPasswordForm() {
               control={passwordForm.control}
               render={({ field }) => (
                 <FormItem className="relative pb-5">
-                  <FormLabel className="text-gray-700 text-xs !text-black">
-                    Confirm Password
-                  </FormLabel>
+                  <FormLabel className="text-xs !text-black">Confirm Password</FormLabel>
                   <FormControl>
                     <Input
                       {...field}

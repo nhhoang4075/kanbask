@@ -47,7 +47,7 @@ export function SearchProvider({ children }) {
           break;
 
         case "tasks":
-          data = await searchTasks({ query, task: options.status || "all", limit, offset });
+          data = await searchTasks({ query, status: options.status || "all", limit, offset });
           if (append) {
             setResults((prev) => ({
               ...prev,

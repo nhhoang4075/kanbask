@@ -12,6 +12,7 @@ import { getStatusClass, handleEventClick, getPriorityClass } from "@/lib/calend
 import { useCalendar } from "@/hooks/use-calendar";
 import { useSession } from "@/hooks/use-session";
 import { useRouter } from "next/navigation";
+import Spinner from "../app/spinner";
 
 export default function Calendar() {
   const calendarRef = useRef(null);
@@ -38,9 +39,9 @@ export default function Calendar() {
   // Function to handle date clicks
   const handleDateClick = (info) => {
     // Redirect to the task creation page with the selected date
-    const selectedDate = info.dateStr;
-    const url = `/tasks/create?date=${encodeURIComponent(selectedDate)}`;
-    router.push(url);
+    // const selectedDate = info.dateStr;
+    // const url = `/tasks/create?date=${encodeURIComponent(selectedDate)}`;
+    // router.push(url);
   };
 
   useEffect(() => {
@@ -85,8 +86,8 @@ export default function Calendar() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[80dvh] w-[95dvw]">
-        <div className="text-white text-2xl">Loading calendar...</div>
+      <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-white z-50">
+        <Spinner size="lg" className="text-white bg-white" />
       </div>
     );
   }
@@ -131,7 +132,7 @@ export default function Calendar() {
       },
       dayGridWeek: {
         titleFormat: { year: "numeric", month: "short", day: "2-digit" },
-        dayHeaderFormat: { weekday: "long" },
+        dayHeaderFormat: { weekday: "long", day: "numeric", month: "numeric" },
         dayMaxEvents: 8
       }
     },
@@ -160,14 +161,11 @@ export default function Calendar() {
       return (
         <div className={cn(
           "fc-event-custom-content flex justify-between items-center",
-          eventInfo.view.type === "listWeek" && "!p-0"
         )}>
-          <div className="font-medium truncate">{title}</div>
-          {eventInfo.view.type !== "listWeek" && (
-            <div className={cn("text-[0.6rem] rounded px-1 mr-2", statusClass)}>
-              {extendedProps.status}
-            </div>
-          )}
+        <div className="font-medium truncate">{title}</div>
+          <div className={cn("text-[0.6rem] rounded px-1 mr-2", statusClass)}>
+            {extendedProps.status}
+          </div>
         </div>
       );
     },
@@ -272,12 +270,12 @@ export default function Calendar() {
         }
         .fc .fc-daygrid-day {
           border-color: #000;
+          transition: background-color 0.2s ease-in-out;
         }
 
         .fc .fc-daygrid-day-frame {
           min-height: 190px !important;
           height: 190px !important;
-          transition: background-color 0.2s ease-in-out;
         }
         .fc .fc-daygrid-day:hover {
           background-color: var(--color-blue-100);

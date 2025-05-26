@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 
 import { API_URL, handleResponse } from "@/lib/api-util";
+import { ApiError } from "@/lib/api-util";
 
 async function apiServer(endpoint, options = {}) {
   const cookieStore = await cookies();

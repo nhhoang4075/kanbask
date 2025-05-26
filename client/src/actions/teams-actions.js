@@ -20,16 +20,16 @@ async function createTeam(data) {
 async function getUserTeams() {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/teams`, {
     method: "GET",
-    credentials: "include"
+    credentials: "include",
+    headers: { "Content-Type": "application/json" }
   });
-
-  console.log(res);
 
   if (res.ok) {
     const json = await res.json();
     if (!json.success) throw new Error(json.message);
     return json.data.teams;
   } else {
+    console.log(res);
     throw new Error("getUserTeams API Error");
   }
 }

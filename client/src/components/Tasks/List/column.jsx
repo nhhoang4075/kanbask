@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowUpDown, Calendar, Clock, GripVertical, Paperclip } from "lucide-react";
-import MoreActions from "../tasks-ui/MoreActions";
+import MoreActions from "../tasks-ui/more-action";
 import { Badge } from "@/components/ui/badge";
 import { AvatarGroup } from "@/components/ui/avatar-group";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

@@ -51,7 +51,7 @@ const validateUpdateTeamRole = validate(
     body: z
       .object({
         user_id: z.string().uuid(),
-        role: z.enum(["member", "admin"])
+        role: z.enum(["member", "owner"])
       })
       .strict(),
     params: z

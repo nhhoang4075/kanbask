@@ -4,7 +4,7 @@ export async function createTask(data) {
   return post("/tasks", data);
 }
 
-export async function getTaskOfProject(projectId) {
+export async function getTasksOfProject(projectId) {
   return get(`/tasks?project_id=${projectId}`);
 }
 

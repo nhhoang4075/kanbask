@@ -17,7 +17,7 @@ export default function NavHeader() {
         {open ? (
           <div className="flex items-center justify-between">
             <Link href="/app">
-              <Image src={KanbaskWhite} alt="Kanbask Logo" width={170} priority />
+              <Image src={KanbaskWhite} alt="Kanbask Logo" width={160} priority />
             </Link>
             <NotificationButton />
           </div>

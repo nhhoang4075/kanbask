@@ -42,6 +42,57 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+  --animate-aurora: aurora 8s ease-in-out infinite alternate;
+  @keyframes aurora {
+    0% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
+    }
+    25% {
+      background-position: 50% 100%;
+      transform: rotate(5deg) scale(1.1);
+    }
+    50% {
+      background-position: 100% 50%;
+      transform: rotate(-3deg) scale(0.95);
+    }
+    75% {
+      background-position: 50% 0%;
+      transform: rotate(3deg) scale(1.05);
+    }
+    100% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
+    }
+  }
+  --animate-pulse: pulse var(--duration) ease-out infinite;
+  @keyframes pulse {
+    0%,
+    100% {
+      boxshadow: 0 0 0 0 var(--pulse-color);
+    }
+    50% {
+      boxshadow: 0 0 0 8px var(--pulse-color);
+    }
+  }
 }
 
 @theme {
@@ -79,8 +130,6 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  /* --sidebar: oklch(0.985 0 0); */
-  /* --sidebar-foreground: oklch(0.145 0 0); */
   --sidebar: var(--color-prussian-blue);
   --sidebar-foreground: var(--color-ghost-white);
   --sidebar-primary: oklch(0.205 0 0);
@@ -138,4 +187,86 @@ html,
 body {
   overscroll-behavior: none;
   pointer-events: auto !important;
+}
+
+/* Config */
+:root {
+  --sk-size: 24px;
+  --sk-color: var(--color-prussian-blue);
+}
+
+/* Utility class for centering */
+.sk-center {
+  margin: auto;
+}
+
+/*  Fold
+      <div class="sk-fold">
+        <div class="sk-fold-cube"></div>
+        <div class="sk-fold-cube"></div>
+        <div class="sk-fold-cube"></div>
+        <div class="sk-fold-cube"></div>
+      </div>
+ */
+.sk-fold {
+  width: var(--sk-size);
+  height: var(--sk-size);
+  position: relative;
+  transform: rotateZ(45deg);
+}
+
+.sk-fold-cube {
+  float: left;
+  width: 50%;
+  height: 50%;
+  position: relative;
+  transform: scale(1.1);
+}
+
+.sk-fold-cube:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--sk-color);
+  animation: sk-fold 2.4s infinite linear both;
+  transform-origin: 100% 100%;
+}
+.sk-fold-cube:nth-child(2) {
+  transform: scale(1.1) rotateZ(90deg);
+}
+.sk-fold-cube:nth-child(4) {
+  transform: scale(1.1) rotateZ(180deg);
+}
+.sk-fold-cube:nth-child(3) {
+  transform: scale(1.1) rotateZ(270deg);
+}
+.sk-fold-cube:nth-child(2):before {
+  animation-delay: 0.3s;
+}
+.sk-fold-cube:nth-child(4):before {
+  animation-delay: 0.6s;
+}
+.sk-fold-cube:nth-child(3):before {
+  animation-delay: 0.9s;
+}
+
+@keyframes sk-fold {
+  0%,
+  10% {
+    transform: perspective(140px) rotateX(-180deg);
+    opacity: 0;
+  }
+  25%,
+  75% {
+    transform: perspective(140px) rotateX(0deg);
+    opacity: 1;
+  }
+  90%,
+  100% {
+    transform: perspective(140px) rotateY(180deg);
+    opacity: 0;
+  }
 }

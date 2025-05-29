@@ -4,9 +4,11 @@ import taskModel from "../models/task-model.js";
 import taskActivityLogModel from "../models/task-activity-log-model.js";
 import projectModel from "../models/project-model.js";
 import attachmentModel from "../models/attachment-model.js";
+import notificationModel from "../models/notification-model.js";
 import ApiError from "../../utils/api-error.js";
 import embeddingProvider from "../../config/embedding-provider.js";
 import supabaseProvider from "../../config/supabase-provider.js";
+import { emitNewNotification } from "../../socket/notification-socket.js";
 import { sanitizeAllowedFields } from "../../utils/helper.js";
 
 const createOneTask = async (data, actorId) => {
@@ -46,6 +48,12 @@ const createOneTask = async (data, actorId) => {
       action: "create",
       details: {}
     });
+
+    await notifyAssigneesOfTask(
+      taskId,
+      "Task Assigned",
+      `You have been assigned to a task: ${title}`
+    );
 
     const task = await taskModel.getOneTaskById(taskId);
     const taskAssignees = await taskModel.getAssigneesOfTask(taskId);
@@ -158,6 +166,14 @@ const updateOneTaskById = async (id, data, actorId) => {
         action: "change_status",
         details: { old: task.status, new: allowedData.status }
       });
+    }
+
+    if (allowedData.assignees && allowedData.assignees.length > 0) {
+      await notifyAssigneesOfTask(
+        task.id,
+        "Task Assigned",
+        `You have been assigned to a task: ${task.title}`
+      );
     }
 
     return task.id;
@@ -291,6 +307,28 @@ const getAttachmentUrlOfTask = async (taskId, attachmentId, actorId) => {
     const url = await supabaseProvider.generateUrl(attachment.supabase_path);
 
     return url;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const notifyAssigneesOfTask = async (taskId, title, content) => {
+  try {
+    const assignees = await taskModel.getAssigneesOfTask(taskId);
+
+    for (const assignee of assignees) {
+      const notificationId = await notificationModel.createOneNotification({
+        user_id: assignee.user_id,
+        reference_type: "task",
+        reference_id: taskId,
+        title,
+        content
+      });
+
+      const notification = await notificationModel.getOneNotificationById(notificationId);
+
+      emitNewNotification(assignee.user_id, notification);
+    }
   } catch (err) {
     throw err;
   }

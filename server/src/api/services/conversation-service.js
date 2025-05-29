@@ -3,43 +3,20 @@ import { StatusCodes } from "http-status-codes";
 import conversationModel from "../models/conversation-model.js";
 import ApiError from "../../utils/api-error.js";
 
-const createOneConversation = async (data) => {
+const getOneConversationById = async (id, actorId) => {
   try {
-    const { type, team_id = null, project_id = null, user_ids } = data;
+    const isConversationParticipant = await conversationModel.isUserInConversation(id, actorId);
 
-    const conversationId = await conversationModel.createOneConversation({
-      type,
-      team_id,
-      project_id
-    });
-
-    if (!conversationId) {
-      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the conversation");
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
     }
 
-    await conversationModel.addParticipantsToConversation(conversationId, user_ids);
-
-    const conversation = await conversationModel.getOneConversationById(conversationId);
-    const participants = await conversationModel.getParticipantsOfConversation(conversationId);
-
-    const formattedConversation = {
-      ...conversation,
-      participants: participants.map((p) => ({
-        user_id: p.user_id
-      }))
-    };
-
-    return formattedConversation;
-  } catch (err) {
-    throw err;
-  }
-};
-
-const getOneConversationById = async (id, userId) => {
-  try {
     const conversation = {
       ...(await conversationModel.getOneConversationById(id)),
-      ...(await conversationModel.getDetailOfConversation(id, userId))
+      ...(await conversationModel.getDetailOfConversation(id, actorId))
     };
 
     return conversation;
@@ -69,16 +46,6 @@ const getManyConversationsByUserId = async (userId) => {
   }
 };
 
-const deleteOneConversation = async (conversationId) => {
-  try {
-    await conversationModel.deleteOneConversationById(conversationId);
-
-    return conversationId;
-  } catch (err) {
-    throw err;
-  }
-};
-
 const getParticipantsOfConversation = async (conversationId, actorId) => {
   try {
     const isConversationParticipant = await conversationModel.isUserInConversation(
@@ -101,13 +68,51 @@ const getParticipantsOfConversation = async (conversationId, actorId) => {
   }
 };
 
-const updateLastReadMessage = async (conversationId, userId) => {
+const updateConversationPendingStatus = async (conversationId, actorId) => {
   try {
-    const conversation = await conversationModel.getDetailOfConversation(conversationId, userId);
+    const isConversationParticipant = await conversationModel.isUserInConversation(
+      conversationId,
+      actorId
+    );
+
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
+    }
+
+    const conversation = await conversationModel.getOneConversationById(conversationId);
+
+    if (conversation.is_pending) {
+      await conversationModel.updateConversationPendingStatus(conversationId, false);
+    }
+
+    return conversationId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const updateLastReadMessage = async (conversationId, actorId) => {
+  try {
+    const isConversationParticipant = await conversationModel.isUserInConversation(
+      conversationId,
+      actorId
+    );
+
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
+    }
+
+    const conversation = await conversationModel.getDetailOfConversation(conversationId, actorId);
 
     await conversationModel.updateLastReadMessage(
       conversationId,
-      userId,
+      actorId,
       conversation.latest_message_id
     );
 
@@ -118,10 +123,9 @@ const updateLastReadMessage = async (conversationId, userId) => {
 };
 
 export default {
-  createOneConversation,
   getOneConversationById,
   getManyConversationsByUserId,
-  deleteOneConversation,
   getParticipantsOfConversation,
+  updateConversationPendingStatus,
   updateLastReadMessage
 };

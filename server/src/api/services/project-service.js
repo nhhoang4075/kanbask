@@ -143,8 +143,9 @@ const addMembersToProject = async (projectId, userIds, actorId) => {
 
     for (const userId of userIds) {
       const isTeamMember = await teamModel.isUserInTeam(project.team_id, userId);
+      const isProjectMember = await projectModel.isUserInProject(projectId, userId);
 
-      if (isTeamMember) {
+      if (isTeamMember && !isProjectMember) {
         sanitizedUserIds.push(userId);
       }
     }
@@ -152,7 +153,7 @@ const addMembersToProject = async (projectId, userIds, actorId) => {
     await projectModel.addMembersToProject(projectId, sanitizedUserIds);
 
     const conversation = await conversationModel.getOneConversationByProjectId(projectId);
-    await conversationModel.addParticipantsToConversation(conversation.id, userIds);
+    await conversationModel.addParticipantsToConversation(conversation.id, sanitizedUserIds);
 
     const actor = await userModel.getOneUserById(actorId);
     for (const userId of sanitizedUserIds) {

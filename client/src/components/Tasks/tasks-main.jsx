@@ -9,7 +9,7 @@ import { Plus } from "lucide-react";
 import NewTasks from "./tasks-ui/new-task";
 import { Separator } from "../ui/separator";
 import KanbanBoard from "./kanban/kanban-board";
-import { ListView } from "./List/list-view";
+import { ListView } from "./list/list-view";
 import TaskDetails from "./task-detail-sheet/task-detail";
 import { useTask } from "@/hooks/use-tasks";
 

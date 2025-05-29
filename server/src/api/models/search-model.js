@@ -2,7 +2,7 @@ import pgvector from "pgvector/knex";
 
 import { db } from "../../config/db.js";
 
-const searchUsersByVector = async (team_ids, search_term, query_vector, options = {}) => {
+const searchUsersByVector = async (team_ids, search_term, query_vector, options = {}, actor_id) => {
   try {
     const { limit = 10, offset = 0 } = options;
     const minSimilarity = 0.5;
@@ -16,6 +16,20 @@ const searchUsersByVector = async (team_ids, search_term, query_vector, options 
         "email",
         "full_name",
         "avatar_url",
+        db.raw(
+          `
+          (
+            SELECT c.id 
+            FROM conversations c
+            JOIN conversation_participants cp1 ON cp1.conversation_id = c.id AND cp1.user_id = ?
+            JOIN conversation_participants cp2 ON cp2.conversation_id = c.id AND cp2.user_id = users.id
+            WHERE c.type = 'direct'
+            AND users.id != ?
+            LIMIT 1
+          ) as direct_conversation_id
+        `,
+          [actor_id, actor_id]
+        ),
         db.raw("CASE WHEN full_name ILIKE ? OR email ILIKE ? THEN 1 ELSE 0 END AS fulltext", [
           qLike,
           qLike
@@ -32,6 +46,7 @@ const searchUsersByVector = async (team_ids, search_term, query_vector, options 
       })
       .orderBy("fulltext", "desc")
       .orderBy("similarity", "desc")
+      .orderBy("created_at", "desc")
       .limit(limit)
       .offset(offset);
 
@@ -80,6 +95,7 @@ const searchTasksByVector = async (
       })
       .orderBy("fulltext", "desc")
       .orderBy("similarity", "desc")
+      .orderBy("created_at", "desc")
       .limit(limit)
       .offset(offset);
 
@@ -118,6 +134,7 @@ const searchMessagesByVector = async (conversation_id, search_term, query_vector
       })
       .orderBy("fulltext", "desc")
       .orderBy("similarity", "desc")
+      .orderBy("created_at", "desc")
       .limit(limit)
       .offset(offset);
 

@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/hooks/use-session";
-import { getInitials } from "@/lib/user-utils";
+import { getInitials, pickAvatarColor } from "@/lib/user-utils";
+import { cn } from "@/lib/utils";
 
 export default function NavUser() {
   const { isMobile, open } = useSidebar();
@@ -33,7 +34,10 @@ export default function NavUser() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="flex items-center data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className={cn(
+                "flex items-center data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground transition-colors duration-200 ease-in-out",
+                !open && "mb-2"
+              )}
             >
               {loading ? (
                 <Skeleton className="h-8 w-8 rounded-md" />
@@ -44,7 +48,7 @@ export default function NavUser() {
                     alt={user?.full_name}
                     className="object-cover"
                   />
-                  <AvatarFallback className="rounded-md bg-mustard text-prussian-blue">
+                  <AvatarFallback className="rounded-md" style={pickAvatarColor(user?.full_name)}>
                     {getInitials(user?.full_name)}
                   </AvatarFallback>
                 </Avatar>
@@ -70,7 +74,7 @@ export default function NavUser() {
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
             align="end"
-            sideOffset={4}
+            sideOffset={10}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
@@ -80,7 +84,7 @@ export default function NavUser() {
                     alt={user?.full_name}
                     className="object-cover"
                   />
-                  <AvatarFallback className="rounded-md bg-mustard text-prussian-blue">
+                  <AvatarFallback className="rounded-md" style={pickAvatarColor(user?.full_name)}>
                     {getInitials(user?.full_name)}
                   </AvatarFallback>
                 </Avatar>
@@ -92,21 +96,21 @@ export default function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="group focus:bg-prussian-blue focus:text-background">
-                <UserCircleIcon className="text-muted-foreground group-focus:text-background" />
+              <DropdownMenuItem className="group focus:bg-prussian-blue focus:text-background transition-colors duration-200 ease-in-out">
+                <UserCircleIcon className="text-muted-foreground group-focus:text-background transition-colors duration-200 ease-in-out" />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem className="group focus:bg-prussian-blue focus:text-background">
-                <Settings className="text-muted-foreground group-focus:text-background" />
+              <DropdownMenuItem className="group focus:bg-prussian-blue focus:text-background transition-colors duration-200 ease-in-out">
+                <Settings className="text-muted-foreground group-focus:text-background transition-colors duration-200 ease-in-out" />
                 Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={logout}
-              className="group text-destructive focus:bg-destructive/75 focus:text-background"
+              className="group text-destructive focus:bg-destructive/75 focus:text-background transition-colors duration-200 ease-in-out"
             >
-              <LogOutIcon className="text-destructive group-focus:text-background" />
+              <LogOutIcon className="text-destructive group-focus:text-background transition-colors duration-200 ease-in-out" />
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

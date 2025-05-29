@@ -16,6 +16,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from "@/components/ui/sidebar";
+import SearchButton from "../search/search-button";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -31,17 +32,17 @@ const items = [
   },
   {
     title: "Calendar",
-    url: "#",
+    url: "/app/calendar",
     icon: Calendar1
   },
   {
-    title: "Tasks",
-    url: "/app/tasks",
+    title: "Task",
+    url: "/app/task",
     icon: SquareCheckBig
   },
   {
     title: "Team",
-    url: "/app/teams",
+    url: "/app/team",
     icon: UsersIcon
   }
 ];
@@ -52,11 +53,20 @@ export default function NavMain() {
   return (
     <SidebarGroup>
       <SidebarMenu>
+        {/* <SearchButton /> */}
         {items.map((item) => {
           const isActive = item.url === pathname;
           return (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton isActive={isActive} tooltip={item.title} asChild>
+              <SidebarMenuButton
+                isActive={isActive}
+                tooltip={item.title}
+                asChild
+                className={cn(
+                  "hover:bg-mustard active:bg-mustard hover:text-prussian-blue active:text-prussian-blue transition-all duration-200 ease-in-out rounded-sm",
+                  "data-[active=true]:bg-mustard data-[active=true]:text-prussian-blue"
+                )}
+              >
                 <Link href={item.url}>
                   {item.icon && <item.icon className={cn(isActive && "text-blue-green")} />}
                   <span>{item.title}</span>

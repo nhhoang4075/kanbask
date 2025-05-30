@@ -1,6 +1,6 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { format, isSameDay, isSameYear, parseISO, differenceInMinutes } from "date-fns";
+import { format, isSameDay, isSameYear, parseISO } from "date-fns";
 
 export function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -42,4 +42,8 @@ export function formatShortTimestamp(isoString) {
   } else {
     return format(date, "MMM d, yyyy");
   }
+}
+
+export function formatDate(isoString) {
+  return format(isoString, "MMM d, yyyy");
 }

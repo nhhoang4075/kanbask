@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useState, useEffect, createContext, useContext } from "react";
-import { useRouter } from "next/navigation";
 
 import {
   createProject,
@@ -28,30 +27,26 @@ export function ProjectProvider({ children }) {
   const [projectMembers, setProjectMembers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const router = useRouter();
 
-  const fetchProjects = useCallback(async () => {
-    if (!selectedTeam) return;
+  const fetchProjects = useCallback(async (teamId) => {
+    if (!teamId) return;
 
     try {
       setLoading(true);
-      const data = await getProjectsInTeamOfUser(selectedTeam.id);
-      setProjects((prev) => {
-        const newProjects = { ...prev, [selectedTeam.id]: data.projects };
-        return newProjects;
-      });
+      const data = await getProjectsInTeamOfUser(teamId);
+      setProjects((prev) => ({ ...prev, [teamId]: data.projects }));
     } catch (err) {
       setError(err);
     } finally {
       setLoading(false);
     }
-  }, [selectedTeam]);
+  }, []);
 
   const fetchProjectMembers = useCallback(async (projectId) => {
     try {
       setLoading(true);
-      const members = await getMembersOfProject(projectId);
-      setProjectMembers(members);
+      const data = await getMembersOfProject(projectId);
+      setProjectMembers(data.members);
     } catch (err) {
       setError(err);
     } finally {
@@ -60,8 +55,16 @@ export function ProjectProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
+    if (selectedTeam) {
+      fetchProjects(selectedTeam.id);
+    }
+  }, [selectedTeam, fetchProjects]);
+
+  useEffect(() => {
+    if (selectedProject) {
+      fetchProjectMembers(selectedProject.id);
+    }
+  }, [selectedProject, fetchProjectMembers]);
 
   // Project actions
   const handleCreateProject = useCallback(
@@ -69,7 +72,7 @@ export function ProjectProvider({ children }) {
       try {
         setLoading(true);
         const newProject = await createProject(projectData);
-        await fetchProjects();
+        await fetchProjects(selectedTeam.id);
         setSelectedProject(newProject);
         return newProject;
       } catch (err) {
@@ -79,7 +82,7 @@ export function ProjectProvider({ children }) {
         setLoading(false);
       }
     },
-    [fetchProjects]
+    [fetchProjects, selectedTeam]
   );
 
   const handleUpdateProject = useCallback(
@@ -87,7 +90,7 @@ export function ProjectProvider({ children }) {
       try {
         setLoading(true);
         await updateProject(projectId, updates);
-        await fetchProjects();
+        await fetchProjects(selectedTeam.id);
       } catch (err) {
         setError(err);
         throw err;
@@ -95,7 +98,7 @@ export function ProjectProvider({ children }) {
         setLoading(false);
       }
     },
-    [fetchProjects]
+    [fetchProjects, selectedTeam]
   );
 
   const handleDeleteProject = useCallback(
@@ -103,7 +106,7 @@ export function ProjectProvider({ children }) {
       try {
         setLoading(true);
         await deleteProject(projectId);
-        await fetchProjects();
+        await fetchProjects(selectedTeam.id);
       } catch (err) {
         setError(err);
         throw err;
@@ -111,14 +114,14 @@ export function ProjectProvider({ children }) {
         setLoading(false);
       }
     },
-    [fetchProjects]
+    [fetchProjects, selectedTeam]
   );
 
   const handleAddProjectMembers = useCallback(
-    async (projectId, memberIds) => {
+    async (projectId, data) => {
       try {
         setLoading(true);
-        await addMembersToProject(projectId, memberIds);
+        await addMembersToProject(projectId, data);
         await fetchProjectMembers(projectId);
       } catch (err) {
         setError(err);
@@ -131,10 +134,10 @@ export function ProjectProvider({ children }) {
   );
 
   const handleRemoveProjectMembers = useCallback(
-    async (projectId, memberIds) => {
+    async (projectId, data) => {
       try {
         setLoading(true);
-        await removeMembersFromProject(projectId, memberIds);
+        await removeMembersFromProject(projectId, data);
         await fetchProjectMembers(projectId);
       } catch (err) {
         setError(err);
@@ -146,11 +149,11 @@ export function ProjectProvider({ children }) {
     [fetchProjectMembers]
   );
 
-  const handleUpdateProjectMemberRole = useCallback(
-    async (projectId, memberId, role) => {
+  const handleUpdateProjectRoleOfMember = useCallback(
+    async (projectId, data) => {
       try {
         setLoading(true);
-        await updateProjectRoleOfMember(projectId, memberId, role);
+        await updateProjectRoleOfMember(projectId, data);
         await fetchProjectMembers(projectId);
       } catch (err) {
         setError(err);
@@ -168,13 +171,15 @@ export function ProjectProvider({ children }) {
     projectMembers,
     loading,
     error,
+
     setSelectedProject,
+
     handleCreateProject,
     handleUpdateProject,
     handleDeleteProject,
     handleAddProjectMembers,
     handleRemoveProjectMembers,
-    handleUpdateProjectMemberRole,
+    handleUpdateProjectRoleOfMember,
     fetchProjects,
     fetchProjectMembers
   };

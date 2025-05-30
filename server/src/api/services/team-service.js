@@ -2,6 +2,7 @@ import { StatusCodes } from "http-status-codes";
 
 import teamModel from "../models/team-model.js";
 import userModel from "../models/user-model.js";
+import projectModel from "../models/project-model.js";
 import conversationModel from "../models/conversation-model.js";
 import notificationModel from "../models/notification-model.js";
 import ApiError from "../../utils/api-error.js";
@@ -151,6 +152,17 @@ const removeMembersFromTeam = async (teamId, userIds, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not delete self");
     }
 
+    // Get all projects in the team
+    const projects = await projectModel.getManyProjectsByTeamId(teamId, actorId);
+
+    // Remove members from all projects in the team
+    for (const project of projects) {
+      const projectConversation = await conversationModel.getOneConversationByProjectId(project.id);
+
+      await conversationModel.removeParticipantsFromConversation(projectConversation.id, userIds);
+      await projectModel.removeMembersFromProject(project.id, userIds);
+    }
+
     const conversation = await conversationModel.getOneConversationByTeamId(teamId);
     await conversationModel.removeParticipantsFromConversation(conversation.id, userIds);
 
@@ -227,14 +239,14 @@ const joinOneTeamByCode = async (code, actorId) => {
       await conversationModel.addParticipantsToConversation(conversation.id, [actorId]);
 
       await notifyMembersOfTeam(team.id, `<@${user.full_name}> has joined the team.`);
-    }
+    } else {
+      const isRequestPending = await teamModel.isTeamJoinRequestPending(team.id, actorId);
 
-    const isRequestPending = await teamModel.isTeamJoinRequestPending(team.id, actorId);
+      if (!isRequestPending) {
+        await teamModel.createOneTeamJoinRequest(team.id, actorId);
 
-    if (!isRequestPending) {
-      await teamModel.createOneTeamJoinRequest(team.id, actorId);
-
-      await notifyMembersOfTeam(team.id, `<@${user.full_name}> has requested to join the team.`);
+        await notifyMembersOfTeam(team.id, `<@${user.full_name}> has requested to join the team.`);
+      }
     }
 
     return team.id;
@@ -255,6 +267,17 @@ const leaveOneTeamById = async (teamId, actorId) => {
 
     if (role === "owner") {
       throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not leave team");
+    }
+
+    // Get all projects in the team
+    const projects = await projectModel.getManyProjectsByTeamId(teamId, actorId);
+
+    // Leave all projects in the team
+    for (const project of projects) {
+      const projectConversation = await conversationModel.getOneConversationByProjectId(project.id);
+
+      await conversationModel.removeParticipantsFromConversation(projectConversation.id, [actorId]);
+      await projectModel.removeMembersFromProject(project.id, [actorId]);
     }
 
     const conversation = await conversationModel.getOneConversationByTeamId(teamId);

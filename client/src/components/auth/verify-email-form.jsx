@@ -150,7 +150,12 @@ export default function VerifyEmailForm() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} autoComplete="off">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          autoComplete="off"
+          spellCheck="false"
+          className="space-y-2"
+        >
           <div className="flex flex-col items-center">
             <FormField
               name="code"

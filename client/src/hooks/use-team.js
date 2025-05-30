@@ -5,14 +5,14 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 import {
   createTeam,
   getTeamsOfUser,
-  getMembersOfTeam,
   updateTeam,
   deleteTeam,
-  addMembersToTeam,
+  getMembersOfTeam,
   removeMembersFromTeam,
-  updateTeamMemberRole,
+  updateTeamRoleOfMember,
   leaveTeam,
   joinTeam,
+  getJoinRequestsOfTeam,
   approveJoinRequest,
   rejectJoinRequest
 } from "@/actions/team-actions";
@@ -34,11 +34,7 @@ export function TeamProvider({ children }) {
   const [teams, setTeams] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [teamMembers, setTeamMembers] = useState([]);
-  const [isEditable, setIsEditable] = useState(false);
-
-  // UI state
-  // const [activeTab, setActiveTab] = useState("members");
-  // const [isOpenTeamDetails, setIsOpenTeamDetails] = useState(false);
+  const [teamJoinRequests, setTeamJoinRequests] = useState([]);
 
   // Fetch teams
   const fetchTeams = useCallback(async () => {
@@ -55,7 +51,7 @@ export function TeamProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, [selectedTeam]);
+  }, [user]);
 
   // Fetch team members
   const fetchTeamMembers = useCallback(
@@ -65,7 +61,23 @@ export function TeamProvider({ children }) {
         setError(null);
         const data = await getMembersOfTeam(teamId);
         setTeamMembers(data.members);
-        setIsEditable(data.find((member) => member.id === user?.id)?.role === "owner");
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user]
+  );
+
+  // Fetch team requests
+  const fetchTeamJoinRequests = useCallback(
+    async (teamId) => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getJoinRequestsOfTeam(teamId);
+        setTeamJoinRequests(data.requests);
       } catch (err) {
         setError(err);
       } finally {
@@ -80,12 +92,13 @@ export function TeamProvider({ children }) {
     fetchTeams();
   }, [fetchTeams]);
 
-  // Fetch team members when team changes
+  // Fetch team members and requests when team changes
   useEffect(() => {
     if (selectedTeam) {
       fetchTeamMembers(selectedTeam.id);
+      fetchTeamJoinRequests(selectedTeam.id);
     }
-  }, [selectedTeam, fetchTeamMembers]);
+  }, [selectedTeam, fetchTeamMembers, fetchTeamJoinRequests]);
 
   // Team actions
   const handleCreateTeam = useCallback(
@@ -170,27 +183,11 @@ export function TeamProvider({ children }) {
     [fetchTeams]
   );
 
-  const handleAddTeamMembers = useCallback(
-    async (teamId, memberIds) => {
-      try {
-        setLoading(true);
-        await addMembersToTeam(teamId, memberIds);
-        await fetchTeamMembers(teamId);
-      } catch (err) {
-        setError(err);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [fetchTeamMembers]
-  );
-
   const handleRemoveTeamMembers = useCallback(
-    async (teamId, memberIds) => {
+    async (teamId, data) => {
       try {
         setLoading(true);
-        await removeMembersFromTeam(teamId, memberIds);
+        await removeMembersFromTeam(teamId, data);
         await fetchTeamMembers(teamId);
       } catch (err) {
         setError(err);
@@ -202,11 +199,11 @@ export function TeamProvider({ children }) {
     [fetchTeamMembers]
   );
 
-  const handleUpdateTeamMemberRole = useCallback(
-    async (teamId, memberId, role) => {
+  const handleUpdateTeamRoleOfMember = useCallback(
+    async (teamId, data) => {
       try {
         setLoading(true);
-        await updateTeamMemberRole(teamId, memberId, role);
+        await updateTeamRoleOfMember(teamId, data);
         await fetchTeamMembers(teamId);
       } catch (err) {
         setError(err);
@@ -216,6 +213,38 @@ export function TeamProvider({ children }) {
       }
     },
     [fetchTeamMembers]
+  );
+
+  const handleApproveJoinRequest = useCallback(
+    async (requestId) => {
+      try {
+        setLoading(true);
+        await approveJoinRequest(requestId);
+        await fetchTeamJoinRequests(selectedTeam.id);
+      } catch (err) {
+        setError(err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchTeamJoinRequests, selectedTeam]
+  );
+
+  const handleRejectJoinRequest = useCallback(
+    async (requestId) => {
+      try {
+        setLoading(true);
+        await rejectJoinRequest(requestId);
+        await fetchTeamJoinRequests(selectedTeam.id);
+      } catch (err) {
+        setError(err);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchTeamJoinRequests, selectedTeam]
   );
 
   const contextValue = {
@@ -223,16 +252,12 @@ export function TeamProvider({ children }) {
     teams,
     selectedTeam,
     teamMembers,
+    teamJoinRequests,
     loading,
     error,
-    isEditable,
-    // activeTab,
-    // isOpenTeamDetails,
 
     // Setters
     setSelectedTeam,
-    // setActiveTab,
-    // setIsOpenTeamDetails,
 
     // Team actions
     handleCreateTeam,
@@ -240,9 +265,10 @@ export function TeamProvider({ children }) {
     handleDeleteTeam,
     handleJoinTeam,
     handleLeaveTeam,
-    handleAddTeamMembers,
     handleRemoveTeamMembers,
-    handleUpdateTeamMemberRole
+    handleUpdateTeamRoleOfMember,
+    handleApproveJoinRequest,
+    handleRejectJoinRequest
   };
 
   return <TeamContext.Provider value={contextValue}>{children}</TeamContext.Provider>;

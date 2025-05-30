@@ -26,7 +26,7 @@ export default function NavConversation() {
     <Card className="h-full p-0 shadow-lg rounded-none bg-ghost-white overflow-hidden">
       <CardContent className="p-0 h-full">
         <Tabs defaultValue="all" className="h-full">
-          <TabsList className="justify-start w-full px-6 gap-x-4 rounded-none border-b bg-white">
+          <TabsList className="justify-start w-full px-6 gap-x-6 rounded-none border-b bg-white">
             <TabsTrigger
               value="all"
               className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"

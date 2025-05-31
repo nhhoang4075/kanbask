@@ -1,17 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
-import { Users, UsersRound, FolderKanban, MoreHorizontal } from "lucide-react";
+import { Users, UsersRound, FolderKanban } from "lucide-react";
 
-import ChatOption from "@/components/chat/chat-option";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetTitle,
-  SheetDescription
-} from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChat } from "@/hooks/use-chat";
@@ -31,7 +23,7 @@ export default function ChatHeader() {
   }
 
   return (
-    <div className="flex w-full max-w-full gap-4 items-center border-b bg-white px-6 py-4">
+    <div className="flex w-full h-20 max-w-full gap-4 items-center border-b bg-white px-6 py-4">
       <Avatar className="h-12 w-12 relative">
         <AvatarImage
           src={currConversation.avatar_url}
@@ -85,18 +77,6 @@ export default function ChatHeader() {
           )}
         </div>
       </div>
-      <Sheet>
-        <SheetTrigger asChild>
-          <button className="flex-none rounded-full p-2 ml-auto mr-2 hover:cursor-pointer">
-            <MoreHorizontal className="text-prussian-blue" size={25} />
-          </button>
-        </SheetTrigger>
-        <SheetContent side="right" className="w-1/2 bg-white dark:bg-black">
-          <SheetTitle />
-          <SheetDescription />
-          <ChatOption currConversation={currConversation} />
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }

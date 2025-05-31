@@ -13,6 +13,8 @@ export function useTask() {
 
 export function TaskProvider({ children }) {
   const [tasks, setTasks] = useState([]);
+  const [selectedTeamId, setSelectedTeamId] = useState(null);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all"); // all, active, completed
@@ -30,19 +32,19 @@ export function TaskProvider({ children }) {
     try {
       setLoading(true);
       setError(null);
-      const data = await getTaskOfProject();
-      setTasks(data.tasks || []);
+      const data = await getTaskOfProject(selectedProjectId);
+      setTasks(data.tasks);
     } catch (err) {
       setError(err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedProjectId]);
 
   // Create a new task
-  const create = useCallback(async (taskData) => {
+  const handleCreateTask = useCallback(async (data) => {
     try {
-      const newTask = await createTask(taskData);
+      const newTask = await createTask(data);
       setTasks((prev) => [newTask, ...prev]);
       return newTask;
     } catch (err) {
@@ -52,7 +54,7 @@ export function TaskProvider({ children }) {
   }, []);
 
   // Update a task
-  const update = useCallback(async (taskId, updates) => {
+  const handleUpdateTask = useCallback(async (taskId, updates) => {
     try {
       const updatedTask = await updateTask(taskId, updates);
       setTasks((prev) => prev.map((task) => (task.id === taskId ? updatedTask : task)));
@@ -64,7 +66,7 @@ export function TaskProvider({ children }) {
   }, []);
 
   // Delete a task
-  const remove = useCallback(async (taskId) => {
+  const handleDeleteTask = useCallback(async (taskId) => {
     try {
       await deleteTask(taskId);
       setTasks((prev) => prev.filter((task) => task.id !== taskId));
@@ -78,18 +80,21 @@ export function TaskProvider({ children }) {
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
-  ``;
 
   const contextValue = {
     tasks,
+    selectedTeamId,
+    selectedProjectId,
+    setSelectedTeamId,
+    setSelectedProjectId,
     loading,
     error,
     filterOptions,
     filter,
     setFilter,
-    create,
-    update,
-    remove
+    handleCreateTask,
+    handleUpdateTask,
+    handleDeleteTask
   };
 
   return <TaskContext.Provider value={contextValue}>{children}</TaskContext.Provider>;

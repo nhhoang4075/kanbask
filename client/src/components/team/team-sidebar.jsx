@@ -97,8 +97,8 @@ export default function TeamSideBar() {
   }, 500);
 
   return (
-    <div className="w-full h-full bg-white overflow-hidden">
-      <div className="flex items-center justify-between gap-2 px-6 py-4 border-b">
+    <div className="w-full h-full bg-white overflow-hidden py-4">
+      <div className="flex items-center justify-between gap-2 px-6 mb-2">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
           <Input
@@ -125,7 +125,7 @@ export default function TeamSideBar() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <ScrollArea className="h-[calc(100vh-10.5rem)] p-2">
+      <ScrollArea className="h-[calc(100vh-140px)] px-2">
         {filteredTeams.map((team) => (
           <Collapsible key={team.id} open={expandedTeams[team.id] || false}>
             <div

@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-
 import SummaryChart from "@/components/dashboard/summary-chart";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import {
@@ -12,21 +10,13 @@ import {
 import { useDashboard } from "@/hooks/use-dashboard";
 
 export default function Summary() {
-  const { projects, tasks } = useDashboard();
-  const [selectedProjectId, setSelectedProjectId] = useState(projects[0]?.id || null);
-
-  // Set the initial chosen project ID to the first project in the list
-  useEffect(() => {
-    if (projects.length > 0) {
-      setSelectedProjectId(projects[0].id);
-    }
-  }, [projects]);
+  const { projects, tasks, selectedProjectId, setSelectedProjectId } = useDashboard();
 
   return (
     <Card className="h-full flex flex-col overflow-hidden bg-white shadow-md md:col-span-3">
       <CardHeader className="flex-shrink-0 flex flex-row items-center justify-between space-y-0">
         <CardTitle className="text-xl m-0 p-0">Summary</CardTitle>
-        <Select onValueChange={setSelectedProjectId} value={selectedProjectId}>
+        <Select onValueChange={setSelectedProjectId} value={selectedProjectId} defaultValue={-1}>
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Choose project" />
           </SelectTrigger>
@@ -41,13 +31,7 @@ export default function Summary() {
         </Select>
       </CardHeader>
       <CardContent className="flex-1 overflow-hidden">
-        {selectedProjectId ? (
-          <SummaryChart selectedProjectId={selectedProjectId} tasks={tasks} />
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-gray-500">Please select a project to view summary chart</p>
-          </div>
-        )}
+        <SummaryChart selectedProjectId={selectedProjectId || -1} tasks={tasks} />
       </CardContent>
     </Card>
   );

@@ -13,16 +13,14 @@ export function useChat() {
   return useContext(ChatContext);
 }
 
-export function ChatProvider({ initialConversations = [], children }) {
+export function ChatProvider({ children }) {
   const { loading: sessionLoading } = useSession();
   const { socket, connected: socketConnected } = useSocket();
   const router = useRouter();
   const pathname = usePathname();
 
-  const [conversations, setConversations] = useState(initialConversations);
-  const [selectedConversationId, setSelectedConversationId] = useState(
-    initialConversations[0]?.id || null
-  );
+  const [conversations, setConversations] = useState([]);
+  const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [lastReadMessageId, setLastReadMessageId] = useState(null);
   const [highlightId, setHighlightId] = useState(null);
@@ -31,6 +29,17 @@ export function ChatProvider({ initialConversations = [], children }) {
   const [error, setError] = useState(null);
 
   const selectedIdRef = useRef(selectedConversationId);
+
+  // Fetch conversations
+  const fetchConversations = useCallback(async () => {
+    const data = await getConversations();
+    setConversations(data.conversations);
+    setSelectedConversationId(data.conversations[0]?.id || null);
+  }, []);
+
+  useEffect(() => {
+    fetchConversations();
+  }, []);
 
   // Keep selectedIdRef in sync
   useEffect(() => {

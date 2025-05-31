@@ -22,7 +22,7 @@ export default function TeamLayout({ children }) {
               </ResizablePanel>
               <ResizableHandle className="mx-0.5 w-0.5 rounded bg-transparent hover:bg-mustard active:bg-mustard transition duration-200 ease-in-out" />
               <ResizablePanel defaultSize={70} className="rounded-md">
-                <div className="flex flex-col items-center h-full">{children}</div>
+                {children}
               </ResizablePanel>
             </ResizablePanelGroup>
           </div>

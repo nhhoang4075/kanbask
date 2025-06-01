@@ -71,25 +71,27 @@ const searchTasksByVector = async (
     const qLike = `%${search_term}%`;
     const queryVectorSql = pgvector.toSql(query_vector);
 
-    const tasks = await db("tasks")
+    const tasks = await db("tasks AS t")
+      .join("projects AS p", "p.id", "=", "t.project_id")
       .select(
-        "id",
-        "project_id",
-        "title",
-        "status",
-        "priority",
-        "created_at",
-        db.raw("CASE WHEN title ILIKE ? THEN 1 ELSE 0 END AS fulltext", [qLike]),
+        "t.id",
+        "t.project_id",
+        "p.team_id",
+        "t.title",
+        "t.status",
+        "t.priority",
+        "t.created_at",
+        db.raw("CASE WHEN t.title ILIKE ? THEN 1 ELSE 0 END AS fulltext", [qLike]),
         db.raw("1 - (embedding <=> ?) AS similarity", [queryVectorSql])
       )
-      .whereIn("project_id", project_ids)
+      .whereIn("t.project_id", project_ids)
       .andWhere(function () {
         if (status && status !== "all") {
-          this.where("status", status);
+          this.where("t.status", status);
         }
       })
       .andWhere(function () {
-        this.where("title", "ILIKE", qLike).orWhere(
+        this.where("t.title", "ILIKE", qLike).orWhere(
           db.raw("1 - (embedding <=> ?) >= ?", [queryVectorSql, minSimilarity])
         );
       })

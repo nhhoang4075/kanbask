@@ -2,7 +2,7 @@ import React from "react";
 import { ToggleGroup, ToggleGroupItem } from "../../ui/toggle-group";
 import { LayoutGrid, List } from "lucide-react";
 
-const ToggleView = ({ viewMode, setViewMode }) => {
+export default function ToggleView({ viewMode, setViewMode }) {
   return (
     <ToggleGroup
       type="single"
@@ -26,6 +26,4 @@ const ToggleView = ({ viewMode, setViewMode }) => {
       </ToggleGroupItem>
     </ToggleGroup>
   );
-};
-
-export default ToggleView;
+}

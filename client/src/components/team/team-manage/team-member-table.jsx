@@ -39,8 +39,9 @@ export default function TeamMemberTable() {
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
-  const [columns, setColumns] = useState(getColumns(selectedTeam.role === "owner"));
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const columns = getColumns(selectedTeam.role === "owner");
 
   const table = useReactTable({
     data: teamMembers,

@@ -1,13 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, ImageIcon, FileIcon as FileWord, Download, Eye, Trash2 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatDistanceToNow } from "date-fns";
+import { FileText, ImageIcon, FileIcon as FileWord, Download, Eye, Trash2 } from "lucide-react";
 
-export function FileAttachmentList({ files = [], onDelete, readOnly = false }) {
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { useTask } from "@/hooks/use-task";
+import { getInitials, pickAvatarColor } from "@/lib/user-utils";
+
+export default function AttachmentList({ task, readOnly = false }) {
+  const { handleDeleteTaskAttachments } = useTask();
   const [previewFile, setPreviewFile] = useState(null);
 
   const formatFileSize = (bytes) => {
@@ -43,13 +47,13 @@ export function FileAttachmentList({ files = [], onDelete, readOnly = false }) {
     if (!previewFile) return null;
 
     let content;
-    switch (previewFile.type) {
+    switch (previewFile.mime_type) {
       case "image":
         content = (
           <div className="flex items-center justify-center h-full">
             <img
               src={previewFile.url || "/placeholder.svg"}
-              alt={previewFile.name}
+              alt={previewFile.original_name}
               className="max-w-full max-h-[70vh] object-contain"
             />
           </div>
@@ -59,14 +63,14 @@ export function FileAttachmentList({ files = [], onDelete, readOnly = false }) {
         content = (
           <div className="flex flex-col items-center justify-center h-full">
             <FileText className="h-16 w-16 text-red-500 mb-4" />
-            <p className="text-lg font-medium mb-2">{previewFile.name}</p>
+            <p className="text-lg font-medium mb-2">{previewFile.original_name}</p>
             <p className="text-sm text-muted-foreground mb-4">
               PDF files can't be previewed directly
             </p>
             <Button asChild>
               <a
                 href={previewFile.url}
-                download={previewFile.name}
+                download={previewFile.original_name}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -81,14 +85,14 @@ export function FileAttachmentList({ files = [], onDelete, readOnly = false }) {
         content = (
           <div className="flex flex-col items-center justify-center h-full">
             <FileWord className="h-16 w-16 text-blue-700 mb-4" />
-            <p className="text-lg font-medium mb-2">{previewFile.name}</p>
+            <p className="text-lg font-medium mb-2">{previewFile.original_name}</p>
             <p className="text-sm text-muted-foreground mb-4">
               Word documents can't be previewed directly
             </p>
             <Button asChild>
               <a
                 href={previewFile.url}
-                download={previewFile.name}
+                download={previewFile.original_name}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -103,12 +107,12 @@ export function FileAttachmentList({ files = [], onDelete, readOnly = false }) {
         content = (
           <div className="flex flex-col items-center justify-center h-full">
             <FileText className="h-16 w-16 text-gray-500 mb-4" />
-            <p className="text-lg font-medium mb-2">{previewFile.name}</p>
+            <p className="text-lg font-medium mb-2">{previewFile.original_name}</p>
             <p className="text-sm text-muted-foreground mb-4">This file type can't be previewed</p>
             <Button asChild>
               <a
                 href={previewFile.url}
-                download={previewFile.name}
+                download={previewFile.original_name}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -132,26 +136,23 @@ export function FileAttachmentList({ files = [], onDelete, readOnly = false }) {
     );
   };
 
-  if (files.length === 0) {
-    return <p className="text-sm text-muted-foreground">No attachments</p>;
-  }
-
   return (
     <div className="space-y-2">
-      {files.map((file) => (
+      {task.attachments.map((attachment) => (
         <div
-          key={file.id}
+          key={attachment.id}
           className="flex items-center justify-between p-3 rounded-md border bg-background hover:bg-muted/50 transition-colors"
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {getFileIcon(file.type)}
+            {getFileIcon(attachment.mime_type)}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{file.name}</p>
+              <p className="text-sm font-medium truncate">{attachment.original_name}</p>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <span>{formatFileSize(file.size)}</span>
+                <span>{formatFileSize(attachment.size_bytes)}</span>
                 <span>•</span>
                 <span>
-                  Uploaded {formatDistanceToNow(new Date(file.uploadedAt), { addSuffix: true })}
+                  Uploaded{" "}
+                  {formatDistanceToNow(new Date(attachment.attached_at), { addSuffix: true })}
                 </span>
               </div>
             </div>
@@ -160,14 +161,14 @@ export function FileAttachmentList({ files = [], onDelete, readOnly = false }) {
             <div className="flex items-center mr-2">
               <Avatar className="h-5 w-5">
                 <AvatarImage
-                  src={file.uploadedBy.avatar || "/placeholder.svg"}
-                  alt={file.uploadedBy.name}
+                  src={attachment.attacher_avatar_url}
+                  alt={attachment.attacher_full_name}
                 />
-                <AvatarFallback className="text-[8px]">
-                  {file.uploadedBy.name
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
+                <AvatarFallback
+                  className="text-[8px]"
+                  style={pickAvatarColor(attachment.attacher_full_name)}
+                >
+                  {getInitials(attachment.attacher_full_name)}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -175,14 +176,19 @@ export function FileAttachmentList({ files = [], onDelete, readOnly = false }) {
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={() => handlePreview(file)}
+              onClick={() => handlePreview(attachment)}
               title="Preview"
             >
               <Eye className="h-4 w-4" />
               <span className="sr-only">Preview</span>
             </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8" asChild title="Download">
-              <a href={file.url} download={file.name} target="_blank" rel="noopener noreferrer">
+              <a
+                href={attachment.url}
+                download={attachment.original_name}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Download className="h-4 w-4" />
                 <span className="sr-only">Download</span>
               </a>
@@ -192,7 +198,7 @@ export function FileAttachmentList({ files = [], onDelete, readOnly = false }) {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-destructive hover:text-destructive"
-                onClick={() => onDelete(file.id)}
+                onClick={() => handleDeleteTaskAttachments(task.id, [attachment.id])}
                 title="Delete"
               >
                 <Trash2 className="h-4 w-4" />

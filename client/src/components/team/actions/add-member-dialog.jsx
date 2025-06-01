@@ -89,7 +89,7 @@ export default function AddMemberDialog({ isOpen, onOpenChange }) {
                 <FormItem className="relative pb-5">
                   <FormLabel className="text-xs !text-black">Members</FormLabel>
                   <FormControl>
-                    <Popover modal={true}>
+                    <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
@@ -103,6 +103,7 @@ export default function AddMemberDialog({ isOpen, onOpenChange }) {
                             <div className="flex gap-1 overflow-hidden">
                               {field.value.slice(0, 3).map((memberId) => {
                                 const member = availableMembers.find((m) => m.id === memberId);
+
                                 return (
                                   <TooltipProvider key={memberId} delayDuration={0}>
                                     <Tooltip>
@@ -131,7 +132,10 @@ export default function AddMemberDialog({ isOpen, onOpenChange }) {
                           <Search className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[400px] p-0">
+                      <PopoverContent
+                        className="w-[400px] p-0"
+                        onWheel={(e) => e.stopPropagation()}
+                      >
                         <Command>
                           <CommandInput placeholder={"Search members"} />
                           <CommandEmpty>No members found.</CommandEmpty>

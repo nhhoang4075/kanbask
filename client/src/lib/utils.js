@@ -47,3 +47,7 @@ export function formatShortTimestamp(isoString) {
 export function formatDate(isoString) {
   return format(isoString, "MMM d, yyyy");
 }
+
+export function formatDateShort(isoString) {
+  return format(isoString, "dd/MM/yyyy");
+}

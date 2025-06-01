@@ -1,23 +1,64 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
 import {
-  CommandList,
-  CommandGroup,
   Command,
   CommandEmpty,
+  CommandGroup,
   CommandInput,
-  CommandItem
+  CommandItem,
+  CommandList
 } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useTeam } from "@/hooks/use-team";
+import { useProject } from "@/hooks/use-project";
+import { cn } from "@/lib/utils";
 
-const ProjectSelector = ({ projects, selectedProjectId, setSelectedProjectId }) => {
+export default function ProjectSelector({ projectId }) {
   const [open, setOpen] = useState(false);
+  const { teams, selectedTeam } = useTeam();
+  const { projects, selectedProject, setSelectedProject, fetchProjects } = useProject();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const selectedProject = projects.filter((project) => project.id === selectedProjectId)[0];
+  useEffect(() => {
+    if (!teams.length || !selectedTeam) return;
+
+    if (!(selectedTeam.id in projects)) {
+      fetchProjects(selectedTeam.id);
+    }
+  }, [selectedTeam, teams]);
+
+  useEffect(() => {
+    if (!selectedProject || selectedProject.team_id !== selectedTeam?.id) {
+      setSelectedProject(projects[selectedTeam?.id]?.[0]);
+    }
+  }, [selectedProject, projects, selectedTeam]);
+
+  useEffect(() => {
+    if (!projects[selectedTeam?.id] || projectId === selectedProject?.id) return;
+
+    if (projectId) {
+      const existingProject = projects[selectedTeam?.id]?.find(
+        (project) => project.id === projectId
+      );
+
+      if (existingProject) {
+        setSelectedProject(existingProject);
+      } else {
+        const params = new URLSearchParams(searchParams);
+        params.delete("project");
+
+        router.push(`${pathname}?${params.toString()}`);
+      }
+    }
+  }, [projectId, projects, selectedTeam]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -26,44 +67,47 @@ const ProjectSelector = ({ projects, selectedProjectId, setSelectedProjectId }) 
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="min-w-[200px] justify-between"
+          className="w-50 justify-between bg-white"
         >
-          <div className="flex items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis">
-            {selectedProject?.name}
-          </div>
+          {selectedProject ? (
+            <p className="truncate font-normal">{selectedProject.name}</p>
+          ) : (
+            <p className="truncate text-gray-500">Select Project</p>
+          )}
           <ChevronsUpDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent>
+      <PopoverContent className="w-50 p-0">
         <Command>
           <CommandInput placeholder="Search project..." />
           <CommandList>
             <CommandEmpty>No project found.</CommandEmpty>
             <CommandGroup>
-              {projects.map((project) => (
-                <CommandItem
-                  key={project.id}
-                  value={project.name}
-                  onSelect={() => {
-                    setSelectedProjectId(() => project.id);
-                    setOpen(false);
-                  }}
-                >
-                  <div className="flex items-center gap-2">{project.name}</div>
-                  <Check
-                    className={cn(
-                      "ml-auto h-4 w-4",
-                      selectedProject.id === project.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
+              {projects[selectedTeam?.id]?.map((project) => {
+                const params = new URLSearchParams(searchParams);
+                params.set("project", project.id);
+
+                return (
+                  <CommandItem key={project.id} value={project.id} onSelect={() => setOpen(false)}>
+                    <Link
+                      href={`${pathname}?${params.toString()}`}
+                      className="w-full flex items-center justify-between"
+                    >
+                      <div className="truncate">{project.name}</div>
+                      <Check
+                        className={cn(
+                          "ml-auto h-4 w-4",
+                          selectedProject?.id === project.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    </Link>
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
   );
-};
-
-export default ProjectSelector;
+}

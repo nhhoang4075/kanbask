@@ -13,7 +13,7 @@ import { sanitizeAllowedFields } from "../../utils/helper.js";
 
 const createOneTask = async (data, actorId) => {
   try {
-    const { project_id, title, status, priority, due_date, assignees } = data;
+    const { project_id, title, description, status, priority, due_date, assignees } = data;
 
     const isProjectMember = await projectModel.isUserInProject(project_id, actorId);
 
@@ -28,6 +28,7 @@ const createOneTask = async (data, actorId) => {
       {
         project_id,
         title,
+        description,
         status,
         priority,
         due_date,
@@ -58,7 +59,7 @@ const createOneTask = async (data, actorId) => {
     const task = await taskModel.getOneTaskById(taskId);
     const taskAssignees = await taskModel.getAssigneesOfTask(taskId);
 
-    const formattedTask = { ...task, assignees: taskAssignees };
+    const formattedTask = { ...task, assignees: taskAssignees, attachments: [] };
 
     return formattedTask;
   } catch (err) {
@@ -89,7 +90,9 @@ const getManyTasksByProjectId = async (projectId, actorId) => {
             original_name: a.original_name,
             mime_type: a.mime_type,
             size_bytes: a.size_bytes,
-            attached_by: a.attached_by,
+            attacher_id: a.attacher_id,
+            attacher_full_name: a.attacher_full_name,
+            attacher_avatar_url: a.attacher_avatar_url,
             attached_at: a.attached_at
             // url: await supabaseProvider.generateUrl(a.supabase_path)
           }))
@@ -125,6 +128,7 @@ const updateOneTaskById = async (id, data, actorId) => {
 
     const allowedData = sanitizeAllowedFields(data, [
       "title",
+      "description",
       "status",
       "priority",
       "due_date",

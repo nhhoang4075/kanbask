@@ -2,8 +2,16 @@
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 
-import { getTaskOfProject, createTask, updateTask, deleteTask } from "@/actions/task-actions";
-import { useSocket } from "@/hooks/use-socket";
+import {
+  getTasksOfProject,
+  createTask,
+  updateTask,
+  deleteTask,
+  uploadTaskAttachments,
+  getTaskAttachmentUrl,
+  deleteTaskAttachments
+} from "@/actions/task-actions";
+import { useProject } from "@/hooks/use-project";
 
 const TaskContext = createContext();
 
@@ -12,89 +20,156 @@ export function useTask() {
 }
 
 export function TaskProvider({ children }) {
+  const { selectedProject, projectMembers } = useProject();
+
   const [tasks, setTasks] = useState([]);
-  const [selectedTeamId, setSelectedTeamId] = useState(null);
-  const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [filter, setFilter] = useState("all"); // all, active, completed
-
-  const { socket, connected: socketConnected } = useSocket();
-
-  const filterOptions = [
-    { value: "all", label: "All Tasks" },
-    { value: "active", label: "Active Tasks" },
-    { value: "completed", label: "Completed Tasks" }
-  ];
 
   // Fetch tasks
   const fetchTasks = useCallback(async () => {
+    if (!selectedProject) return;
+
     try {
       setLoading(true);
       setError(null);
-      const data = await getTaskOfProject(selectedProjectId);
+      const data = await getTasksOfProject(selectedProject.id);
       setTasks(data.tasks);
     } catch (err) {
       setError(err);
     } finally {
       setLoading(false);
     }
-  }, [selectedProjectId]);
-
-  // Create a new task
-  const handleCreateTask = useCallback(async (data) => {
-    try {
-      const newTask = await createTask(data);
-      setTasks((prev) => [newTask, ...prev]);
-      return newTask;
-    } catch (err) {
-      setError(err);
-      throw err;
-    }
-  }, []);
-
-  // Update a task
-  const handleUpdateTask = useCallback(async (taskId, updates) => {
-    try {
-      const updatedTask = await updateTask(taskId, updates);
-      setTasks((prev) => prev.map((task) => (task.id === taskId ? updatedTask : task)));
-      return updatedTask;
-    } catch (err) {
-      setError(err);
-      throw err;
-    }
-  }, []);
-
-  // Delete a task
-  const handleDeleteTask = useCallback(async (taskId) => {
-    try {
-      await deleteTask(taskId);
-      setTasks((prev) => prev.filter((task) => task.id !== taskId));
-    } catch (err) {
-      setError(err);
-      throw err;
-    }
-  }, []);
+  }, [selectedProject]);
 
   // Initial fetch
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
 
+  // Create a new task
+  const handleCreateTask = useCallback(async (taskData) => {
+    try {
+      const newTaskData = await createTask(taskData);
+
+      setTasks((prev) => [newTaskData.task, ...prev]);
+    } catch (err) {
+      setError(err);
+    }
+  }, []);
+
+  // Update a task
+  const handleUpdateTask = useCallback(
+    async (taskId, updates) => {
+      try {
+        /**
+         * Optimistic update
+         * 1. Get the current task to preserve existing assignees
+         * 2. Get new assignees from project members
+         * 3. Filter out removed assignees and merge with new ones
+         * 4. Update the task with the new assignees
+         * 5. Call the updateTask action to update the task in the database
+         */
+        // Get the current task to preserve existing assignees
+        const currentTask = tasks.find((task) => task.id === taskId);
+        const existingAssignees = currentTask?.assignees || [];
+
+        // Get new assignees from project members
+        const newAssignees = projectMembers
+          .filter((member) => updates.assignees.includes(member.id))
+          .map((member) => ({
+            user_id: member.id,
+            full_name: member.full_name,
+            avatar_url: member.avatar_url,
+            assigned_at: new Date().toISOString()
+          }));
+
+        // Filter out removed assignees and merge with new ones
+        const updatedAssignees = [
+          ...existingAssignees.filter((existing) => updates.assignees.includes(existing.user_id)),
+          ...newAssignees.filter(
+            (newAssignee) =>
+              !existingAssignees.some((existing) => existing.user_id === newAssignee.user_id)
+          )
+        ];
+
+        // Optimistic update
+        setTasks((prev) =>
+          prev.map((task) =>
+            task.id === taskId
+              ? {
+                  ...task,
+                  ...updates,
+                  assignees: updatedAssignees,
+                  updated_at: new Date().toISOString()
+                }
+              : task
+          )
+        );
+
+        await updateTask(taskId, updates);
+      } catch (err) {
+        setError(err);
+      }
+    },
+    [tasks, projectMembers]
+  );
+
+  // Delete a task
+  const handleDeleteTask = useCallback(async (taskId) => {
+    try {
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+
+      await deleteTask(taskId);
+    } catch (err) {
+      setError(err);
+    }
+  }, []);
+
+  // Reorder tasks (for drag and drop in list view)
+  const handleReorderTask = useCallback(async (taskId, newPosition) => {
+    try {
+      await updateTask(taskId, { position: newPosition });
+    } catch (err) {
+      setError(err);
+    }
+  }, []);
+
+  const handleUploadTaskAttachments = useCallback(async (taskId, files) => {
+    try {
+      await uploadTaskAttachments(taskId, files);
+    } catch (err) {
+      setError(err);
+    }
+  }, []);
+
+  const handleGetTaskAttachmentUrl = useCallback(async (taskId, attachmentId) => {
+    try {
+      await getTaskAttachmentUrl(taskId, attachmentId);
+    } catch (err) {
+      setError(err);
+    }
+  }, []);
+
+  const handleDeleteTaskAttachments = useCallback(async (taskId, attachmentIds) => {
+    try {
+      await deleteTaskAttachments(taskId, attachmentIds);
+    } catch (err) {
+      setError(err);
+    }
+  }, []);
+
   const contextValue = {
     tasks,
-    selectedTeamId,
-    selectedProjectId,
-    setSelectedTeamId,
-    setSelectedProjectId,
     loading,
     error,
-    filterOptions,
-    filter,
-    setFilter,
     handleCreateTask,
     handleUpdateTask,
-    handleDeleteTask
+    handleDeleteTask,
+    handleReorderTask,
+    handleUploadTaskAttachments,
+    handleGetTaskAttachmentUrl,
+    handleDeleteTaskAttachments
   };
 
   return <TaskContext.Provider value={contextValue}>{children}</TaskContext.Provider>;

@@ -30,21 +30,27 @@ const createOneTask = async (data, assignees) => {
 
 const getOneTaskById = async (id) => {
   try {
-    const [task] = await db("tasks")
+    const [task] = await db("tasks AS t")
+      .join("user_public_view AS v", "v.id", "=", "t.created_by")
+      .join("projects AS p", "p.id", "=", "t.project_id")
       .select(
-        "id",
-        "project_id",
-        "title",
-        "status",
-        "priority",
-        "description",
-        "due_date",
-        "completed_at",
-        "position",
-        "created_at",
-        "updated_at"
+        "t.id",
+        "t.project_id",
+        "p.team_id",
+        "t.title",
+        "t.status",
+        "t.priority",
+        "t.description",
+        "t.due_date",
+        "t.completed_at",
+        "t.position",
+        "t.created_by as creator_id",
+        "v.full_name as creator_full_name",
+        "v.avatar_url as creator_avatar_url",
+        "t.created_at",
+        "t.updated_at"
       )
-      .where({ id })
+      .where({ "t.id": id })
       .limit(1);
 
     return task;
@@ -55,22 +61,28 @@ const getOneTaskById = async (id) => {
 
 const getManyTasksByProjectId = async (project_id) => {
   try {
-    const tasks = db("tasks")
+    const tasks = db("tasks AS t")
+      .join("user_public_view AS v", "v.id", "=", "t.created_by")
+      .join("projects AS p", "p.id", "=", "t.project_id")
       .select(
-        "id",
-        "project_id",
-        "title",
-        "status",
-        "priority",
-        "description",
-        "due_date",
-        "completed_at",
-        "position",
-        "created_at",
-        "updated_at"
+        "t.id",
+        "t.project_id",
+        "p.team_id",
+        "t.title",
+        "t.status",
+        "t.priority",
+        "t.description",
+        "t.due_date",
+        "t.completed_at",
+        "t.position",
+        "t.created_by as creator_id",
+        "v.full_name as creator_full_name",
+        "v.avatar_url as creator_avatar_url",
+        "t.created_at",
+        "t.updated_at"
       )
-      .where({ project_id })
-      .orderBy("position", "asc");
+      .where({ "t.project_id": project_id })
+      .orderBy("t.position", "asc");
 
     return tasks;
   } catch (err) {

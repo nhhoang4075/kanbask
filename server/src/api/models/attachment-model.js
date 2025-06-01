@@ -23,7 +23,8 @@ const getOneAttachmentById = async (id) => {
 const getManyAttachmentsByTaskId = async (task_id) => {
   try {
     const attachments = await db("task_attachments AS ta")
-      .join("storage_attachments AS sa", "ta.attachment_id", "sa.id")
+      .join("storage_attachments AS sa", "sa.id", "=", "ta.attachment_id")
+      .join("user_public_view AS v", "v.id", "=", "ta.attached_by")
       .where("ta.task_id", task_id)
       .select(
         "sa.id",
@@ -31,7 +32,9 @@ const getManyAttachmentsByTaskId = async (task_id) => {
         "sa.original_name",
         "sa.mime_type",
         "sa.size_bytes",
-        "ta.attached_by",
+        "ta.attached_by AS attacher_id",
+        "v.full_name AS attacher_full_name",
+        "v.avatar_url AS attacher_avatar_url",
         "ta.attached_at"
       )
       .orderBy("ta.attached_at", "asc");
@@ -45,7 +48,8 @@ const getManyAttachmentsByTaskId = async (task_id) => {
 const getManyAttachmentsByMessageId = async (message_id) => {
   try {
     const attachments = await db("message_attachments AS ma")
-      .join("storage_attachments AS sa", "ma.attachment_id", "sa.id")
+      .join("storage_attachments AS sa", "sa.id", "=", "ma.attachment_id")
+      .join("user_public_view AS v", "v.id", "=", "ma.attached_by")
       .where("ma.message_id", message_id)
       .select(
         "sa.id",
@@ -53,7 +57,9 @@ const getManyAttachmentsByMessageId = async (message_id) => {
         "sa.original_name",
         "sa.mime_type",
         "sa.size_bytes",
-        "ma.attached_by",
+        "ma.attached_by AS attacher_id",
+        "v.full_name AS attacher_full_name",
+        "v.avatar_url AS attacher_avatar_url",
         "ma.attached_at"
       )
       .orderBy("ma.attached_at", "asc");

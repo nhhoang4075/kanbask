@@ -44,7 +44,13 @@ export function NotificationProvider({ children }) {
         setError(null);
 
         const data = await getNotifications({ limit, offset });
-        setNotifications((prev) => [...prev, ...data.notifications]);
+
+        if (append) {
+          setNotifications((prev) => [...prev, ...data.notifications]);
+        } else {
+          setNotifications(data.notifications);
+        }
+
         setHasMore(data.notifications.length === NOTIFICATION_LIMIT);
         setOffset(offset + data.notifications.length);
       } catch (err) {

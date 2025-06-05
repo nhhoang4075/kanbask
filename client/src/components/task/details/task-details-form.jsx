@@ -86,369 +86,383 @@ export default function TaskDetailsForm({ task, onSubmit, initialValues }) {
         autoComplete="off"
         spellCheck="false"
       >
-        <div className="grid grid-cols-[100px_1fr] gap-y-4 gap-x-6 items-start">
-          {/* Task Name */}
-          <Label htmlFor="task-title" className="text-muted-foreground font-normal pt-3">
-            Task title
-          </Label>
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Input
-                    {...field}
-                    id="task-title"
-                    placeholder="Type here"
-                    className="border-none shadow-none hover:bg-prussian-blue/5 focus-visible:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out"
-                  />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-
-          {/* Status */}
-          <Label htmlFor="task-status" className="text-muted-foreground font-normal pt-3">
-            Status
-          </Label>
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <div className="group flex gap-2 items-center">
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger
-                        id="task-status"
-                        className="w-full [&_svg]:hidden border-none shadow-none hover:bg-prussian-blue/5 data-[state=open]:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out group-hover:bg-prussian-blue/5"
-                      >
-                        {field.value ? (
-                          <SelectValue placeholder="Select status" />
-                        ) : (
-                          <p className="text-muted-foreground">Select status</p>
-                        )}
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {["todo", "in_progress", "review", "done", "canceled"].map((status) => (
-                        <SelectItem key={status} value={status}>
-                          <Badge
-                            variant="outline"
-                            className={cn("rounded-md", pickStatusColor(status))}
-                          >
-                            {capitalCase(status)}
-                          </Badge>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {field.value && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-9 w-9 hover:bg-prussian-blue/5 transition-colors duration-200 ease-in-out"
-                      onClick={() => field.onChange(null)}
-                    >
-                      <X className="h-4 w-4" />
-                      <span className="sr-only">Clear status</span>
-                    </Button>
-                  )}
-                </div>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-
-          {/* Priority */}
-          <Label htmlFor="task-priority" className="text-muted-foreground font-normal pt-3">
-            Priority
-          </Label>
-          <FormField
-            control={form.control}
-            name="priority"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <div className="group flex gap-2 items-center">
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger
-                        id="task-priority"
-                        className="w-full [&_svg]:hidden border-none shadow-none hover:bg-prussian-blue/5 data-[state=open]:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out group-hover:bg-prussian-blue/5"
-                      >
-                        {field.value ? (
-                          <SelectValue placeholder="Select status" />
-                        ) : (
-                          <p className="text-muted-foreground">Select status</p>
-                        )}
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {["low", "medium", "high"].map((priority) => (
-                        <SelectItem key={priority} value={priority}>
-                          <Badge
-                            variant="outline"
-                            className={cn("rounded-md", pickPriorityColor(priority))}
-                          >
-                            {capitalCase(priority)}
-                          </Badge>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {field.value && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-9 w-9 hover:bg-prussian-blue/5 transition-colors duration-200 ease-in-out"
-                      onClick={() => field.onChange(null)}
-                    >
-                      <X className="h-4 w-4" />
-                      <span className="sr-only">Clear priority</span>
-                    </Button>
-                  )}
-                </div>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-
-          {/* Assignees */}
-          <Label htmlFor="task-assignees" className="text-muted-foreground font-normal pt-3">
-            Assignees
-          </Label>
-          <FormField
-            control={form.control}
-            name="assignees"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      id="task-assignees"
-                      variant="outline"
-                      role="combobox"
-                      className="flex items-center flex-wrap h-fit px-3 font-normal justify-start w-full border-none shadow-none hover:bg-prussian-blue/5 data-[state=open]:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out group-hover:bg-prussian-blue/5"
-                    >
-                      {field.value.length > 0 ? (
-                        <div className="flex flex-wrap gap-2 w-full">
-                          {field.value.map((assigneeId) => {
-                            const member = projectMembers.find((m) => m.id === assigneeId);
-
-                            return (
-                              <div
-                                key={member.id}
-                                className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs bg-mustard/50 max-w-2/5"
-                              >
-                                <Avatar className="h-6 w-6">
-                                  <AvatarImage
-                                    className="object-cover"
-                                    src={member.avatar_url}
-                                    alt={member.full_name}
-                                  />
-                                  <AvatarFallback style={pickAvatarColor(member.full_name)}>
-                                    {getInitials(member.full_name)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span className="truncate">{member.full_name}</span>
-                                <div
-                                  className="h-4 w-4 p-0 hover:text-prussian-blue cursor-pointer"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    field.onChange(field.value.filter((id) => id !== member.id));
-                                  }}
-                                >
-                                  <X className="h-4 w-4" />
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <p className="text-muted-foreground">Select assignees</p>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[300px] p-0" onWheel={(e) => e.stopPropagation()}>
-                    <Command>
-                      <CommandInput placeholder={"Search members"} />
-                      <CommandEmpty>No members found.</CommandEmpty>
-                      <CommandGroup>
-                        <ScrollArea className="max-h-[300px] overflow-y-auto">
-                          {availableMembers?.map((member) => (
-                            <CommandItem
-                              key={member.id}
-                              onSelect={() => {
-                                const current = new Set(field.value);
-                                if (current.has(member.id)) {
-                                  current.delete(member.id);
-                                } else {
-                                  current.add(member.id);
-                                }
-                                field.onChange(Array.from(current));
-                              }}
-                              className="flex items-center justify-between px-4"
+        <ScrollArea className="h-[calc(100vh-180px)] px-6 pb-6">
+          <div className="grid grid-cols-[100px_1fr] gap-y-4 gap-x-6 items-start">
+            {/* Task Name */}
+            <Label htmlFor="task-title" className="text-muted-foreground font-normal pt-3">
+              Task title
+            </Label>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input
+                      {...field}
+                      id="task-title"
+                      placeholder="Type here"
+                      className="border-none shadow-none hover:bg-prussian-blue/5 focus-visible:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+            {/* Status */}
+            <Label htmlFor="task-status" className="text-muted-foreground font-normal pt-3">
+              Status
+            </Label>
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <div className="group flex gap-2 items-center">
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger
+                          id="task-status"
+                          className="w-full [&_svg]:hidden border-none shadow-none hover:bg-prussian-blue/5 data-[state=open]:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out group-hover:bg-prussian-blue/5"
+                        >
+                          {field.value ? (
+                            <SelectValue placeholder="Select status" />
+                          ) : (
+                            <p className="text-muted-foreground">Select status</p>
+                          )}
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {["todo", "in_progress", "review", "done", "canceled"].map((status) => (
+                          <SelectItem key={status} value={status}>
+                            <Badge
+                              variant="outline"
+                              className={cn("rounded-md", pickStatusColor(status))}
                             >
-                              <div className="flex items-center gap-2">
-                                <Avatar className="h-8 w-8">
-                                  <AvatarImage
-                                    className="object-cover"
-                                    src={member.avatar_url}
-                                    alt={member.full_name}
-                                  />
-                                  <AvatarFallback style={pickAvatarColor(member.full_name)}>
-                                    {getInitials(member.full_name)}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span>{member.full_name}</span>
-                              </div>
-                              {field.value?.includes(member.id) && (
-                                <Check className="h-4 w-4 text-prussian-blue" />
-                              )}
-                            </CommandItem>
-                          ))}
-                        </ScrollArea>
-                      </CommandGroup>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-
-          {/* Due Date */}
-          <Label htmlFor="task-due-date" className="text-muted-foreground font-normal pt-3">
-            Due date
-          </Label>
-          <FormField
-            control={form.control}
-            name="due_date"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <div className="group flex gap-2 items-center">
+                              {capitalCase(status)}
+                            </Badge>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {field.value && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 w-9 hover:bg-prussian-blue/5 transition-colors duration-200 ease-in-out"
+                        onClick={() => field.onChange(null)}
+                      >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Clear status</span>
+                      </Button>
+                    )}
+                  </div>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+            {/* Priority */}
+            <Label htmlFor="task-priority" className="text-muted-foreground font-normal pt-3">
+              Priority
+            </Label>
+            <FormField
+              control={form.control}
+              name="priority"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <div className="group flex gap-2 items-center">
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger
+                          id="task-priority"
+                          className="w-full [&_svg]:hidden border-none shadow-none hover:bg-prussian-blue/5 data-[state=open]:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out group-hover:bg-prussian-blue/5"
+                        >
+                          {field.value ? (
+                            <SelectValue placeholder="Select status" />
+                          ) : (
+                            <p className="text-muted-foreground">Select status</p>
+                          )}
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {["low", "medium", "high"].map((priority) => (
+                          <SelectItem key={priority} value={priority}>
+                            <Badge
+                              variant="outline"
+                              className={cn("rounded-md", pickPriorityColor(priority))}
+                            >
+                              {capitalCase(priority)}
+                            </Badge>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {field.value && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 w-9 hover:bg-prussian-blue/5 transition-colors duration-200 ease-in-out"
+                        onClick={() => field.onChange(null)}
+                      >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Clear priority</span>
+                      </Button>
+                    )}
+                  </div>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+            {/* Assignees */}
+            <Label htmlFor="task-assignees" className="text-muted-foreground font-normal pt-3">
+              Assignees
+            </Label>
+            <FormField
+              control={form.control}
+              name="assignees"
+              render={({ field }) => (
+                <FormItem className="w-full">
                   <Popover>
                     <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          id="task-due-date"
-                          variant="outline"
-                          className={cn(
-                            "flex-1 p-3 font-normal justify-start border-none shadow-none hover:bg-prussian-blue/5 data-[state=open]:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out group-hover:bg-prussian-blue/5",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? formatDateShort(field.value) : "Select date"}
-                        </Button>
-                      </FormControl>
+                      <Button
+                        id="task-assignees"
+                        variant="outline"
+                        role="combobox"
+                        className="flex items-center flex-wrap h-fit px-3 font-normal justify-start w-full border-none shadow-none hover:bg-prussian-blue/5 data-[state=open]:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out group-hover:bg-prussian-blue/5"
+                      >
+                        {field.value.length > 0 ? (
+                          <div className="flex flex-wrap gap-2 w-full">
+                            {field.value.map((assigneeId) => {
+                              const member = projectMembers.find((m) => m.id === assigneeId);
+
+                              return (
+                                <div
+                                  key={member.id}
+                                  className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs bg-mustard/50 max-w-2/5"
+                                >
+                                  <Avatar className="h-6 w-6">
+                                    <AvatarImage
+                                      className="object-cover"
+                                      src={member.avatar_url}
+                                      alt={member.full_name}
+                                    />
+                                    <AvatarFallback style={pickAvatarColor(member.full_name)}>
+                                      {getInitials(member.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span className="truncate">{member.full_name}</span>
+                                  <div
+                                    className="h-4 w-4 p-0 hover:text-prussian-blue cursor-pointer"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      field.onChange(field.value.filter((id) => id !== member.id));
+                                    }}
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground">Select assignees</p>
+                        )}
+                      </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-fit p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => task?.created_at && date < new Date(task.created_at)}
-                        initialFocus
-                      />
+                    <PopoverContent className="w-[300px] p-0" onWheel={(e) => e.stopPropagation()}>
+                      <Command>
+                        <CommandInput placeholder={"Search members"} />
+                        <CommandEmpty>No members found.</CommandEmpty>
+                        <CommandGroup>
+                          <ScrollArea className="max-h-[300px] overflow-y-auto">
+                            {availableMembers?.map((member) => (
+                              <CommandItem
+                                key={member.id}
+                                onSelect={() => {
+                                  const current = new Set(field.value);
+                                  if (current.has(member.id)) {
+                                    current.delete(member.id);
+                                  } else {
+                                    current.add(member.id);
+                                  }
+                                  field.onChange(Array.from(current));
+                                }}
+                                className="flex items-center justify-between px-4"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Avatar className="h-8 w-8">
+                                    <AvatarImage
+                                      className="object-cover"
+                                      src={member.avatar_url}
+                                      alt={member.full_name}
+                                    />
+                                    <AvatarFallback style={pickAvatarColor(member.full_name)}>
+                                      {getInitials(member.full_name)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span>{member.full_name}</span>
+                                </div>
+                                {field.value?.includes(member.id) && (
+                                  <Check className="h-4 w-4 text-prussian-blue" />
+                                )}
+                              </CommandItem>
+                            ))}
+                          </ScrollArea>
+                        </CommandGroup>
+                      </Command>
                     </PopoverContent>
                   </Popover>
-                  {field.value && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-9 w-9 hover:bg-prussian-blue/5 transition-colors duration-200 ease-in-out"
-                      onClick={() => field.onChange(null)}
-                    >
-                      <X className="h-4 w-4" />
-                      <span className="sr-only">Clear due date</span>
-                    </Button>
-                  )}
-                </div>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-
-          {/* Completed At */}
-          <Label htmlFor="task-completed-at" className="text-muted-foreground font-normal pt-3">
-            Completed at
-          </Label>
-          <FormField
-            control={form.control}
-            name="completed_at"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <div className="group flex gap-2 items-center">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          id="task-completed-at"
-                          variant="outline"
-                          className={cn(
-                            "flex-1 p-3 font-normal justify-start border-none shadow-none hover:bg-prussian-blue/5 data-[state=open]:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out group-hover:bg-prussian-blue/5",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          {field.value ? formatDateShort(field.value) : "Select date"}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-fit p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => task?.created_at && date < new Date(task.created_at)}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  {field.value && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-9 w-9 hover:bg-prussian-blue/5 transition-colors duration-200 ease-in-out"
-                      onClick={() => field.onChange(null)}
-                    >
-                      <X className="h-4 w-4" />
-                      <span className="sr-only">Clear completed at</span>
-                    </Button>
-                  )}
-                </div>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-
-          {/* Description */}
-          <Label htmlFor="task-description" className="text-muted-foreground font-normal pt-3">
-            Description
-          </Label>
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Textarea
-                    {...field}
-                    id="task-description"
-                    placeholder="Type here"
-                    className="min-h-36 max-h-64 border-none shadow-none hover:bg-prussian-blue/5 focus-visible:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out"
-                  />
-                </FormControl>
-                <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+            {/* Due Date */}
+            <Label htmlFor="task-due-date" className="text-muted-foreground font-normal pt-3">
+              Due date
+            </Label>
+            <FormField
+              control={form.control}
+              name="due_date"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <div className="group flex gap-2 items-center">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            id="task-due-date"
+                            variant="outline"
+                            className={cn(
+                              "flex-1 p-3 font-normal justify-start border-none shadow-none hover:bg-prussian-blue/5 data-[state=open]:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out group-hover:bg-prussian-blue/5",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? formatDateShort(field.value) : "Select date"}
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-fit p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            task?.created_at &&
+                            date < new Date(task.created_at).setHours(0, 0, 0, 0)
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    {field.value && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 w-9 hover:bg-prussian-blue/5 transition-colors duration-200 ease-in-out"
+                        onClick={() => field.onChange(null)}
+                      >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Clear due date</span>
+                      </Button>
+                    )}
+                  </div>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+            {/* Completed At */}
+            <Label htmlFor="task-completed-at" className="text-muted-foreground font-normal pt-3">
+              Completed at
+            </Label>
+            <FormField
+              control={form.control}
+              name="completed_at"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <div className="group flex gap-2 items-center">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            id="task-completed-at"
+                            variant="outline"
+                            className={cn(
+                              "flex-1 p-3 font-normal justify-start border-none shadow-none hover:bg-prussian-blue/5 data-[state=open]:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out group-hover:bg-prussian-blue/5",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? formatDateShort(field.value) : "Select date"}
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-fit p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            task?.created_at &&
+                            date < new Date(task.created_at).setHours(0, 0, 0, 0)
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    {field.value && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 w-9 hover:bg-prussian-blue/5 transition-colors duration-200 ease-in-out"
+                        onClick={() => field.onChange(null)}
+                      >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Clear completed at</span>
+                      </Button>
+                    )}
+                  </div>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+            {/* Description */}
+            <Label htmlFor="task-description" className="text-muted-foreground font-normal pt-3">
+              Description
+            </Label>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Textarea
+                      {...field}
+                      id="task-description"
+                      placeholder="Type here"
+                      className="min-h-36 max-h-64 border-none shadow-none hover:bg-prussian-blue/5 focus-visible:bg-blue-green/15 focus-visible:ring-0 transition-colors duration-200 ease-in-out"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
+                </FormItem>
+              )}
+            />
+          </div>
+        </ScrollArea>
+        <div className="absolute bottom-6 right-6 flex justify-end gap-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+            className="bg-prussian-blue hover:bg-prussian-blue/90"
+          >
+            Confirm
+          </Button>
         </div>
       </form>
     </Form>

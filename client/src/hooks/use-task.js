@@ -63,7 +63,7 @@ export function TaskProvider({ children }) {
   // Initial fetch
   useEffect(() => {
     fetchMyAssignedTasks();
-  }, [fetchMyAssignedTasks]);
+  }, [tasks, fetchMyAssignedTasks]);
 
   // Create a new task
   const handleCreateTask = useCallback(async (taskData) => {

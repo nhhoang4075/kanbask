@@ -82,7 +82,15 @@ const updateOneTeamById = async (teamId, updateData, actorId) => {
     }
 
     if (allowedData.join_policy && allowedData.join_policy === "auto") {
-      await teamModel.updateTeamJoinRequestsOfTeam(teamId, "rejected");
+      const requests = await teamModel.getManyTeamJoinRequestsOfTeam(teamId);
+
+      const pendingRequest = requests.filter((t) => t.status === "pending");
+
+      await Promise.all(
+        pendingRequest.map(
+          async (r) => await teamModel.updateTeamJoinRequestStatus(r.id, "rejected")
+        )
+      );
     }
 
     await teamModel.updateOneTeamById(teamId, allowedData);

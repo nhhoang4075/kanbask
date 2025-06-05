@@ -217,19 +217,6 @@ const updateTeamJoinRequestStatus = async (request_id, status) => {
   }
 };
 
-const updateTeamJoinRequestsOfTeam = async (team_id, status) => {
-  try {
-    const [request] = await db("team_join_requests")
-      .update({ status, updated_at: db.fn.now() })
-      .where({ team_id })
-      .returning("id");
-
-    return request?.id;
-  } catch (err) {
-    throw new Error(err);
-  }
-};
-
 export default {
   createOneTeam,
   getOneTeamById,
@@ -247,6 +234,5 @@ export default {
   getOneTeamJoinRequestById,
   getManyTeamJoinRequestsOfTeam,
   isTeamJoinRequestPending,
-  updateTeamJoinRequestStatus,
-  updateTeamJoinRequestsOfTeam
+  updateTeamJoinRequestStatus
 };

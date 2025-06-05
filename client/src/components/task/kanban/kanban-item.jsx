@@ -10,7 +10,6 @@ import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 import { cn, formatDate, capitalCase } from "@/lib/utils";
 
 export default function KanbanItem({ task, columnId }) {
-
   const handleDragStart = (e) => {
     e.dataTransfer.setData("taskId", task.id);
     e.dataTransfer.setData("columnId", columnId);
@@ -27,7 +26,7 @@ export default function KanbanItem({ task, columnId }) {
     >
       <CardContent className="px-4">
         <div className="mt-2 mb-4 space-y-1">
-          <div className="flex justify-between items-center gap-2">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
             <h4 className="text-md font-semibold truncate">{task.title}</h4>
             <div className="-mr-2">
               <TaskActions task={task} />

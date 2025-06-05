@@ -34,9 +34,11 @@ import { Input } from "@/components/ui/custom-input";
 import { Button } from "@/components/ui/button";
 import { getColumns } from "@/components/task/list/task-list-column";
 import { useTask } from "@/hooks/use-task";
+import { useProject } from "@/hooks/use-project";
 
 export default function TaskList() {
   const { tasks, handleReorderTask } = useTask();
+  const { selectedProject } = useProject();
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
@@ -124,6 +126,7 @@ export default function TaskList() {
           <Button
             size="sm"
             onClick={() => setIsCreateTaskSheetOpen(true)}
+            disabled={!selectedProject}
             className="flex flex-row items-center gap-2 bg-prussian-blue text-white hover:bg-prussian-blue/90"
           >
             <Plus className="w-4 h-4" />

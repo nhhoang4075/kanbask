@@ -29,20 +29,8 @@ export default function CreateTaskSheet({ isOpen, onOpenChange, initialValues })
           <SheetTitle className="text-3xl font-bold truncate">Untitled Task</SheetTitle>
         </SheetHeader>
         <SheetDescription className="px-6">Create a new task</SheetDescription>
-        <ScrollArea className="h-[calc(100vh-150px)] p-6">
+        <div className="py-6">
           <TaskDetailsForm onSubmit={handleSubmit} initialValues={initialValues} />
-        </ScrollArea>
-        <div className="absolute bottom-6 right-6 flex justify-end gap-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-          <Button
-            type="submit"
-            form="task-details-form"
-            className="bg-prussian-blue hover:bg-prussian-blue/90"
-          >
-            Confirm
-          </Button>
         </div>
       </SheetContent>
     </Sheet>

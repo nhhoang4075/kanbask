@@ -36,11 +36,11 @@ const login = async (req, res, next) => {
     const accessToken = jwtProvider.generateToken(
       userPayload,
       process.env.ACCESS_TOKEN_SECRET,
-      "30m"
+      "1h"
     );
 
     res.cookie("access_token", accessToken, {
-      maxAge: ms("30m"),
+      maxAge: ms("1h"),
       httpOnly: true,
       secure: true,
       sameSite: "none"
@@ -108,10 +108,10 @@ const refreshSession = async (req, res, next) => {
       email_verified: decodedRefreshToken.email_verified
     };
 
-    const accessToken = jwtProvider.generateToken(payload, process.env.ACCESS_TOKEN_SECRET, "30m");
+    const accessToken = jwtProvider.generateToken(payload, process.env.ACCESS_TOKEN_SECRET, "1h");
 
     res.cookie("access_token", accessToken, {
-      maxAge: ms("30m"),
+      maxAge: ms("1h"),
       httpOnly: true,
       secure: true,
       sameSite: "none"

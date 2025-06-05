@@ -40,7 +40,11 @@ const taskFormSchema = z.object({
     .min(1, "Title is required")
     .max(255, "Title must be less than 255 characters")
     .trim(),
-  description: z.string().max(1000, "Description must be less than 1000 characters").nullable(),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .trim()
+    .nullable(),
   status: z.enum(["todo", "in_progress", "done", "review", "canceled", ""]).nullable(),
   priority: z.enum(["low", "medium", "high", ""]).nullable(),
   assignees: z.array(z.string().uuid()),

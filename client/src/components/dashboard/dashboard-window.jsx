@@ -1,14 +1,21 @@
 "use client";
 
-import React from "react";
+import { useEffect } from "react";
 
 import WorkloadCard from "@/components/dashboard/workload-card";
 import PriorityCard from "@/components/dashboard/priority-card";
 import ProgressCard from "@/components/dashboard/progress-card";
 import SummaryCard from "@/components/dashboard/summary-card";
 import TasksCard from "@/components/dashboard/tasks-card";
+import { useTask } from "@/hooks/use-task";
 
 export default function DashboardWindow() {
+  const { fetchMyAssignedTasks } = useTask();
+
+  useEffect(() => {
+    fetchMyAssignedTasks();
+  }, []);
+
   return (
     <div className="p-4">
       <div className="flex flex-col gap-4 min-h-0 overflow-scroll">

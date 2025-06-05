@@ -213,7 +213,7 @@ const uploadAttachmentsToTask = async (taskId, files, actorId) => {
     }
 
     if (!files || files.length == 0) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, "Files not found");
+      throw new ApiError(StatusCodes.BAD_REQUEST, "No file provided");
     }
 
     const attachmentIds = [];
@@ -244,7 +244,7 @@ const uploadAttachmentsToTask = async (taskId, files, actorId) => {
     const attachments = await Promise.all(
       attachmentIds.map(async (id) => {
         const attachment = await attachmentModel.getOneTaskAttachmentById(taskId, id);
-        const url = await supabaseProvider.generateUrl(attachment.supabase_path);
+        const url = await supabaseProvider.generateSignedUrl(attachment.supabase_path);
 
         delete attachment.supabase_path;
 
@@ -276,7 +276,7 @@ const getManyAttachmentsByTaskId = async (taskId, actorId) => {
 
     const formattedAttachments = await Promise.all(
       attachments.map(async (a) => {
-        const url = await supabaseProvider.generateUrl(a.supabase_path);
+        const url = await supabaseProvider.generateSignedUrl(a.supabase_path);
 
         delete a.supabase_path;
 

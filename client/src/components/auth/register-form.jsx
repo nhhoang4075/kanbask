@@ -36,17 +36,24 @@ const RegisterSchema = z
     full_name: z
       .string({ required_error: "Full name is required" })
       .min(1, "Full name is required")
+      .max(100, "Full name must be less than 100 characters")
       .trim(),
     email: z
       .string({ required_error: "Email is required" })
       .min(1, "Email is required")
+      .max(100, "Email must be less than 100 characters")
       .email("Invalid email")
       .trim(),
     password: z
       .string({ required_error: "Password must have at least 8 characters" })
       .min(8, "Password must have at least 8 characters")
+      .max(255, "Password must be less than 255 characters")
       .trim(),
-    confirm: z.string().min(1, "Confirm password is required")
+    confirm: z
+      .string()
+      .min(1, "Confirm password is required")
+      .max(255, "Password must be less than 255 characters")
+      .trim()
   })
   .refine((data) => data.password === data.confirm, {
     message: "Passwords don't match",

@@ -6,7 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 export default function Toast() {
   return (
     <ToastContainer
-      position="top-center"
+      position="top-right"
       autoClose={3000}
       hideProgressBar={false}
       newestOnTop={false}
@@ -15,7 +15,7 @@ export default function Toast() {
       pauseOnFocusLoss
       draggable
       pauseOnHover
-      theme="light" // Hoặc 'dark' hoặc 'colored'
+      theme="light"
     />
   );
 }

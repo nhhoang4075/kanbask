@@ -38,11 +38,13 @@ const loginSchema = z.object({
   email: z
     .string({ required_error: "Email is required" })
     .min(1, "Email is required")
+    .max(100, "Email must be less than 100 characters")
     .email("Invalid email")
     .trim(),
   password: z
     .string({ required_error: "Password must have at least 8 characters" })
     .min(8, "Password must have at least 8 characters")
+    .max(255, "Password must be less than 255 characters")
     .trim()
 });
 

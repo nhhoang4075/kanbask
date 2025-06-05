@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import UserModel from "../models/user-model.js";
 import ApiError from "../../utils/api-error.js";
 import embeddingProvider from "../../config/embedding-provider.js";
+import supabaseProvider from "../../config/supabase-provider.js";
 import { sanitizeUser, sanitizeAllowedFields } from "../../utils/helper.js";
 
 const getOneUserById = async (userId) => {
@@ -36,12 +37,7 @@ const getOneUserByEmail = async (userEmail) => {
 
 const updateUserProfile = async (userId, data) => {
   try {
-    const allowedData = sanitizeAllowedFields(data, [
-      "full_name",
-      "first_name",
-      "last_name",
-      "avatar_url"
-    ]);
+    const allowedData = sanitizeAllowedFields(data, ["full_name", "first_name", "last_name"]);
 
     if (Object.keys(allowedData).length === 0) {
       throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "No allowed field to update");
@@ -85,6 +81,25 @@ const changeUserPassword = async (userId, oldPassword, newPassword) => {
   }
 };
 
+export const uploadUserAvatar = async (userId, file) => {
+  try {
+    if (!file) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "No file provided");
+    }
+
+    const path = `avatars/${userId}`;
+    const metadata = await supabaseProvider.uploadToStorage(file, path);
+
+    const publicUrl = supabaseProvider.generatePublicUrl(metadata.supabase_path);
+
+    await UserModel.updateOneUserById(userId, { avatar_url: publicUrl });
+
+    return publicUrl;
+  } catch (err) {
+    throw err;
+  }
+};
+
 const deleteUserAccount = async (userId) => {
   try {
     await UserModel.deleteOneUserById(userId);
@@ -99,6 +114,7 @@ export default {
   getOneUserById,
   getOneUserByEmail,
   updateUserProfile,
+  uploadUserAvatar,
   changeUserPassword,
-  deleteUserAccount,
+  deleteUserAccount
 };

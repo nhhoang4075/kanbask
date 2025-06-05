@@ -44,7 +44,7 @@ export default function CommentItem({ comment }) {
   return (
     <div className="flex gap-4">
       <Avatar className="h-8 w-8 flex-shrink-0">
-        <AvatarImage src={comment.commenter_avatar_url} />
+        <AvatarImage src={comment.commenter_avatar_url} className="object-cover"/>
         <AvatarFallback style={pickAvatarColor(comment.commenter_full_name)}>
           {getInitials(comment.commenter_full_name)}
         </AvatarFallback>

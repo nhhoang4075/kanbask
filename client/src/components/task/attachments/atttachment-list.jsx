@@ -60,6 +60,7 @@ export default function AttachmentList({ task }) {
                           <AvatarImage
                             src={attachment.attacher_avatar_url}
                             alt={attachment.attacher_full_name}
+                            className="object-cover"
                           />
                           <AvatarFallback
                             className="text-[8px]"

@@ -45,6 +45,8 @@ export default function SearchButton({ className, ...props }) {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (!e.key) return;
+
       const key = e.key.toLowerCase();
       const hotkey = isMac ? e.metaKey && key === "k" : e.ctrlKey && key === "k";
       if (hotkey) {

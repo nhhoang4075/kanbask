@@ -9,7 +9,6 @@ const validateUpdateProfile = validate(
         full_name: z.string().max(100).optional(),
         first_name: z.string().max(100).optional(),
         last_name: z.string().max(100).optional(),
-        avatar_url: z.string().url().optional()
       })
       .strict(),
     params: z.object({}).optional(),

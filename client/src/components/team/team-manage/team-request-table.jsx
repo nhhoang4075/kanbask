@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useTeam } from "@/hooks/use-team";

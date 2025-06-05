@@ -27,6 +27,19 @@ const getTasksOfProject = async (req, res, next) => {
   }
 };
 
+const getMyAssignedTasks = async (req, res, next) => {
+  try {
+    const tasks = await taskService.getAssignedTasksByUserId(req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: { tasks }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const updateOneTaskById = async (req, res, next) => {
   try {
     const taskId = await taskService.updateOneTaskById(req.params.id, req.body, req.user.id);
@@ -55,11 +68,29 @@ const deleteOneTaskById = async (req, res, next) => {
 
 const uploadAttachmentsToTask = async (req, res, next) => {
   try {
-    const taskId = await taskService.uploadAttachmentsToTask(req.params.id, req.files, req.user.id);
+    const attachments = await taskService.uploadAttachmentsToTask(
+      req.params.id,
+      req.files,
+      req.user.id
+    );
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Upload successfully attachments to task with id ${taskId}`
+      // message: `Upload successfully attachments to task with id ${req.params.id}`,
+      data: { attachments }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getAttachmentsOfTask = async (req, res, next) => {
+  try {
+    const attachments = await taskService.getManyAttachmentsByTaskId(req.params.id, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: { attachments }
     });
   } catch (error) {
     next(error);
@@ -83,29 +114,13 @@ const deleteAttachmentsFromTask = async (req, res, next) => {
   }
 };
 
-const getAttachmentUrlOfTask = async (req, res, next) => {
-  try {
-    const url = await taskService.getAttachmentUrlOfTask(
-      req.params.id,
-      req.query.attachment_id,
-      req.user.id
-    );
-
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: { url }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 export default {
   createOneTask,
   getTasksOfProject,
+  getMyAssignedTasks,
   updateOneTaskById,
   deleteOneTaskById,
   uploadAttachmentsToTask,
-  deleteAttachmentsFromTask,
-  getAttachmentUrlOfTask
+  getAttachmentsOfTask,
+  deleteAttachmentsFromTask
 };

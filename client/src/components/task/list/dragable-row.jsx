@@ -1,10 +1,12 @@
+"use client";
+
 import { flexRender } from "@tanstack/react-table";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 import { TableCell, TableRow } from "@/components/ui/table";
 
-export default function DragableRow({ row, reorderRow }) {
+export default function DragableRow({ row }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: row.original.id
   });
@@ -23,11 +25,13 @@ export default function DragableRow({ row, reorderRow }) {
       ref={setNodeRef}
       style={style}
       data-state={row.getIsSelected() && "selected"}
-      className="cursor-pointer"
-      // onClick={() => handleViewDetails(row.original)}
     >
       {row.getVisibleCells().map((cell, index) => (
-        <TableCell key={cell.id} {...(index === 0 ? { ...attributes, ...listeners } : {})}>
+        <TableCell
+          key={cell.id}
+          {...(index === 0 ? { ...attributes, ...listeners } : {})}
+          className="max-w-50 truncate"
+        >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </TableCell>
       ))}

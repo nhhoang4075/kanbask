@@ -48,7 +48,21 @@ const getOneTaskById = async (id) => {
         "v.full_name as creator_full_name",
         "v.avatar_url as creator_avatar_url",
         "t.created_at",
-        "t.updated_at"
+        "t.updated_at",
+        db.raw(
+          `(
+            SELECT COUNT(ta.attachment_id)
+            FROM task_attachments ta
+            WHERE ta.task_id = t.id
+          )::int AS attachment_count`
+        ),
+        db.raw(
+          `(
+            SELECT COUNT(tc.id)
+            FROM task_comments tc
+            WHERE tc.task_id = t.id
+          )::int AS comment_count`
+        )
       )
       .where({ "t.id": id })
       .limit(1);
@@ -79,10 +93,52 @@ const getManyTasksByProjectId = async (project_id) => {
         "v.full_name as creator_full_name",
         "v.avatar_url as creator_avatar_url",
         "t.created_at",
-        "t.updated_at"
+        "t.updated_at",
+        db.raw(
+          `(
+            SELECT COUNT(ta.attachment_id)
+            FROM task_attachments ta
+            WHERE ta.task_id = t.id
+          )::int AS attachment_count`
+        ),
+        db.raw(
+          `(
+            SELECT COUNT(tc.id)
+            FROM task_comments tc
+            WHERE tc.task_id = t.id
+          )::int AS comment_count`
+        )
       )
       .where({ "t.project_id": project_id })
       .orderBy("t.position", "asc");
+
+    return tasks;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const getAssignedTasksByUserId = async (user_id) => {
+  try {
+    const tasks = await db("tasks AS t")
+      .join("task_assignees AS ta", "ta.task_id", "=", "t.id")
+      .join("projects AS p", "p.id", "=", "t.project_id")
+      .select(
+        "t.id",
+        "t.project_id",
+        "p.team_id",
+        "t.title",
+        "t.status",
+        "t.priority",
+        "t.description",
+        "t.due_date",
+        "ta.assigned_at",
+        "t.completed_at",
+        "t.created_at",
+        "t.updated_at"
+      )
+      .where("ta.user_id", user_id)
+      .orderBy("ta.assigned_at", "asc");
 
     return tasks;
   } catch (err) {
@@ -193,6 +249,7 @@ export default {
   createOneTask,
   getOneTaskById,
   getManyTasksByProjectId,
+  getAssignedTasksByUserId,
   updateOneTaskById,
   deleteOneTaskById,
   getAssigneesOfTask,

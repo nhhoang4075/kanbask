@@ -78,7 +78,7 @@ const updateOneTaskCommentById = async (id, updateData, actorId) => {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Comment not found");
     }
 
-    if (comment.user_id !== actorId) {
+    if (comment.commenter_id !== actorId) {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only author of comment can access this");
     }
 
@@ -104,7 +104,7 @@ const deleteOneTaskCommentById = async (id, actorId) => {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Comment not found");
     }
 
-    if (comment.user_id !== actorId) {
+    if (comment.commenter_id !== actorId) {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only author of comment can access this");
     }
 

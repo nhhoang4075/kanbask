@@ -14,7 +14,7 @@ export function getInitials(fullName) {
 }
 
 const AVATAR_COLORS = [
-  { background: "linear-gradient(135deg, #FF37bC 0%, #FF4B2B 100%)", color: "#FFF5F8" },
+  { background: "linear-gradient(135deg, #FF37BC 0%, #FF4B2B 100%)", color: "#FFF5F8" },
   { background: "linear-gradient(135deg, #00C9FF 0%, #92FE9D 100%)", color: "#003E4F" },
   { background: "linear-gradient(135deg, #7F00FF 0%, #E100FF 100%)", color: "#F3EFFF" },
   { background: "linear-gradient(135deg, #E7770E 0%, #FFD200 100%)", color: "#3E2E00" },

@@ -3,7 +3,6 @@
 import { useMemo } from "react";
 
 import NavConversationItem from "@/components/chat/nav-conversation-item";
-import Spinner from "@/components/app/spinner";
 import NotFound from "@/components/app/not-found";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";

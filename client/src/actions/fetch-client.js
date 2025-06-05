@@ -27,18 +27,18 @@ async function api(endpoint, options = {}) {
 }
 
 // HTTP method helpers
-export async function get(endpoint) {
-  return api(endpoint, { method: "GET" });
+export async function get(endpoint, options = {}) {
+  return api(endpoint, { method: "GET", ...options });
 }
 
-export async function post(endpoint, data) {
-  return api(endpoint, { method: "POST", body: data });
+export async function post(endpoint, data, options = {}) {
+  return api(endpoint, { method: "POST", body: data, ...options });
 }
 
-export async function put(endpoint, data) {
-  return api(endpoint, { method: "PUT", body: data });
+export async function put(endpoint, data, options = {}) {
+  return api(endpoint, { method: "PUT", body: data, ...options });
 }
 
-export async function del(endpoint, data) {
-  return api(endpoint, { method: "DELETE", body: data });
+export async function del(endpoint, data, options = {}) {
+  return api(endpoint, { method: "DELETE", body: data, ...options });
 }

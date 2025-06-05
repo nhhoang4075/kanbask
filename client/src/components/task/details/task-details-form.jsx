@@ -16,7 +16,7 @@ import {
   CommandItem
 } from "@/components/ui/command";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
@@ -48,7 +48,16 @@ const taskFormSchema = z.object({
   completed_at: z.coerce.date().nullable()
 });
 
-export default function TaskDetailsForm({ task, onSubmit }) {
+export default function TaskDetailsForm({ task, onSubmit, initialValues }) {
+  // If initialValues are provided, use them to set default values
+  if (initialValues) {
+    task = {
+      assignees: [],
+      ...task,
+      ...initialValues
+    };
+  }
+
   const { projectMembers } = useProject();
 
   const availableMembers = projectMembers?.filter(
@@ -62,7 +71,7 @@ export default function TaskDetailsForm({ task, onSubmit }) {
       description: task?.description || "",
       status: task?.status || null,
       priority: task?.priority || null,
-      assignees: task?.assignees.map((assignee) => assignee.user_id) || [],
+      assignees: task?.assignees.map((a) => a.user_id) || [],
       due_date: task?.due_date ? new Date(task.due_date) : null,
       completed_at: task?.completed_at || null
     }
@@ -124,7 +133,7 @@ export default function TaskDetailsForm({ task, onSubmit }) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {["todo", "in_progress", "done", "review", "canceled"].map((status) => (
+                      {["todo", "in_progress", "review", "done", "canceled"].map((status) => (
                         <SelectItem key={status} value={status}>
                           <Badge
                             variant="outline"
@@ -233,7 +242,7 @@ export default function TaskDetailsForm({ task, onSubmit }) {
                             return (
                               <div
                                 key={member.id}
-                                className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs bg-mustard/60 max-w-2/5"
+                                className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs bg-mustard/50 max-w-2/5"
                               >
                                 <Avatar className="h-6 w-6">
                                   <AvatarImage

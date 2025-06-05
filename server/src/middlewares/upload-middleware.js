@@ -10,6 +10,8 @@ const defaultAllowedFileTypes =
   /jpeg|jpg|png|gif|pdf|doc|docx|xls|xlsx|ppt|pptx|zip|rar|mp4|mov|avi|txt|csv/;
 
 const customFileFilter = (req, file, cb) => {
+  file.originalname = Buffer.from(file.originalname, "latin1").toString("utf8");
+
   const isValidMimeType = defaultAllowedFileTypes.test(file.mimetype);
   const isValidExtname = defaultAllowedFileTypes.test(
     path.extname(file.originalname).toLowerCase()
@@ -34,7 +36,7 @@ const anyFileFilter = (req, file, cb) => {
 
 const uploadAttachment = multer({
   storage: storage,
-  fileFilter: anyFileFilter,
+  fileFilter: customFileFilter,
   limits: { fileSize: 50 * 1024 * 1024 }
 });
 

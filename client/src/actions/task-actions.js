@@ -8,6 +8,10 @@ export async function getTasksOfProject(projectId) {
   return get(`/tasks?project_id=${projectId}`);
 }
 
+export async function getMyAssignedTasks() {
+  return get(`/tasks/me`);
+}
+
 export async function updateTask(taskId, data) {
   return put(`/tasks/${taskId}`, data);
 }
@@ -23,11 +27,15 @@ export async function uploadTaskAttachments(taskId, files) {
     formData.append("files", file);
   }
 
-  return post(`/tasks/${taskId}/attachments`, formData);
+  return post(`/tasks/${taskId}/attachments`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data"
+    }
+  });
 }
 
-export async function getTaskAttachmentUrl(taskId, attachmentId) {
-  return get(`/tasks/${taskId}/attachments?attachment_id=${attachmentId}`);
+export async function getTaskAttachments(taskId) {
+  return get(`/tasks/${taskId}/attachments`);
 }
 
 export async function deleteTaskAttachments(taskId, attachmentIds) {

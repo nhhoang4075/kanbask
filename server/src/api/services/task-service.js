@@ -59,7 +59,7 @@ const createOneTask = async (data, actorId) => {
     const task = await taskModel.getOneTaskById(taskId);
     const taskAssignees = await taskModel.getAssigneesOfTask(taskId);
 
-    const formattedTask = { ...task, assignees: taskAssignees, attachments: [] };
+    const formattedTask = { ...task, assignees: taskAssignees };
 
     return formattedTask;
   } catch (err) {
@@ -79,34 +79,26 @@ const getManyTasksByProjectId = async (projectId, actorId) => {
 
     const formattedTasks = await Promise.all(
       tasks.map(async (t) => {
-        const [assignees, attachments] = await Promise.all([
-          taskModel.getAssigneesOfTask(t.id),
-          attachmentModel.getManyAttachmentsByTaskId(t.id)
-        ]);
-
-        const formattedAttachments = await Promise.all(
-          attachments.map(async (a) => ({
-            id: a.id,
-            original_name: a.original_name,
-            mime_type: a.mime_type,
-            size_bytes: a.size_bytes,
-            attacher_id: a.attacher_id,
-            attacher_full_name: a.attacher_full_name,
-            attacher_avatar_url: a.attacher_avatar_url,
-            attached_at: a.attached_at
-            // url: await supabaseProvider.generateUrl(a.supabase_path)
-          }))
-        );
+        const assignees = await taskModel.getAssigneesOfTask(t.id);
 
         return {
           ...t,
-          assignees,
-          attachments: formattedAttachments
+          assignees
         };
       })
     );
 
     return formattedTasks;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getAssignedTasksByUserId = async (actorId) => {
+  try {
+    const tasks = await taskModel.getAssignedTasksByUserId(actorId);
+
+    return tasks;
   } catch (err) {
     throw err;
   }
@@ -172,14 +164,6 @@ const updateOneTaskById = async (id, data, actorId) => {
       });
     }
 
-    if (allowedData.assignees && allowedData.assignees.length > 0) {
-      await notifyAssigneesOfTask(
-        task.id,
-        "Task Assigned",
-        `You have been assigned to a task: ${task.title}`
-      );
-    }
-
     return task.id;
   } catch (err) {
     throw err;
@@ -232,6 +216,8 @@ const uploadAttachmentsToTask = async (taskId, files, actorId) => {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Files not found");
     }
 
+    const attachmentIds = [];
+
     await Promise.all(
       files.map(async (file) => {
         const path = `tasks/${actorId}`;
@@ -241,6 +227,8 @@ const uploadAttachmentsToTask = async (taskId, files, actorId) => {
           ...metadata,
           uploaded_by: actorId
         });
+
+        attachmentIds.push(attachmentId);
 
         await attachmentModel.linkOneAttachmentToTask(task.id, attachmentId, actorId);
       })
@@ -253,7 +241,50 @@ const uploadAttachmentsToTask = async (taskId, files, actorId) => {
       details: {}
     });
 
-    return task.id;
+    const attachments = await Promise.all(
+      attachmentIds.map(async (id) => {
+        const attachment = await attachmentModel.getOneTaskAttachmentById(taskId, id);
+        const url = await supabaseProvider.generateUrl(attachment.supabase_path);
+
+        delete attachment.supabase_path;
+
+        return { ...attachment, url };
+      })
+    );
+
+    return attachments;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getManyAttachmentsByTaskId = async (taskId, actorId) => {
+  try {
+    const task = await taskModel.getOneTaskById(taskId);
+
+    if (!task) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
+    }
+
+    const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
+    }
+
+    const attachments = await attachmentModel.getManyAttachmentsByTaskId(taskId);
+
+    const formattedAttachments = await Promise.all(
+      attachments.map(async (a) => {
+        const url = await supabaseProvider.generateUrl(a.supabase_path);
+
+        delete a.supabase_path;
+
+        return { ...a, url };
+      })
+    );
+
+    return formattedAttachments;
   } catch (err) {
     throw err;
   }
@@ -292,30 +323,6 @@ const deleteAttachmentsFromTask = async (taskId, attachmentIds, actorId) => {
   }
 };
 
-const getAttachmentUrlOfTask = async (taskId, attachmentId, actorId) => {
-  try {
-    const task = await taskModel.getOneTaskById(taskId);
-
-    if (!task) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
-    }
-
-    const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
-
-    if (!isProjectMember) {
-      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
-    }
-
-    const attachment = await attachmentModel.getOneAttachmentById(attachmentId);
-
-    const url = await supabaseProvider.generateUrl(attachment.supabase_path);
-
-    return url;
-  } catch (err) {
-    throw err;
-  }
-};
-
 const notifyAssigneesOfTask = async (taskId, title, content) => {
   try {
     const assignees = await taskModel.getAssigneesOfTask(taskId);
@@ -341,9 +348,10 @@ const notifyAssigneesOfTask = async (taskId, title, content) => {
 export default {
   createOneTask,
   getManyTasksByProjectId,
+  getAssignedTasksByUserId,
   updateOneTaskById,
   deleteOneTaskById,
   uploadAttachmentsToTask,
-  deleteAttachmentsFromTask,
-  getAttachmentUrlOfTask
+  getManyAttachmentsByTaskId,
+  deleteAttachmentsFromTask
 };

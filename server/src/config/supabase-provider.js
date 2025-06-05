@@ -66,7 +66,7 @@ const generateUrl = async (path) => {
   try {
     const { data, error } = await supabase.storage
       .from(supabaseBucket)
-      .createSignedUrl(path, 60 * 5);
+      .createSignedUrl(path, 24 * 60 * 60);
 
     if (error) {
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Supabase error: ${error.message}`);

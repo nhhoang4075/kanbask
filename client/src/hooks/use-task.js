@@ -4,12 +4,10 @@ import { createContext, useContext, useState, useEffect, useCallback } from "rea
 
 import {
   getTasksOfProject,
+  getMyAssignedTasks,
   createTask,
   updateTask,
-  deleteTask,
-  uploadTaskAttachments,
-  getTaskAttachmentUrl,
-  deleteTaskAttachments
+  deleteTask
 } from "@/actions/task-actions";
 import { useProject } from "@/hooks/use-project";
 
@@ -23,6 +21,8 @@ export function TaskProvider({ children }) {
   const { selectedProject, projectMembers } = useProject();
 
   const [tasks, setTasks] = useState([]);
+  const [myAssignedTasks, setMyAssignedTasks] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -42,17 +42,35 @@ export function TaskProvider({ children }) {
     }
   }, [selectedProject]);
 
+  const fetchMyAssignedTasks = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getMyAssignedTasks();
+      setMyAssignedTasks(data.tasks);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Initial fetch
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchMyAssignedTasks();
+  }, [fetchMyAssignedTasks]);
 
   // Create a new task
   const handleCreateTask = useCallback(async (taskData) => {
     try {
       const newTaskData = await createTask(taskData);
 
-      setTasks((prev) => [newTaskData.task, ...prev]);
+      setTasks((prev) => [...prev, newTaskData.task]);
     } catch (err) {
       setError(err);
     }
@@ -62,38 +80,38 @@ export function TaskProvider({ children }) {
   const handleUpdateTask = useCallback(
     async (taskId, updates) => {
       try {
-        /**
-         * Optimistic update
-         * 1. Get the current task to preserve existing assignees
-         * 2. Get new assignees from project members
-         * 3. Filter out removed assignees and merge with new ones
-         * 4. Update the task with the new assignees
-         * 5. Call the updateTask action to update the task in the database
-         */
         // Get the current task to preserve existing assignees
         const currentTask = tasks.find((task) => task.id === taskId);
         const existingAssignees = currentTask?.assignees || [];
+        let updatedAssignees = existingAssignees;
 
-        // Get new assignees from project members
-        const newAssignees = projectMembers
-          .filter((member) => updates.assignees.includes(member.id))
-          .map((member) => ({
-            user_id: member.id,
-            full_name: member.full_name,
-            avatar_url: member.avatar_url,
-            assigned_at: new Date().toISOString()
-          }));
+        // Only update assignees if updates.assignees is present
+        if (updates.assignees) {
+          // ...existing assignee update logic...
+          let newAssignees = [];
+          if (updates.assignees.length !== 0) {
+            newAssignees = projectMembers
+              .filter((member) => updates.assignees.includes(member.id))
+              .map((member) => ({
+                user_id: member.id,
+                full_name: member.full_name,
+                avatar_url: member.avatar_url,
+                assigned_at: new Date().toISOString()
+              }));
 
-        // Filter out removed assignees and merge with new ones
-        const updatedAssignees = [
-          ...existingAssignees.filter((existing) => updates.assignees.includes(existing.user_id)),
-          ...newAssignees.filter(
-            (newAssignee) =>
-              !existingAssignees.some((existing) => existing.user_id === newAssignee.user_id)
-          )
-        ];
+            updatedAssignees = [
+              ...existingAssignees.filter((existing) =>
+                updates.assignees.includes(existing.user_id)
+              ),
+              ...newAssignees.filter(
+                (newAssignee) =>
+                  !existingAssignees.some((existing) => existing.user_id === newAssignee.user_id)
+              )
+            ];
+          }
+        }
 
-        // Optimistic update
+        // Optimistic update: always update the task with new fields
         setTasks((prev) =>
           prev.map((task) =>
             task.id === taskId
@@ -135,41 +153,15 @@ export function TaskProvider({ children }) {
     }
   }, []);
 
-  const handleUploadTaskAttachments = useCallback(async (taskId, files) => {
-    try {
-      await uploadTaskAttachments(taskId, files);
-    } catch (err) {
-      setError(err);
-    }
-  }, []);
-
-  const handleGetTaskAttachmentUrl = useCallback(async (taskId, attachmentId) => {
-    try {
-      await getTaskAttachmentUrl(taskId, attachmentId);
-    } catch (err) {
-      setError(err);
-    }
-  }, []);
-
-  const handleDeleteTaskAttachments = useCallback(async (taskId, attachmentIds) => {
-    try {
-      await deleteTaskAttachments(taskId, attachmentIds);
-    } catch (err) {
-      setError(err);
-    }
-  }, []);
-
   const contextValue = {
     tasks,
+    myAssignedTasks,
     loading,
     error,
     handleCreateTask,
     handleUpdateTask,
     handleDeleteTask,
-    handleReorderTask,
-    handleUploadTaskAttachments,
-    handleGetTaskAttachmentUrl,
-    handleDeleteTaskAttachments
+    handleReorderTask
   };
 
   return <TaskContext.Provider value={contextValue}>{children}</TaskContext.Provider>;

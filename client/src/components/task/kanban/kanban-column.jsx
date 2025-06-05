@@ -1,21 +1,24 @@
 "use client";
 
 import { useState } from "react";
+import { Plus } from "lucide-react";
 
-import { cn } from "@/lib/utils";
-import { SortAsc } from "lucide-react";
+import KanbanItem from "@/components/task/kanban/kanban-item";
+import CreateTaskSheet from "@/components/task/create-task-sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger
-} from "../../ui/dropdown-menu";
-import { Button } from "../../ui/button";
-import KanbanTask from "./kanban-task";
+} from "@/components/ui/dropdown-menu";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { pickStatusColor } from "@/lib/task-utils";
+import { cn } from "@/lib/utils";
 
-const KanbanColumn = ({ column, handleTaskMove }) => {
+export default function KanbanColumn({ column, handleMoveTask }) {
   const [isOver, setIsOver] = useState(false);
-  const [sortBy, setSortBy] = useState(null);
+  const [isCreateTaskSheetOpen, setIsCreateTaskSheetOpen] = useState(false);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -30,77 +33,61 @@ const KanbanColumn = ({ column, handleTaskMove }) => {
     e.preventDefault();
     setIsOver(false);
 
-    const taskId = e.dataTransfer.getData("taskId");
+    const taskId = parseInt(e.dataTransfer.getData("taskId"));
     const sourceColumnId = e.dataTransfer.getData("columnId");
 
     if (sourceColumnId !== column.id) {
-      handleTaskMove(taskId, column.id);
+      handleMoveTask(taskId, column.id);
     }
   };
 
-  const sortedTasks = [...column.tasks];
-
-  if (sortBy === "priority") {
-    // Sort by priority (high, medium, low)
-    const priorityOrder = { high: 1, medium: 2, low: 3 };
-    sortedTasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
-  } else if (sortBy === "name") {
-    // Sort by task name alphabetically
-    sortedTasks.sort((a, b) => a.title.localeCompare(b.title));
-  } else if (sortBy === "dueDate") {
-    // Sort by due date (null dates at the end)
-    sortedTasks.sort((a, b) => {
-      if (!a.dueDate && !b.dueDate) return 0;
-      return new Date(a.dueDate) - new Date(b.dueDate);
-    });
-  }
-
   return (
-    <div
-      className={cn(
-        "flex flex-col bg-muted/40 border-2 rounded-lg p-3 min-h-[500px]",
-        isOver && "ring-2 ring-primary/20"
-      )}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <h3 className="font-medium text-sm">{column.title}</h3>
-          <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-            {column.tasks.length}
-          </span>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <SortAsc className="h-4 w-4" />
-              <span className="sr-only">Sort</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setSortBy("priority")}>
-              Sort by Priority
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSortBy("name")}>Sort by Name</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setSortBy("dueDate")}>
-              Sort by Due Date
-            </DropdownMenuItem>
-            {sortBy && (
-              <DropdownMenuItem onClick={() => setSortBy(null)}>Clear Sorting</DropdownMenuItem>
+    <>
+      <div
+        className={cn(
+          "flex flex-col bg-prussian-blue/5 rounded-lg py-4 h-[calc(100vh-170px)]",
+          isOver && "outline outline-primary/20 outline-dashed"
+        )}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        <div className="px-4">
+          <div
+            className={cn(
+              "flex items-center justify-between rounded-full mb-4 px-2 py-1.5",
+              pickStatusColor(column.id)
             )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-black font-medium bg-white px-2.5 py-1 rounded-full">
+                {column.tasks.length}
+              </span>
+              <h3 className="font-medium text-sm">{column.title}</h3>
+            </div>
+            <Button
+              variant="ghost"
+              className="w-6 h-6 text-white rounded-full"
+              onClick={() => setIsCreateTaskSheetOpen(true)}
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
 
-      <div className="flex flex-col gap-2 flex-1">
-        {sortedTasks.map((task) => (
-          <KanbanTask key={task.id} task={task} columnId={column.id} />
-        ))}
+        <ScrollArea className="overflow-y-auto px-4">
+          <div className="space-y-2 py-2">
+            {column.tasks.map((task) => (
+              <KanbanItem key={task.id} task={task} columnId={column.id} />
+            ))}
+          </div>
+        </ScrollArea>
       </div>
-    </div>
+      <CreateTaskSheet
+        isOpen={isCreateTaskSheetOpen}
+        onOpenChange={setIsCreateTaskSheetOpen}
+        initialValues={{ status: column.id }}
+      />
+    </>
   );
-};
-
-export default KanbanColumn;
+}

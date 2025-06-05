@@ -12,7 +12,20 @@ const createOneTaskComment = async (data) => {
 
 const getOneTaskCommentById = async (id) => {
   try {
-    const [comment] = await db("task_comments").where({ id }).limit(1);
+    const [comment] = await db("task_comments AS tc")
+      .join("user_public_view AS v", "v.id", "=", "tc.user_id")
+      .select(
+        "tc.id",
+        "tc.task_id",
+        "tc.content",
+        "tc.user_id as commenter_id",
+        "v.full_name as commenter_full_name",
+        "v.avatar_url as commenter_avatar_url",
+        "tc.created_at",
+        "tc.updated_at"
+      )
+      .where("tc.id", id)
+      .limit(1);
 
     return comment;
   } catch (err) {
@@ -24,8 +37,17 @@ const getManyTaskCommentsByTaskId = async (task_id) => {
   try {
     const comments = await db("task_comments AS tc")
       .join("user_public_view AS v", "v.id", "=", "tc.user_id")
-      .select("tc.*", "v.full_name", "v.avatar_url")
-      .where({ task_id })
+      .select(
+        "tc.id",
+        "tc.task_id",
+        "tc.content",
+        "tc.user_id as commenter_id",
+        "v.full_name as commenter_full_name",
+        "v.avatar_url as commenter_avatar_url",
+        "tc.created_at",
+        "tc.updated_at"
+      )
+      .where("tc.task_id", task_id)
       .orderBy("created_at", "asc");
 
     return comments;
@@ -38,7 +60,7 @@ const updateOneTaskCommentById = async (id, data) => {
   try {
     const [comment] = await db("task_comments")
       .where({ id })
-      .update({ ...data })
+      .update({ ...data, updated_at: db.fn.now() })
       .returning("id");
 
     return comment?.id;

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useCallback } from "react";
 import { MoreVertical, Info, Trash } from "lucide-react";
 
 import TaskDetailsSheet from "@/components/task/task-details-sheet";
@@ -14,19 +15,27 @@ import { Button } from "@/components/ui/button";
 import { useTask } from "@/hooks/use-task";
 
 export default function TaskActions({ task }) {
-  const [isDetailsSheetOpen, setIsDetailsSheetOpen] = useState(false);
   const { handleDeleteTask } = useTask();
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleOpenDetails = () => {
+    const params = new URLSearchParams(searchParams);
+    params.set("task", String(task.id));
+    router.push(`?${params.toString()}`);
+  };
 
   return (
     <div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="sm">
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent side="left" align="start">
-          <DropdownMenuItem onSelect={() => setIsDetailsSheetOpen(true)}>
+        <DropdownMenuContent side="bottom" align="end">
+          <DropdownMenuItem onSelect={handleOpenDetails}>
             <Info className="h-4 w-4" />
             <span>Details</span>
           </DropdownMenuItem>
@@ -39,11 +48,7 @@ export default function TaskActions({ task }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <TaskDetailsSheet
-        isOpen={isDetailsSheetOpen}
-        onOpenChange={setIsDetailsSheetOpen}
-        task={task}
-      />
+      <TaskDetailsSheet task={task} />
     </div>
   );
 }

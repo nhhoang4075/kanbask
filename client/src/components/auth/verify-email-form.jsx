@@ -99,7 +99,7 @@ export default function VerifyEmailForm() {
   const onSubmit = async (formData) => {
     setIsLoading(true);
     try {
-      await verifyEmail({ code: formData.code });
+      await verifyEmail(formData.code);
       toast.success("Email verified! Please login again to continue.");
       await logout();
     } catch (error) {

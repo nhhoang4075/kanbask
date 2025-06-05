@@ -123,7 +123,7 @@ export default function ForgotPasswordForm() {
 
     setIsLoading(true);
     try {
-      await forgotPassword({ email: formData.email });
+      await forgotPassword(formData.email);
       toast.success("Password reset link has been sent to your email!");
       const expiryTime = Date.now() + 30 * 1000; // 30 seconds from now
       localStorage.setItem("forgot-password-cooldown", expiryTime.toString());

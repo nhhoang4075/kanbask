@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import { Bell } from "lucide-react";
 
 import NotificationHeader from "@/components/notification/notification-header";

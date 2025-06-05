@@ -100,8 +100,8 @@ export default function NavUser() {
             <DropdownMenuGroup>
               <Link href="/app/account">
                 <DropdownMenuItem className="group focus:bg-prussian-blue focus:text-background transition-colors duration-200 ease-in-out">
-                    <UserCircleIcon className="text-muted-foreground group-focus:text-background transition-colors duration-200 ease-in-out" />
-                    Account
+                  <UserCircleIcon className="text-muted-foreground group-focus:text-background transition-colors duration-200 ease-in-out" />
+                  Account
                 </DropdownMenuItem>
               </Link>
               <DropdownMenuItem className="group focus:bg-prussian-blue focus:text-background transition-colors duration-200 ease-in-out">

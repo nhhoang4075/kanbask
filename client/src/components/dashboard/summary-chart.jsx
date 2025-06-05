@@ -57,10 +57,16 @@ export default function SummaryChart() {
         day: "numeric"
       });
 
+      console.log(tasks);
+
       // Count all tasks for this project on this date
       const allTasks = tasks.filter((task) => {
+        // Set createDate to 0h00 of that day
         const createDate = new Date(task.created_at);
+        createDate.setHours(0, 0, 0, 0);
+
         const dueDate = task.due_date ? new Date(task.due_date) : new Date(9999, 11, 31);
+
         return createDate <= date && date <= dueDate;
       });
 

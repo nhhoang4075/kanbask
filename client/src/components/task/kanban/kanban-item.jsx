@@ -29,7 +29,9 @@ export default function KanbanItem({ task, columnId }) {
         <div className="mt-2 mb-4 space-y-1">
           <div className="flex justify-between items-center gap-2">
             <h4 className="text-md font-semibold truncate">{task.title}</h4>
-            <TaskActions task={task} />
+            <div className="-mr-2">
+              <TaskActions task={task} />
+            </div>
           </div>
 
           {task.priority && (
@@ -43,7 +45,7 @@ export default function KanbanItem({ task, columnId }) {
         </div>
         <p className="text-xs text-muted-foreground line-clamp-2">{task.description}</p>
       </CardContent>
-      <CardFooter className="p-3 pt-0 flex justify-between items-center">
+      <CardFooter className="px-4 pb-2 flex justify-between items-end">
         <div className="flex items-center gap-2">
           {task.assignees && task.assignees.length > 0 ? (
             <AvatarGroup className="flex items-center justify-center -space-x-2.5">

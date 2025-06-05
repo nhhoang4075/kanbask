@@ -42,7 +42,8 @@ export default function TaskDetailsSheet({ task }) {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange} modal={false}>
-      <SheetContent className="min-w-[100vw] md:min-w-[70vw] lg:min-w-[600px] p-0">
+      <SheetContent
+        className="min-w-[100vw] md:min-w-[70vw] lg:min-w-[600px] p-0">
         <SheetHeader className="p-6 pb-0">
           <SheetTitle className="text-3xl font-bold truncate">{task.title}</SheetTitle>
         </SheetHeader>

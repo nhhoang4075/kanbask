@@ -34,16 +34,6 @@ const getOneUserByEmail = async (userEmail) => {
   }
 };
 
-const getAllUsers = async () => {
-  try {
-    const users = await UserModel.getAllUsers();
-
-    return users.map(sanitizeUser);
-  } catch (err) {
-    throw err;
-  }
-};
-
 const updateUserProfile = async (userId, data) => {
   try {
     const allowedData = sanitizeAllowedFields(data, [
@@ -105,49 +95,10 @@ const deleteUserAccount = async (userId) => {
   }
 };
 
-const updateOneUserForAdmin = async (userId, data) => {
-  try {
-    const allowedData = sanitizeAllowedFields(data, ["role", "is_enabled"]);
-
-    if (Object.keys(allowedData).length === 0) {
-      throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "No allowed field to update");
-    }
-
-    await UserModel.updateOneUserById(userId, allowedData);
-
-    return userId;
-  } catch (err) {
-    throw err;
-  }
-};
-
-const deleteOneUserForAdmin = async (userId) => {
-  try {
-    const user = await UserModel.getOneUserById(userId);
-
-    if (!user) {
-      throw new ApiError(StatusCodes.NOT_FOUND, "No user found");
-    }
-
-    if (user.role === "admin") {
-      throw new ApiError(StatusCodes.FORBIDDEN, "Can not delete admin account");
-    }
-
-    await UserModel.deleteOneUserById(user.id);
-
-    return user.id;
-  } catch (err) {
-    throw err;
-  }
-};
-
 export default {
   getOneUserById,
   getOneUserByEmail,
-  getAllUsers,
   updateUserProfile,
   changeUserPassword,
   deleteUserAccount,
-  updateOneUserForAdmin,
-  deleteOneUserForAdmin
 };

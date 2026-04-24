@@ -7,19 +7,28 @@ const createOneConversation = async (reqBody) => {
   try {
     const { type, userIds } = reqBody;
 
-    const { conversationId } = await conversationModel.createOneConversation(
-      type,
-      userIds
-    );
+    const conversation = await conversationModel.createOneConversation(type);
 
-    if (!conversationId) {
+    if (!conversation.id) {
       throw new ApiError(
         StatusCodes.INTERNAL_SERVER_ERROR,
         "Failed to create the conversation"
       );
     }
 
-    return conversationId;
+    const participants = await conversationModel.addParticipantsToConversation(
+      conversation.id,
+      userIds
+    );
+
+    if (!participants.length) {
+      throw new ApiError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        "Failed to add participants to the conversation"
+      );
+    }
+
+    return { conversation, participants };
   } catch (err) {
     throw err;
   }
@@ -36,6 +45,26 @@ const getManyConversationsByUserId = async (userId) => {
     }
 
     return conversations;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const updateOneConversation = async (conversationId, updateData) => {
+  try {
+    const conversation = await conversationModel.updateOneConversation(
+      conversationId,
+      reqBody
+    );
+
+    if (!conversation) {
+      throw new ApiError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        "Failed to update the conversation"
+      );
+    }
+
+    return conversation;
   } catch (err) {
     throw err;
   }

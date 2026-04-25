@@ -1,0 +1,52 @@
+[
+  {
+    "id": "conv-001",
+    "teamId": "team-1",
+    "projectId": "project-101",
+    "participants": ["user1", "user2"],
+    "messageIds": ["msg-001", "msg-002", "msg-003"],
+    "title": "Task board issue",
+    "createdAt": "2023-06-10T08:30:00.000Z",
+    "updatedAt": "2023-06-10T08:42:08.000Z"
+  },
+  {
+    "id": "conv-002",
+    "teamId": "team-1",
+    "projectId": "project-102",
+    "participants": ["user2", "user3"],
+    "messageIds": ["msg-004", "msg-005"],
+    "title": "Team meeting",
+    "createdAt": "2023-06-11T14:23:00.000Z",
+    "updatedAt": "2023-06-11T14:28:30.000Z"
+  },
+  {
+    "id": "conv-003",
+    "teamId": "team-2",
+    "projectId": "project-201",
+    "participants": ["user1", "user3"],
+    "messageIds": ["msg-006", "msg-007", "msg-008"],
+    "title": "Sprint report",
+    "createdAt": "2023-06-12T10:05:00.000Z",
+    "updatedAt": "2023-06-12T10:20:45.000Z"
+  },
+  {
+    "id": "conv-004",
+    "teamId": "team-2",
+    "projectId": "project-202",
+    "participants": ["user1", "user4", "user5"],
+    "messageIds": [],
+    "title": "New feature planning",
+    "createdAt": "2023-06-13T09:00:00.000Z",
+    "updatedAt": "2023-06-13T09:00:00.000Z"
+  },
+  {
+    "id": "conv-005",
+    "teamId": "team-3",
+    "projectId": "project-301",
+    "participants": ["user2", "user4", "user5"],
+    "messageIds": [],
+    "title": "Budget review",
+    "createdAt": "2023-06-14T11:30:00.000Z",
+    "updatedAt": "2023-06-14T11:30:00.000Z"
+  }
+]

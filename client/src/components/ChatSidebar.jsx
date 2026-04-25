@@ -2,20 +2,15 @@
 
 import { ScrollArea } from "./ui/scroll-area"
 import { Input } from "./ui/input"
-import { DropdownMenu } from "./ui/dropdown-menu"
-import { Button } from "./ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar"
 import { Separator } from "./ui/separator"
 import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
-import messages from "@/data/messages"
-import conversations from "@/data/conversations"
-import users from "@/data/users"
 
 export function ChatSidebar({setCurrConv}) {
     const searchParams = useSearchParams();
     const currentId = searchParams.get("userId");
-
+    const conversations = [];
     return (
         <div className="flex flex-col w-90">
             <Separator />

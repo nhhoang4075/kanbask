@@ -1,3 +1,42 @@
+/**
+ * AppSidebar Component
+ *
+ * This component renders a sidebar navigation menu for the application.
+ * It uses Next.js navigation hooks and dynamically generates navigation buttons
+ * based on the provided `navItems` array. Each button navigates to a specific route
+ * and preserves query parameters if present.
+ *
+ * @component
+ * @returns {JSX.Element} The rendered AppSidebar component.
+ *
+ * @example
+ * <AppSidebar />
+ *
+ * @dependencies
+ * - `next/navigation`: Provides `usePathname`, `useRouter`, and `useSearchParams` hooks for navigation.
+ * - `next/link`: Used for client-side navigation.
+ * - `lucide-react`: Provides icons for the navigation items.
+ * - `@/components/ui/button`: Custom Button component for styling.
+ * - `@/components/ui/scroll-area`: Scrollable container for the sidebar content.
+ * - `@/components/ui/sidebar`: Sidebar and SidebarContent components for layout.
+ * - `@/lib/utils`: Utility function `cn` for conditional class names.
+ *
+ * @hooks
+ * - `usePathname`: Retrieves the current pathname.
+ * - `useRouter`: Provides navigation methods like `router.push`.
+ * - `useSearchParams`: Retrieves the current query parameters.
+ *
+ * @state
+ * - `navItems`: Array of navigation items, each containing:
+ *   - `name` (string): The display name of the navigation item.
+ *   - `href` (string): The route path for the navigation item.
+ *   - `icon` (React.Component): The icon component for the navigation item.
+ *
+ * @styles
+ * - The sidebar has a width of 64 and a gray background with rounded corners.
+ * - Buttons are styled with conditional classes to indicate the active route.
+ * - Hover effects are applied to buttons for better user experience.
+ */
 "use client";
 
 import { usePathname } from "next/navigation";

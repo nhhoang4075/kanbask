@@ -7,41 +7,46 @@ import { Separator } from "./ui/separator"
 import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-export function ChatSidebar({setCurrConv}) {
+export function ChatSidebar({ setCurrConv, conversations, messages, users }){
     const searchParams = useSearchParams();
     const currentId = searchParams.get("userId");
-    const conversations = [];
+    // Only render if conversations, messages, and users are available
+    if (conversations.length === 0 || messages.length === 0 || users.length === 0) return null;
     return (
         <div className="flex flex-col w-90">
-            <Separator />
-            <div className="p-4">All Message</div>
-            <Separator />
+            <div className="p-4 text-2xl">All Message</div>
+            <Separator className="w-15"/>
             <div className="p-4">
                 <Input type="search" placeholder="Search"/>
             </div>
-            <Separator />
+            <Separator className="w-15"/>
             <ScrollArea className={"flex-1"}>
-                {conversations.filter(conversation => conversation.participantsId.includes(parseInt(currentId))).map(conversation => (
-                    <Conversation key={conversation.id} currentConv={conversation} currentUserId={currentId} setCurrConv={setCurrConv}/>
+                {conversations.filter(conversation => conversation.participants.includes(currentId)).map(conversation => (
+                    <Conversation key={conversation.id} 
+                                  conversation={conversation}
+                                  currentUserId={currentId} 
+                                  setCurrConv={setCurrConv} 
+                                  messages={messages} 
+                                  users={users}/>
                 ))}
             </ScrollArea>
         </div>
     )
 }
-function Conversation( { currentConv, currentUserId, setCurrConv } ){
-    const lastMessage = messages.find(message => message.id === currentConv.messagesId[currentConv.messagesId.length - 1]);
-    const receiverUser = users.find(user => user.id === currentConv.participantsId.find(id => id !== parseInt(currentUserId)));
-    
+function Conversation({ conversation, currentUserId, setCurrConv, messages, users }){
+    const lastUpdate = new Date(conversation.updatedAt);
+    const lastMessage = messages.find(message => new Date(message.createdAt).valueOf() === lastUpdate.valueOf());
+    const receiverUsers = conversation.participants.filter(id => id !== currentUserId).map(id => users.find(user => user.id === id));
     return (
-        <button onClick={() => setCurrConv(currentConv)} className={cn("flex gap-2 p-4 w-90 hover:bg-gray-200")}>
+        <button onClick={() => setCurrConv(conversation)} className={cn("flex gap-2 p-4 w-90 hover:bg-gray-400")}>
             <Avatar className="flex-none">
-                <AvatarImage src={receiverUser.avatar_url} alt="" />
+                <AvatarImage src={receiverUsers[0].avatar_url} alt="" />
                 <AvatarFallback>CN</AvatarFallback>
             </Avatar>
             <div className="flex flex-col flex-1 text-left">
-                <div className="flex-1 text-xl font-bold">{receiverUser.name}</div>
-                <div className="flex-1">{lastMessage.content}</div>
-                <div className="flex-1">{new Date(lastMessage.createAt).toLocaleString()}</div>
+                <div className="flex-1 text-xl font-bold">{receiverUsers[0].fullname}</div>
+                <div className="flex-1">{lastMessage && lastMessage.content}</div>
+                <div className="flex-1">{new Intl.DateTimeFormat("en-GB", {dateStyle: "short", timeStyle: "short"}).format(lastUpdate)}</div>
             </div>
         </button>
     )

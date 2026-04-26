@@ -8,15 +8,16 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { validateUser } from "@/lib/ValidateUser";
+import { validateUser } from "@/lib/ServerActions";
 import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Username is required"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 export default function Login() {
+  // Add a reack-hook-form to manage the form state and validation
   const form = useForm({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -76,11 +77,12 @@ export default function Login() {
           />
           {(isValid == 1) && <p className="text-green-500">Login successful!</p>}
           {(isValid == 2) && <p className="text-red-500">Invalid username or password!</p>}
-          <Button type="submit" className="w-full">
-            Login
-          </Button>
+          <Button type="submit" className="w-full">Login</Button>
         </form>
       </Form>
+      <p className="mt-4 text-center">
+        Don't have an account? <a href="/register" className="text-blue-500">Register</a>
+      </p>
     </div>
   );
 }

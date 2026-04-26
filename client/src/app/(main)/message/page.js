@@ -4,7 +4,7 @@ import { ChatSidebar } from '@/components/ChatSidebar';
 import { Separator } from "@/components/ui/separator";
 import { Chat } from '@/components/Chat';
 import { useState, useEffect } from 'react';
-import { getConversations, getMessages, getUsers, sendMessage, updateConversation } from '@/lib/ServerActions';
+import { getConversations, getMessages, getUsers, sendMessage, updateConversation, addConversation } from '@/lib/ServerActions';
 
 export default function Message() {
     const [conversations, setConversations] = useState([]);
@@ -69,26 +69,42 @@ export default function Message() {
             setLoading(false);
         }
     };
-
+    // Pass function to add a new conversation
+    const addConv = async () => {
+        const newConv = {
+            id: `conv-${Date.now()}`, // Unique ID based on timestamp
+            participants: [users[0].id], // Assuming the first user is the sender
+            messageIds: [],
+            updatedAt: new Date().toISOString()
+        };
+        setConversations([...conversations, newConv]);
+        setCurrConv(newConv);
+        await addConversation(newConv);
+        // Optionally, you can also fetch the updated conversations list here
+        // const updatedConversations = await getConversations();
+        // setConversations(updatedConversations);
+    };
     return (
-        <div className="flex h-screen bg-gray-300 rounded-sm dark:bg-black">
-            <div className="flex flex-1">
+        <div className="flex h-full w-full overflow-hidden">
+            <div className="flex-none w-90 overflow-hidden">
                 <ChatSidebar 
                     setCurrConv={setCurrConv} 
                     conversations={conversations} 
                     messages={messages} 
                     users={users}
                 />
-                <Separator orientation="vertical" className="w-15"/>
             </div>
-            <Chat 
-                currConv={currConv} 
-                conversations={conversations} 
-                messages={messages} 
-                users={users}
-                handleSendMessage={handleSendMessage}
-                loading={loading}
-            />
+            <Separator orientation="vertical" className="flex-none w-0.5 bg-black dark:bg-white"/>
+            <div className="flex-1 overflow-hidden">
+                <Chat 
+                    currConv={currConv} 
+                    conversations={conversations} 
+                    messages={messages} 
+                    users={users}
+                    handleSendMessage={handleSendMessage}
+                    loading={loading}
+                />
+            </div>
         </div>
     )
 }

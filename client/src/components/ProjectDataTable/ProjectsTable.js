@@ -13,7 +13,7 @@ import { projectMember, teams, teamsMember, users } from "@/data/teams.js";
 import { DataTable } from "./MemberDataTable/data-table";
 import { columns } from "./MemberDataTable/column";
 
-const MembersTable = ({ props }) => {
+const ProjectsTable = ({ props }) => {
 	const { teamShow, setTeamShow, showData } = props;
 
 	const [usersInTeam, setUsersInTeam] = useState(
@@ -67,4 +67,4 @@ const MembersTable = ({ props }) => {
 	);
 };
 
-export default MembersTable;
+export default ProjectsTable;

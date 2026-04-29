@@ -6,7 +6,7 @@ export const users = [
 		password: "123456",
 		avatar_url:
 			"https://ui-avatars.com/api/?name=John+Doe&background=random",
-		role: "admin",
+		role: "user",
 		name: "John Doe",
 	},
 	{

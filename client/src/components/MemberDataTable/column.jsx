@@ -10,9 +10,9 @@ import {
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
-import DeleteAlert from "./DeleteAlert";
+import DeleteAlert from "../DeleteAlert";
 import EditMember from "./EditMember";
 
 export const columns = [
@@ -48,19 +48,73 @@ export const columns = [
 	},
 	{
 		accessorKey: "name",
-		header: "Name",
+		header: ({ column }) => {
+			return (
+				<Button
+					variant="ghost"
+					onClick={() => {
+						column.toggleSorting(
+							column.getIsSorted() == "asc" ? "desc" : "asc"
+						);
+					}}
+				>
+					Name
+					<ArrowUpDown className="ml-0.5 h-4 w-4" />
+				</Button>
+			);
+		},
 	},
 	{
 		accessorKey: "status",
-		header: "Status",
+		header: ({ column }) => {
+			return (
+				<Button
+					variant="ghost"
+					onClick={() => {
+						column.toggleSorting(
+							column.getIsSorted() == "asc" ? "desc" : "asc"
+						);
+					}}
+				>
+					Status
+					<ArrowUpDown className="ml-0.5 h-4 w-4" />
+				</Button>
+			);
+		},
 	},
 	{
 		accessorKey: "email",
-		header: "Email",
+		header: ({ column }) => {
+			return (
+				<Button
+					variant="ghost"
+					onClick={() => {
+						column.toggleSorting(
+							column.getIsSorted() == "asc" ? "desc" : "asc"
+						);
+					}}
+				>
+					Email
+					<ArrowUpDown className="ml-0.5 h-4 w-4" />
+				</Button>
+			);
+		},
 	},
 	{
 		accessorKey: "role",
-		header: "Role",
+		header: ({ column }) => {
+			return (
+				<Button
+					variant="ghost"
+					onClick={() =>
+						column.toggleSorting(column.getIsSorted() === "asc")
+					}
+				>
+					Role
+					<ArrowUpDown className="ml-0.5 h-4 w-4" />
+				</Button>
+			);
+		},
 	},
 	{
 		header: "Actions",

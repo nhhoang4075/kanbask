@@ -1,66 +1,53 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "./ui/table";
-import { projectMember, teams, teamsMember, users } from "@/data/teams.js";
-import { DataTable } from "./MemberDataTable/data-table";
-import { columns } from "./MemberDataTable/column";
+import { DataTable } from "./data-table";
+import { columns } from "./column";
+import { projectsData } from "@/data/teams";
 
 const ProjectsTable = ({ props }) => {
-	const { teamShow, setTeamShow, showData } = props;
+	const { project, setProject } = props;
+	console.log("Project: ", project);
 
-	const [usersInTeam, setUsersInTeam] = useState(
-		users.filter((user) => {
-			if (showData == "team")
-				return teamsMember.some(
-					(team) =>
-						team.userId == user.id && team.teamId == teamShow.id
-				);
-			else if (showData == "project")
-				return projectMember.some(
-					(project) =>
-						project.userId == user.id &&
-						project.projectId == teamShow.id
-				);
-		})
-	);
-
-	useEffect(() => {
-		setUsersInTeam(
-			users.filter((user) => {
-				if (showData == "team")
-					return teamsMember.some(
-						(team) =>
-							team.userId == user.id && team.teamId == teamShow.id
-					);
-				else if (showData == "project")
-					return projectMember.some(
-						(project) =>
-							project.userId == user.id &&
-							project.projectId == teamShow.id
-					);
-			})
-		);
-	}, [teamShow]);
-
-	console.log(teamShow);
+	useEffect(() => {}, []);
 
 	return (
 		<div className="w-full h-full px-3">
-			<div>
-				<h2 className="font-bold text-xl mb-3.5 py-2 px-5 capitalize">
-					{teamShow.name}
-				</h2>
+			{/* Display Project Properties */}
+			<div className="grid grid-cols-5 h-45 my-3">
+				<div className="col-span-4 h-full bg-gray-100 rounded-lg shadow-md py-3 px-4">
+					<h2 className="font-bold text-2xl capitalize mb-1">
+						{project.name}
+					</h2>
+					<p className="text-sm text-start text-gray-500">
+						Created By: {project.createdBy}
+					</p>
+					<p className="text-base text-blackcapitalize my-2.5	">
+						Description: {project.description}
+					</p>
+				</div>
+				<div className="grid grid-cols-2 gap-x-1.5 my-2 h-15">
+					<p className="text-sm text-end text-gray-500 capitalize">
+						Created At:
+					</p>
+					<p className="text-sm text-start text-gray-500 capitalize">
+						{project.createdAt}
+					</p>
+					<p className="text-sm text-end text-gray-500 capitalize">
+						Updated At:
+					</p>
+					<p className="text-sm text-start text-gray-500 capitalize">
+						{project.updatedAt}
+					</p>
+				</div>
 			</div>
+			{/* Display Project Table */}
 			<div>
-				<DataTable columns={columns} data={usersInTeam} />
+				<DataTable
+					columns={columns}
+					data={projectsData}
+					setProject={setProject}
+				/>
 			</div>
 			<div></div>
 		</div>

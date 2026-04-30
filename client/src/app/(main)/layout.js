@@ -1,12 +1,12 @@
 "use client";
 
-import AppSidebar from '@/components/AppSidebar';
-import AppHeader from '@/components/AppHeader';
+import AppSidebar from '@/components/AppComponents/AppSidebar';
+import AppHeader from '@/components/AppComponents/AppHeader';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { useState } from 'react';
 
 export default function Layout({ children }) {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(true);
     return (
         <>
             {!isCollapsed && <div className="absolute top-0 left-0 h-[100dvh] w-[100dvw] overflow-hidden z-25 bg-black/75"></div>}

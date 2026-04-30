@@ -1,10 +1,13 @@
 "use client";
 
-import { ChatSidebar } from '@/components/ChatSidebar';
+import { ChatSidebar } from '@/components/ChatComponents/ChatSidebar';
 import { Separator } from "@/components/ui/separator";
-import { Chat } from '@/components/Chat';
+import { Chat } from '@/components/ChatComponents/Chat';
 import { useState, useEffect, useRef } from 'react';
-import { getConversations, getMessages, getUsers, sendMessage, updateConversation, addConversation } from '@/lib/ServerActions';
+import { getConversations, updateConversation, addConversation } from '@/lib/ConversationActions';
+import { getMessages, sendMessage } from '@/lib/MessageActions';
+import { getUsers } from '@/lib/UserActions';
+import { useSearchParams } from 'next/navigation';
 
 export default function Message() {
     const [conversations, setConversations] = useState([]);
@@ -14,13 +17,15 @@ export default function Message() {
     const [loading, setLoading] = useState(false);
     const [searchText, setSearchText] = useState("");
     const convContainerRef = useRef(null);
+    const searchParams = useSearchParams();
+    const currentId = searchParams.get("userId");
 
     useEffect(() => {
         // Use Promise.all to fetch all data at once
         // This will make the code cleaner and more efficient
         Promise.all([
             getConversations(),
-            getMessages(),
+            getMessages(currentId),
             getUsers()
         ]).then(([conversations, messages, users]) => {
             setConversations(conversations);
@@ -84,6 +89,7 @@ export default function Message() {
 
         try {
             setLoading(true);
+            // Handle the case when the current conversation is temporary
             if (newMessage.conversationId === "conv-temp") {
                 // Fix the new message conversation ID
                 const newFixedMessage = {
@@ -99,7 +105,7 @@ export default function Message() {
                     updatedAt: newFixedMessage.createdAt,
                 };
                 // Update when the conversation is temporary
-                Update(newConv, newFixedMessage, true);
+                Update(newConv, newFixedMessage, isTemp = true);
             } else {
                 // Update the existing conversation
                 Update(currConv, newMessage);
@@ -116,6 +122,7 @@ export default function Message() {
         <div className="flex h-full w-full overflow-hidden">
             <div className="flex-none w-90 overflow-hidden">
                 <ChatSidebar 
+                    currentId={currentId}
                     currConv={currConv}
                     setCurrConv={setCurrConv} 
                     conversations={conversations} 

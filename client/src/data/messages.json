@@ -28,7 +28,7 @@
     "conversationId": "conv-2",
     "senderId": "user3",
     "content": "When is the next team meeting scheduled?",
-    "status": "delivered",
+    "status": "read",
     "createdAt": "2023-06-11T14:23:45.000+07:00"
   },
   {
@@ -36,7 +36,7 @@
     "conversationId": "conv-2",
     "senderId": "user2",
     "content": "It's tomorrow at 2pm in the main conference room.",
-    "status": "sent",
+    "status": "read",
     "createdAt": "2023-06-11T14:28:30.000+07:00"
   },
   {
@@ -52,7 +52,7 @@
     "conversationId": "conv-3",
     "senderId": "user3",
     "content": "I'll send it over right away.",
-    "status": "delivered",
+    "status": "read",
     "createdAt": "2023-06-12T10:15:33.000+07:00"
   },
   {
@@ -60,7 +60,7 @@
     "conversationId": "conv-3",
     "senderId": "user3",
     "content": "Just sent it to your email. Let me know if you need anything else!",
-    "status": "sent",
+    "status": "read",
     "createdAt": "2023-06-12T10:20:45.000+07:00"
   },
   {
@@ -108,7 +108,7 @@
     "conversationId": "conv-1",
     "senderId": "user2",
     "content": "Great! Let me know if you encounter any other issues.",
-    "status": "delivered",
+    "status": "read",
     "createdAt": "2023-06-10T08:58:10.000+07:00"
   },
   {
@@ -116,7 +116,7 @@
     "conversationId": "conv-1",
     "senderId": "user2",
     "content": "Hello",
-    "status": "sent",
+    "status": "read",
     "createdAt": "2025-03-30T10:05:23.192Z"
   },
   {
@@ -124,7 +124,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "Hello",
-    "status": "sent",
+    "status": "read",
     "createdAt": "2025-03-31T03:05:29.121Z"
   },
   {
@@ -132,7 +132,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "testing",
-    "status": "sent",
+    "status": "read",
     "createdAt": "2025-04-01T13:31:06.416Z"
   },
   {
@@ -140,7 +140,7 @@
     "conversationId": "conv-3",
     "senderId": "user1",
     "content": "testing",
-    "status": "sent",
+    "status": "read",
     "createdAt": "2025-04-01T13:31:14.727Z"
   }
 ]

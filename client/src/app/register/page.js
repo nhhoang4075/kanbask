@@ -8,7 +8,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { registerUser } from "@/lib/ServerActions";
+import { registerUser } from "@/lib/UserActions";
 import { useRouter } from "next/navigation";
 
 const RegisterSchema = z.object({

@@ -8,7 +8,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { validateUser } from "@/lib/ServerActions";
+import { validateUser } from "@/lib/UserActions";
 import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({

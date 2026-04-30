@@ -28,8 +28,8 @@
  * - The component uses Tailwind CSS classes for styling.
  * - Supports dark mode with `dark:bg-gray-800` and `dark:text-white` classes.
  */
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { Bell } from "lucide-react";
 
 export default function AppHeader() {

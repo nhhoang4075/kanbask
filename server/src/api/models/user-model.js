@@ -51,26 +51,35 @@ export const updateUser = async (id, { username, email, password, first_name, la
 };
 
 export const changePassword = async (userId, oldPassword, newPassword) => {
-  // Lấy thông tin người dùng theo userId
-  const user = await sql`
+  if (!oldPassword || !newPassword) {
+    throw new Error("Old password and new password are required");
+  }
+
+  const [user] = await sql`
     SELECT id, password_hash FROM users WHERE id = ${userId}
   `;
   
   if (!user) throw new Error("User not found");
   
-  // Kiểm tra mật khẩu cũ có khớp hay không
+  if (!user.password_hash) throw new Error("User password hash is missing");
+
   const isMatch = await bcrypt.compare(oldPassword, user.password_hash);
   if (!isMatch) throw new Error("Old password is incorrect");
-  
-  // Mã hóa mật khẩu mới
+
   const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-  
-  // Cập nhật mật khẩu mới vào cơ sở dữ liệu
-  await sql`
-    UPDATE users SET password_hash = ${hashedNewPassword} WHERE id = ${userId}
+
+  const result = await sql`
+    UPDATE users 
+    SET password_hash = ${hashedNewPassword} 
+    WHERE id = ${userId} AND password_hash = ${user.password_hash}
+    RETURNING id;
   `;
-  
-  return true; // Thành công
+
+  if (result.length === 0) {
+    throw new Error("Failed to update password. Please check your old password.");
+  }
+
+  return true;
 };
 
 // Xóa user

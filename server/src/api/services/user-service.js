@@ -30,15 +30,12 @@ export const updateProfile = async (userId, data) => {
   return await UserModel.updateUser(userId, data);
 };
 
-// Thay đổi mật khẩu người dùngimport * as UserModel from "../models/user-model.js";
-
 // Thay đổi mật khẩu người dùng
 export const changePassword = async (userId, oldPassword, newPassword) => {
   if (!oldPassword || !newPassword) {
     throw new Error("Old password and new password are required");
   }
   
-  // Gọi model để thay đổi mật khẩu
   return await UserModel.changePassword(userId, oldPassword, newPassword);
 };
 
@@ -46,6 +43,12 @@ export const changePassword = async (userId, oldPassword, newPassword) => {
 // Xóa user (chỉ admin hoặc chính user đó mới được xóa)
 export const deleteUser = async (userId) => {
   return await UserModel.deleteUser(userId);
+};
+
+export const getUserById = async (userId) => {
+  // Logic để lấy thông tin người dùng theo userId
+  const user = await UserModel.getUserById(userId);
+  return user;
 };
 
 // Lấy danh sách user (chỉ admin)

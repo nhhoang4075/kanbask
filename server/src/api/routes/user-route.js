@@ -15,10 +15,10 @@ const userRoute = (router) => {
   router.put("/change-password/:userId", authenticateUser, userController.changePassword);
 
   // Xóa tài khoản người dùng (Chỉ admin hoặc chính người dùng đó)
-  router.delete("/:userId", authenticateUser, authorizeUserOrAdmin, userController.deleteUser);
+  router.delete("/users/:userId", authenticateUser, authorizeUserOrAdmin, userController.deleteUser);
 
   // Lấy thông tin người dùng (Chỉ admin hoặc người dùng đó)
-  router.get("/:userId", authenticateUser, authorizeUserOrAdmin, userController.getUserById);
+  router.get("/users/:userId", authenticateUser, authorizeUserOrAdmin, userController.getUserById);
 
   // Lấy danh sách tất cả người dùng (Chỉ admin)
   router.get("/", authenticateUser, authorizeAdmin, userController.getAllUsers);

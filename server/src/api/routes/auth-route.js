@@ -1,5 +1,5 @@
-import authController from "../controllers/auth-controller.js";
 import authValidation from "../validations/auth-validation.js";
+import authController from "../controllers/auth-controller.js";
 import authMiddleware from "../../middlewares/auth-middleware.js";
 
 const authRoute = (router) => {

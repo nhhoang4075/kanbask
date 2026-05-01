@@ -34,8 +34,8 @@ const register = async (reqBody) => {
     }
 
     return sanitizeUser(user);
-  } catch (error) {
-    throw error;
+  } catch (err) {
+    throw err;
   }
 };
 
@@ -67,8 +67,8 @@ const login = async (reqBody) => {
     }
 
     return sanitizeUser(user);
-  } catch (error) {
-    throw error;
+  } catch (err) {
+    throw err;
   }
 };
 
@@ -93,8 +93,8 @@ const logout = async (userId) => {
     }
 
     return sanitizeUser(updatedUser);
-  } catch (error) {
-    throw error;
+  } catch (err) {
+    throw err;
   }
 };
 
@@ -139,8 +139,8 @@ const sendVerificationMail = async (userEmail) => {
     });
 
     return sanitizeUser(user);
-  } catch (error) {
-    throw error;
+  } catch (err) {
+    throw err;
   }
 };
 
@@ -185,8 +185,8 @@ const verifyEmail = async (reqBody) => {
     }
 
     return sanitizeUser(updatedUser);
-  } catch (error) {
-    throw error;
+  } catch (err) {
+    throw err;
   }
 };
 
@@ -221,8 +221,8 @@ const sendPasswordResetMail = async (userEmail) => {
     });
 
     return sanitizeUser(user);
-  } catch (error) {
-    throw error;
+  } catch (err) {
+    throw err;
   }
 };
 
@@ -251,8 +251,8 @@ const resetPassword = async (reqBody) => {
     }
 
     return sanitizeUser(updatedUser);
-  } catch (error) {
-    throw error;
+  } catch (err) {
+    throw err;
   }
 };
 

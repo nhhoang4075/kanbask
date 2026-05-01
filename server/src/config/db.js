@@ -1,8 +1,14 @@
+import "dotenv/config";
 import knex from "knex";
+import { neon } from "@neondatabase/serverless";
 
 const db = knex({
   client: "pg",
-  connection: process.env.DATABASE_URL,
+  connection: {
+    connectionString: process.env.DEV_DATABASE_URL
+  }
 });
 
-export { db };
+const sql = neon(process.env.DEV_DATABASE_URL);
+
+export { db, sql };

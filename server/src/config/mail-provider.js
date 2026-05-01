@@ -14,11 +14,11 @@ export const sendMail = async (options) => {
     secure: process.env.SMTP_SECURE === "true",
     auth: {
       user: process.env.SMTP_AUTH_USER,
-      pass: process.env.SMTP_AUTH_PASSWORD,
+      pass: process.env.SMTP_AUTH_PASSWORD
     },
     tls: {
-      rejectUnauthorized: process.env.NODE_ENV === "production",
-    },
+      rejectUnauthorized: process.env.NODE_ENV === "production"
+    }
   });
 
   const { email, subject, template, data } = options;
@@ -32,7 +32,7 @@ export const sendMail = async (options) => {
     from: process.env.EMAIL_FROM,
     to: email,
     subject,
-    html,
+    html
   };
 
   await transporter.sendMail(mailOptions);

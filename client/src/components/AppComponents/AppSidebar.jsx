@@ -61,21 +61,8 @@ export default function AppSidebar({ setisCollapsed, ...props }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const param = searchParams.toString();
-    const { toggleSidebar } = useSidebar();
-    const handleMouseEnter = () => {
-        toggleSidebar(true);
-        setisCollapsed(false);
-    }
-    const handleMouseLeave = () => {
-        toggleSidebar(false);
-        setisCollapsed(true);
-    };
     return (
-        <div
-            className="relative h-full"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-        >
+        <div className="relative h-full">
             <div className="fixed inset-y-0 z-50">
                 <div className="absolute top-19 left-0 h-full">
                     <Sidebar collapsible="icon" {...props} className="absolute top-0 left-0 w-56 h-full z-50">
@@ -85,7 +72,6 @@ export default function AppSidebar({ setisCollapsed, ...props }) {
                                     {navItems.map((item) => (
                                         <SidebarMenuButton
                                             key={item.name}
-                                            isActive={pathname === item.href}
                                             className={cn(
                                                 "transition-all duration-200 rounded-md",
                                                 "bg-white text-black hover:bg-gray-300",

@@ -14,12 +14,11 @@
 
 import { useSearchParams } from "next/navigation";
 import { ScrollArea } from "../ui/scroll-area";
-import { Avatar, AvatarImage, AvatarFallback } from "../ui/avatar";
 import { Card, CardContent } from "../ui/card";
-import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
+import Message from "./Message";
 
 export function Chat({ currConv, messages, users, handleSendMessage, loading }) {
     const searchParams = useSearchParams();
@@ -75,48 +74,19 @@ export function Chat({ currConv, messages, users, handleSendMessage, loading }) 
     return (
         <div className="flex flex-col h-full overflow-hidden">
             <ChatHeader currUser={currUser} currConv={currConv} users={users} />
-            <Card className="flex-1 my-2 min-h-0 bg-amber-100 overflow-hidden">
+            <Card className="flex-1 my-2 min-h-0 bg-neutral-100 dark:bg-black overflow-hidden">
                 <CardContent className="h-full p-2">
                     <ScrollArea className="h-full w-full overflow-auto">
                         <div className="flex flex-col p-2">
-                            {conversationMessages.map(message => {
-                                if (!message) return null;
-                                const sender = users.find(user => user.id === message.senderId);
-                                if (!sender) return null;
-                                // Check if the previous message is from the same sender and on the same date
-                                const prevMessage = conversationMessages[conversationMessages.indexOf(message) - 1];
-                                const prevIsSameSender = prevMessage && prevMessage.senderId === message.senderId;
-                                const prevIsSameDate = prevMessage && new Date(prevMessage.createdAt).toDateString() === new Date(message.createdAt).toDateString();
-                                // Check if the next message is from the same sender and on the same date
-                                const nextMessage = conversationMessages[conversationMessages.indexOf(message) + 1];
-                                const nextIsSameSender = nextMessage && nextMessage.senderId === message.senderId;
-                                const nextIsSameDate = nextMessage && new Date(nextMessage.createdAt).toDateString() === new Date(message.createdAt).toDateString();
-                                return (
-                                    <div key={message.id}>
-                                        {(!prevIsSameDate) ? (
-                                            <div className="w-full py-2 text-sm text-gray-500 text-center">{new Date(message.createdAt).toLocaleDateString()}</div>
-                                        ) : null}
-                                        <div className={cn("flex py-2 gap-2", 
-                                            sender.id === currUser ? "justify-end" : "justify-start")}>
-                                            <div className={cn("flex mx-2 gap-2", sender.id !== currUser ? "flex-row" : "flex-row-reverse")}>
-                                                {(message.senderId !== currUser && !prevIsSameSender) ? (
-                                                    <Avatar className="flex-none">
-                                                        <AvatarImage src={sender.avatar_url ? sender.avatar_url : null} alt="" />
-                                                        <AvatarFallback>CN</AvatarFallback>
-                                                    </Avatar>
-                                                ) : <div className="flex-none w-8"></div>}
-                                                <div className={cn("flex items-center p-3 w-fit max-w-xs h-fit rounded-md bg-amber-300", 
-                                                    sender.id === currUser ? "text-right" : "text-left")}>
-                                                    {message.content}
-                                                </div>
-                                                {(!nextIsSameSender || (nextIsSameSender && !nextIsSameDate))? (
-                                                    <div className="text-sm text-gray-500">{new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                                ) : null}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )
-                            })}
+                            {conversationMessages.map(message => (
+                                <Message 
+                                    key={message.id} 
+                                    message={message} 
+                                    users={users} 
+                                    conversationMessages={conversationMessages} 
+                                    currUser={currUser} 
+                                />
+                            ))}
                             <div ref={chatContainerRef} />
                         </div>
                     </ScrollArea>

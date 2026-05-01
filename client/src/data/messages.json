@@ -142,5 +142,21 @@
     "content": "testing",
     "status": "read",
     "createdAt": "2025-04-01T13:31:14.727Z"
+  },
+  {
+    "id": "msg-1743764498867",
+    "conversationId": "conv-3",
+    "senderId": "user1",
+    "content": "asdjahsjdhsadjkshajkdhajkhdjkahjdhajkhdjkahdjkahjkdhajkhdjkahdjhajkdhajkhdjahdjkhajkdhadjkahjkdhajkhdashdjkashdshajdhasjkhdjkashdjk",
+    "status": "sent",
+    "createdAt": "2025-04-04T11:01:38.867Z"
+  },
+  {
+    "id": "msg-1743783265993",
+    "conversationId": "conv-1",
+    "senderId": "user1",
+    "content": "testing",
+    "status": "sent",
+    "createdAt": "2025-04-04T16:14:25.993Z"
   }
 ]

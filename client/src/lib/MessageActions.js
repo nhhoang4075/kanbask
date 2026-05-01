@@ -15,12 +15,6 @@ export async function getMessages() {
     }
     // Return messages
     const messages = await res.json();
-    const setMessagesReceived = messages.map((message) => {
-        return {
-            ...message,
-            status: message.senderId === currentId ? "sent" : "received",
-        };
-    });
     return messages;
 }
 export async function sendMessage({ message }) {
@@ -39,14 +33,14 @@ export async function sendMessage({ message }) {
     }
     return res.json();
 }
-export async function updateMesssages({ message }) {
+export async function updateMesssages({ messages, changes }) {
     // Update messages in the api
     const res = await fetch("http://localhost:3000/api/messages", {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify(message),
+        body: JSON.stringify(messages, changes),
     });
     // Handle error response
     if (!res.ok) {

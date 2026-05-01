@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 
 export default function ChatInput({mess, setMess, sendMessageHandler, handleKeyPress, loading}) {
     return (
-        <div className="flex-none flex items-center gap-2 p-1">
+        <div className="flex-none flex items-center gap-2 p-1 mb-3">
             <Input 
                 type="text" 
                 placeholder="Type a message" 

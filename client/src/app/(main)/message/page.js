@@ -32,14 +32,16 @@ export default function Message() {
                 // Check if the message is received from another user and update its status
                 if (message.senderId !== currentId && message.status === "sent" && conversations.some(conv => conv.participants.includes(currentId) && conv.id === message.conversationId)) {
                     return { ...message, status: "received" };
-                }
+                } else return message;
             });
             setConversations(conversations);
-            const changedMessages = setReceivedMessages.filter(message => message === "received");
-            if (changedMessages.length > 0) {
+            const changedMessagesId = setReceivedMessages.filter(message => message.status === "received").map(message => message.id);
+            if (changedMessagesId.length > 0) {
                 // Update the messages in the server
-                await updateMesssages({ messages: changedMessages, changes: { status: "received" } });
-                setMessages(setReceivedMessages)
+                const result = await updateMesssages({ messagesId: changedMessagesId, changes: { status: "received" } });
+                if (result.status !== 201) {
+                    console.error("Error updating messages:", result.error);
+                } else setMessages(setReceivedMessages)
             } else setMessages(messages);
             setUsers(users);
         }).catch(error => {
@@ -52,6 +54,7 @@ export default function Message() {
             convContainerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     }
+    // Handle the case when a new message is sent
     const handleSendMessage = (newMessage) => {
         const Update = async (workConv, newmess, isTemp = false) => {
             // Set the new message in the messages state
@@ -128,7 +131,20 @@ export default function Message() {
             ScrollToTop();
         }
     };
-
+    // Handle the case when a message is seen
+    const handleSeenMessage = async (messageId) => {
+        const updatedMessages = messages.map((message) => {
+            if (message.id === messageId) {
+                return { ...message, status: "read" };
+            }
+            return message;
+        });
+        // Update the server with the new status first
+        const result = await updateMesssages({ messagesId: [messageId], changes: { status: "read" } });
+        if (result.status !== 201) {
+            console.error("Error updating messages:", result.error);
+        } else setMessages(updatedMessages);
+    }
     return (
         <div className="flex h-full w-full overflow-hidden">
             <div className="flex-none w-fit min-w-80 overflow-hidden">
@@ -152,6 +168,7 @@ export default function Message() {
                     messages={messages} 
                     users={users}
                     handleSendMessage={handleSendMessage}
+                    handleSeenMessage={handleSeenMessage}
                     loading={loading}
                 />
             </div>

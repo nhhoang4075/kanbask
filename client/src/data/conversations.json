@@ -1,5 +1,22 @@
 [
   {
+    "id": "conv-2",
+    "teamId": "team-1",
+    "projectId": "project-102",
+    "participants": [
+      "user2",
+      "user3"
+    ],
+    "messageIds": [
+      "msg-4",
+      "msg-5",
+      "msg-1743825269492"
+    ],
+    "title": "Team meeting",
+    "createdAt": "2023-06-11T14:23:00.000+07:00",
+    "updatedAt": "2025-04-05T03:54:29.492Z"
+  },
+  {
     "id": "conv-1",
     "teamId": "team-1",
     "projectId": "project-101",
@@ -72,21 +89,5 @@
     "title": "New feature planning",
     "createdAt": "2023-06-13T09:00:00.000+07:00",
     "updatedAt": "2023-06-13T09:00:00.000+07:00"
-  },
-  {
-    "id": "conv-2",
-    "teamId": "team-1",
-    "projectId": "project-102",
-    "participants": [
-      "user2",
-      "user3"
-    ],
-    "messageIds": [
-      "msg-4",
-      "msg-5"
-    ],
-    "title": "Team meeting",
-    "createdAt": "2023-06-11T14:23:00.000+07:00",
-    "updatedAt": "2023-06-11T14:28:30.000+07:00"
   }
 ]

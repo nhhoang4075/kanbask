@@ -3,10 +3,22 @@
 import AppSidebar from '@/components/AppComponents/AppSidebar';
 import AppHeader from '@/components/AppComponents/AppHeader';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 
 export default function Layout({ children }) {
     const [isCollapsed, setIsCollapsed] = useState(true);
+    const pathname = usePathname();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    // Clear convId when navigating away from message route
+    useEffect(() => {
+        if (!pathname.includes('/message') && searchParams.has('convId')) {
+            const params = new URLSearchParams(searchParams.toString());
+            params.delete('convId');
+            router.replace(`${pathname}?${params.toString()}`, { shallow: true });
+        }
+    }, [pathname, router, searchParams]);
     return (
         <>
             {!isCollapsed && <div className="absolute top-19 left-0 h-[100dvh] w-[100dvw] overflow-hidden z-25 bg-black/75"></div>}

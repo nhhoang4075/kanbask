@@ -4,7 +4,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "Hello, I need help with my task board.",
-    "status": "read",
+    "status": "seen",
     "createdAt": "2023-06-10T08:30:25.000+07:00"
   },
   {
@@ -20,7 +20,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "I can't create new cards on the board.",
-    "status": "read",
+    "status": "seen",
     "createdAt": "2023-06-10T08:42:08.000+07:00"
   },
   {
@@ -28,7 +28,7 @@
     "conversationId": "conv-2",
     "senderId": "user3",
     "content": "When is the next team meeting scheduled?",
-    "status": "delivered",
+    "status": "seen",
     "createdAt": "2023-06-11T14:23:45.000+07:00"
   },
   {
@@ -36,7 +36,7 @@
     "conversationId": "conv-2",
     "senderId": "user2",
     "content": "It's tomorrow at 2pm in the main conference room.",
-    "status": "sent",
+    "status": "read",
     "createdAt": "2023-06-11T14:28:30.000+07:00"
   },
   {
@@ -52,7 +52,7 @@
     "conversationId": "conv-3",
     "senderId": "user3",
     "content": "I'll send it over right away.",
-    "status": "delivered",
+    "status": "read",
     "createdAt": "2023-06-12T10:15:33.000+07:00"
   },
   {
@@ -60,7 +60,7 @@
     "conversationId": "conv-3",
     "senderId": "user3",
     "content": "Just sent it to your email. Let me know if you need anything else!",
-    "status": "sent",
+    "status": "read",
     "createdAt": "2023-06-12T10:20:45.000+07:00"
   },
   {
@@ -76,7 +76,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "When I click the 'Add Card' button, nothing happens. No error message or anything.",
-    "status": "read",
+    "status": "seen",
     "createdAt": "2023-06-10T08:48:15.000+07:00"
   },
   {
@@ -92,7 +92,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "I'll try that now.",
-    "status": "read",
+    "status": "seen",
     "createdAt": "2023-06-10T08:51:45.000+07:00"
   },
   {
@@ -100,7 +100,7 @@
     "conversationId": "conv-1",
     "senderId": "user1",
     "content": "That worked! Thanks for the suggestion.",
-    "status": "read",
+    "status": "seen",
     "createdAt": "2023-06-10T08:55:33.000+07:00"
   },
   {
@@ -108,7 +108,7 @@
     "conversationId": "conv-1",
     "senderId": "user2",
     "content": "Great! Let me know if you encounter any other issues.",
-    "status": "delivered",
+    "status": "read",
     "createdAt": "2023-06-10T08:58:10.000+07:00"
   },
   {
@@ -116,7 +116,55 @@
     "conversationId": "conv-1",
     "senderId": "user2",
     "content": "Hello",
-    "status": "sent",
+    "status": "read",
     "createdAt": "2025-03-30T10:05:23.192Z"
+  },
+  {
+    "id": "msg-1743390329121",
+    "conversationId": "conv-1",
+    "senderId": "user1",
+    "content": "Hello",
+    "status": "seen",
+    "createdAt": "2025-03-31T03:05:29.121Z"
+  },
+  {
+    "id": "msg-1743514266416",
+    "conversationId": "conv-1",
+    "senderId": "user1",
+    "content": "testing",
+    "status": "seen",
+    "createdAt": "2025-04-01T13:31:06.416Z"
+  },
+  {
+    "id": "msg-1743514274727",
+    "conversationId": "conv-3",
+    "senderId": "user1",
+    "content": "testing",
+    "status": "read",
+    "createdAt": "2025-04-01T13:31:14.727Z"
+  },
+  {
+    "id": "msg-1743764498867",
+    "conversationId": "conv-3",
+    "senderId": "user1",
+    "content": "asdjahsjdhsadjkshajkdhajkhdjkahjdhajkhdjkahdjkahjkdhajkhdjkahdjhajkdhajkhdjahdjkhajkdhadjkahjkdhajkhdashdjkashdshajdhasjkhdjkashdjk",
+    "status": "read",
+    "createdAt": "2025-04-04T11:01:38.867Z"
+  },
+  {
+    "id": "msg-1743783265993",
+    "conversationId": "conv-1",
+    "senderId": "user1",
+    "content": "testing",
+    "status": "sent",
+    "createdAt": "2025-04-04T16:14:25.993Z"
+  },
+  {
+    "id": "msg-1743825269492",
+    "conversationId": "conv-2",
+    "senderId": "user2",
+    "content": "Hello",
+    "status": "read",
+    "createdAt": "2025-04-05T03:54:29.492Z"
   }
 ]

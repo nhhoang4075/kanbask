@@ -26,3 +26,24 @@ export async function POST(request) {
         return Response.json({ error: 'Failed to send message' }, { status: 500 });
     }
 }
+export async function PUT(request) {
+    try {
+        const {messagesNeedChangeId, changes} = await request.json();
+        const data = await fsPromises.readFile(usersFilePath, 'utf-8');
+        const messages = JSON.parse(data);
+        const messagesIndex = messagesNeedChangeId.map(id => messages.findIndex(message => message.id === id));
+        if (messagesIndex.length === 0) return Response.json({text: "No messages to update", status: 400 });
+        for (let i = 0; i < messagesIndex.length; i++) {
+            const index = messagesIndex[i];
+            if (index !== -1) {
+                messages[index] = { ...messages[index], ...changes };
+            } else {
+                return Response.json({text: "Message not found", status: 404 });
+            }
+        }
+        await fsPromises.writeFile(usersFilePath, JSON.stringify(messages, null, 2));
+        return Response.json({text: "Success", status: 201 });
+    } catch (error) {
+        return Response.json({ error: 'Failed to send message' }, { status: 500 });
+    }
+}

@@ -49,8 +49,26 @@
     "username": "a",
     "email": "a@a.com",
     "password": "11111111",
-    "id": "6",
+    "id": "user6",
     "role": "user",
-    "avatar_url": ""
+    "avatar_url": null
+  },
+  {
+    "fullname": "kjhkjwfh",
+    "username": "sdjkfhjkh",
+    "email": "zzztpnzzz@gmai.com",
+    "password": "namct123",
+    "id": "user7",
+    "role": "user",
+    "avatar_url": null
+  },
+  {
+    "fullname": "123",
+    "username": "123",
+    "email": "123@gmail.com",
+    "password": "123123123",
+    "id": "user8",
+    "role": "user",
+    "avatar_url": null
   }
 ]

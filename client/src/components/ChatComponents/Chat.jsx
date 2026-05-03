@@ -15,8 +15,9 @@
 import { useSearchParams } from "next/navigation";
 import { ScrollArea } from "../ui/scroll-area";
 import { Card, CardContent } from "../ui/card";
+// import { Button } from "../ui/button";
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown } from "lucide-react";
+// import { ChevronDown } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
 import Message from "./Message";
@@ -26,70 +27,75 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
     const currUser = searchParams.get("userId");
     const chatContainerRef = useRef(null);
     const newMessageRef = useRef(null);
+    const inputRef = useRef(null);
     const [mess, setMess] = useState("");
-    const [hasNewMessages, setHasNewMessages] = useState(false);
-    const [showScrollButton, setShowScrollButton] = useState(false);
-    const [firstUnreadMessageId, setFirstUnreadMessageId] = useState(null);
-    const [firstLoad, setFirstLoad] = useState(true);
+    // const [hasNewMessages, setHasNewMessages] = useState(false);
+    // const [showScrollButton, setShowScrollButton] = useState(false);
+    // const [firstUnreadMessageId, setFirstUnreadMessageId] = useState(null);
+    // const [firstLoad, setFirstLoad] = useState(true);
 
     // Get messages for current conversation
     const conversationMessages = currConv?.messageIds
         .map(messageId => messages.find(message => message.id === messageId)) || [];
-    // Function to show the scroll button if there are new messages
-    const handleShowScrollButton = (e) => {
-        const { scrollTop, scrollHeight, clientHeight } = e.target;
-        const isAtBottom = scrollTop + clientHeight >= scrollHeight - 5; // Allow a small buffer
-        if (!isAtBottom && hasNewMessages) {
-            setShowScrollButton(true);
-        } else setShowScrollButton(false);
-    }
-    // Scroll to the new messages divider
-    const scrollToNewMessages = () => {
-        if (newMessageRef.current) {
-            newMessageRef.current.scrollIntoView({ block: "center" });
-        }
-    };
-    // Scroll to the bottom of the conversation
+    
+    // The status is bugged so remove it to fix the socket conversation properly
+
+    // // Function to show the scroll button if user is not at the bottom of the chat
+    // const handleShowScrollButton = (e) => {
+    //     if (!e.currentTarget) return;
+    //     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    //     const isAtBottom = Math.abs(scrollTop + clientHeight - scrollHeight) < 0; // Increased buffer for better detection
+    //     setShowScrollButton(!isAtBottom);
+    // }
+    // // Scroll to the new messages divider
+    // const scrollToNewMessages = () => {
+    //     if (newMessageRef.current) {
+    //         newMessageRef.current.scrollIntoView({ block: "center" });
+    //     }
+    // };
+    // // Scroll to the bottom of the conversation
     const scrollToBottom = () => {
         if (chatContainerRef.current) {
             chatContainerRef.current.scrollIntoView({ block: "end" });
-            setShowScrollButton(false);
+    //         setShowScrollButton(false);
         }
     };
-    // When conversation changes or on initial load
-    useEffect(() => {
-        if (!currConv) return;
+    // // When conversation changes or on initial load
+    // useEffect(() => {
+    //     if (!currConv) return;
         
-        const firstUnreadMessage = conversationMessages.find(message => (message.senderId !== currUser && message.status === "received"));
-        setHasNewMessages(!!firstUnreadMessage);
-        setFirstUnreadMessageId(firstUnreadMessage?.id || null);
+    //     const firstUnreadMessage = conversationMessages.find(message => (message.senderId !== currUser && message.status === "received"));
+    //     setHasNewMessages(!!firstUnreadMessage);
+    //     setFirstUnreadMessageId(firstUnreadMessage?.id || null);
         
-        // Set a brief timeout to ensure DOM elements are rendered
-        setTimeout(() => {
-            if (firstUnreadMessage) {
-                scrollToNewMessages();
-            } else {
-                scrollToBottom();
-            }
-            if (firstLoad) {
-                setFirstLoad(false);
-            }
-        }, 100);
-    }, [currConv]);
-    // When messages change
-    useEffect(() => {
-        if (!currConv || firstLoad) return;
+    //     // Set a brief timeout to ensure DOM elements are rendered
+    //     setTimeout(() => {
+    //         if (firstUnreadMessage) {
+    //             scrollToNewMessages();
+    //         } else {
+    //             scrollToBottom();
+    //         }
+    //         if (firstLoad) {
+    //             setFirstLoad(false);
+    //         }
+    //     }, 100);
+    // }, [currConv]);
+    // // When messages change
+    // useEffect(() => {
+    //     if (!currConv || firstLoad) return;
 
-        const firstUnreadMessage = conversationMessages.find(message => (message.senderId !== currUser && message.status === "received"));
-        setHasNewMessages(!!firstUnreadMessage);
-        setFirstUnreadMessageId(firstUnreadMessage?.id || null);
+    //     const firstUnreadMessage = conversationMessages.find(message => (message.senderId !== currUser && message.status === "received"));
+    //     setHasNewMessages(!!firstUnreadMessage);
+    //     // Only set the first unread message ID if it hasn't been set yet
+    //     setFirstUnreadMessageId(prevId => prevId || firstUnreadMessage?.id || null);
 
-       // If the last message is from the current user, scroll to bottom
-       const lastMessage = conversationMessages[conversationMessages.length - 1];
-       if (lastMessage && lastMessage.senderId === currUser) {
-           setTimeout(scrollToBottom, 100);
-       }
-    }, [messages]);
+    //    // If the last message is from the current user, scroll to bottom
+    //    const lastMessage = conversationMessages[conversationMessages.length - 1];
+    //    if (lastMessage && lastMessage.senderId === currUser) {
+    //        setTimeout(scrollToBottom, 100);
+    //    }
+    // }, [messages]);
+    
     // Handle Enter key press for sending messages
     const handleKeyPress = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -97,6 +103,23 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
             sendMessageHandler();
         }
     };
+
+    useEffect(() => {
+        if (!currConv) return;
+        if (chatContainerRef.current)
+            scrollToBottom();
+    }, [currConv]);
+
+    // Focus on input when the component mounts and when the loading state is false
+    useEffect(() => {
+        if (inputRef.current && !loading) {
+            inputRef.current.focus();
+        }
+    }, [loading, inputRef]);
+
+    // To do handle file upload
+    // This function should handle the file upload logic, e.g., sending the file to the server or processing it
+    const handleFileUpload = async (file) => {};
     // Handle sending message
     const sendMessageHandler = async () => {
         if (!mess || mess.trim() === "" || !currConv) return;
@@ -125,15 +148,15 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
         <div className="flex flex-col h-full overflow-hidden">
             <ChatHeader currUser={currUser} currConv={currConv} users={users} />
             <Card className="flex-1 my-2 min-h-0 bg-neutral-100 dark:bg-black overflow-hidden">
-                <CardContent className="h-full p-2">
+                <CardContent className="flex flex-col items-center h-full p-2">
                     <ScrollArea className="h-full w-full overflow-auto"
-                                onScroll={handleShowScrollButton}
+                                // onScroll={handleShowScrollButton}
                     >
                         <div className="flex flex-col">
                             {conversationMessages.map(message => (
-                            <div key={message.id}>
-                                {(message.id === firstUnreadMessageId) ? (
-                                    <div className="relative py-2">
+                            <div key={message?.id}>
+                                {/* {(message?.id === firstUnreadMessageId) ? (
+                                    <div ref={newMessageRef} className="relative py-2">
                                         <div className="absolute inset-0 flex items-center">
                                             <div className="w-full border-t border-red-400"></div>
                                         </div>
@@ -143,15 +166,12 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
                                             </span>
                                         </div>
                                     </div>
-                                ) : null}
-                                {(message.id === firstUnreadMessageId) ? (
-                                    <div ref={newMessageRef} className="h-0"></div>
-                                ) : null}
+                                ) : null} */}
                                 <Message 
                                     message={message} 
                                     users={users} 
                                     conversationMessages={conversationMessages} 
-                                    currUser={currUser} 
+                                    currUser={currUser}
                                     onMessageSeen={handleSeenMessage}
                                 />  
                             </div>
@@ -159,16 +179,15 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
                             <div ref={chatContainerRef} />
                         </div>
                     </ScrollArea>
-                    {showScrollButton && (
+                    {/* {showScrollButton && (
                         <Button
                             onClick={scrollToBottom}
-                            className="absolute bottom-4 right-4 rounded-full shadow-md bg-amber-400 hover:bg-amber-500"
+                            className="rounded-full shadow-md bg-amber-400 hover:bg-amber-500"
                             size="sm"
                         >
-                            <ChevronDown className="mr-1 h-4 w-4" />
-                            Scroll to bottom
+                            <ChevronDown className="h-4 w-4" />
                         </Button>
-                    )}
+                    )} */}
                 </CardContent>
             </Card>
             <ChatInput 
@@ -177,6 +196,8 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
                 sendMessageHandler={sendMessageHandler} 
                 handleKeyPress={handleKeyPress} 
                 loading={loading} 
+                inputRef={inputRef}
+                handleFileUpload={handleFileUpload}
             />
         </div>
     );

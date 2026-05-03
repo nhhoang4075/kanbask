@@ -33,7 +33,7 @@ export async function sendMessage({ message }) {
     }
     return res.json();
 }
-export async function updateMesssages({ messagesId, changes }) {
+export async function updateMessages({ messagesId, changes }) {
     // Update messages in the api
     const res = await fetch("http://localhost:3000/api/messages", {
         method: "PUT",

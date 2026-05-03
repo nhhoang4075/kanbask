@@ -1,22 +1,5 @@
 [
   {
-    "id": "conv-2",
-    "teamId": "team-1",
-    "projectId": "project-102",
-    "participants": [
-      "user2",
-      "user3"
-    ],
-    "messageIds": [
-      "msg-4",
-      "msg-5",
-      "msg-1743825269492"
-    ],
-    "title": "Team meeting",
-    "createdAt": "2023-06-11T14:23:00.000+07:00",
-    "updatedAt": "2025-04-05T03:54:29.492Z"
-  },
-  {
     "id": "conv-1",
     "teamId": "team-1",
     "projectId": "project-101",
@@ -36,12 +19,11 @@
       "msg-14",
       "msg-1743329123192",
       "msg-1743390329121",
-      "msg-1743514266416",
-      "msg-1743783265993"
+      "msg-1743514266416"
     ],
     "title": "Task board issue",
     "createdAt": "2023-06-10T08:30:00.000+07:00",
-    "updatedAt": "2025-04-04T16:14:25.993Z"
+    "updatedAt": "2025-04-01T13:31:06.416Z"
   },
   {
     "id": "conv-3",
@@ -89,5 +71,21 @@
     "title": "New feature planning",
     "createdAt": "2023-06-13T09:00:00.000+07:00",
     "updatedAt": "2023-06-13T09:00:00.000+07:00"
+  },
+  {
+    "id": "conv-2",
+    "teamId": "team-1",
+    "projectId": "project-102",
+    "participants": [
+      "user2",
+      "user3"
+    ],
+    "messageIds": [
+      "msg-4",
+      "msg-5"
+    ],
+    "title": "Team meeting",
+    "createdAt": "2023-06-11T14:23:00.000+07:00",
+    "updatedAt": "2023-06-11T14:28:30.000+07:00"
   }
 ]

@@ -12,7 +12,7 @@
     "id": "user2",
     "username": "janedoe",
     "email": "jane.doe@example.com",
-    "password": "password456",
+    "password": "12345678",
     "avatar_url": "https://ui-avatars.com/api/?name=Jane+Doe&background=random",
     "role": "user",
     "fullname": "Jane Doe"
@@ -49,8 +49,8 @@
     "username": "a",
     "email": "a@a.com",
     "password": "11111111",
-    "id": "6",
+    "id": "user6",
     "role": "user",
-    "avatar_url": ""
+    "avatar_url": null
   }
 ]

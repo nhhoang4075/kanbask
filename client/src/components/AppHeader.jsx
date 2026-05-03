@@ -34,7 +34,7 @@ import { Bell } from "lucide-react";
 
 export default function AppHeader() {
 	return (
-		<header className="flex px-6 py-3 w-full items-center shadow-md dark:bg-gray-800 dark:text-white">
+		<header className="flex px-6 py-2 w-full items-center shadow-md dark:bg-gray-800 dark:text-white">
 			<h1 className="flex-4/5 text-2xl font-bold">Kanbask</h1>
 			<div className="flex-1/5 flex items-center justify-end gap-4">
 				<Button className="flex-none" variant="ghost">

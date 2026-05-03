@@ -10,7 +10,7 @@ const Projects = () => {
 	const props = { project, setProject };
 
 	return (
-		<div className="flex h-full">
+		<div className="flex h-auto max-h-[calc(100vh-150px)] overflow-hidden w-full bg-white">
 			<ProjectsTable props={props} />
 		</div>
 	);

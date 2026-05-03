@@ -20,12 +20,13 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
-import { Button } from "../ui/button";
-import DeleteAlert from "../DeleteAlert";
-import EditMember from "./EditMember";
-import AddMember from "./AddMember";
+import DeleteAlert from "@/components/DeleteAlert";
+import EditProject from "@/components/ProjectDataTable/EditProject";
+import AddProject from "@/components/ProjectDataTable/AddProject";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-export function DataTable({ columns, data }) {
+export function DataTable({ columns, data, setFunction }) {
 	const [rowSelection, setRowSelection] = useState({});
 	const [sorting, setSorting] = useState([]);
 	const [columnFilters, setColumnFilters] = useState([]);
@@ -37,8 +38,9 @@ export function DataTable({ columns, data }) {
 		onRowSelectionChange: setRowSelection,
 		onSortingChange: setSorting,
 		getSortedRowModel: getSortedRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
+		onColumnFiltersChange: setColumnFilters,
+		getFilteredRowModel: getFilteredRowModel(),
 		state: {
 			sorting,
 			columnFilters,
@@ -52,19 +54,33 @@ export function DataTable({ columns, data }) {
 
 	return (
 		<div>
-			<div className="flex flex-row justify-end gap-3 my-2">
-				{table.getSelectedRowModel()?.rows.length == 1 && (
-					<EditMember user={table.getSelectedRowModel().rows[0]} />
-				)}
-				{table.getSelectedRowModel().rows.length > 0 && (
-					<>
-						<DeleteAlert />
-					</>
-				)}
-
-				<AddMember />
+			<div className="flex flex-row justify-between h-fit align-center py-2">
+				<div className="flex items-center">
+					<Input
+						placeholder="Filter name..."
+						value={table.getColumn("name")?.getFilterValue() ?? ""}
+						onChange={(event) =>
+							table
+								.getColumn("name")
+								?.setFilterValue(event.target.value)
+						}
+						className="w-xs"
+					/>
+				</div>
+				<div className="flex flex-row justify-end gap-3 my-2">
+					{table.getSelectedRowModel()?.rows.length == 1 && (
+						<EditProject
+							project={table.getSelectedRowModel().rows[0]}
+						/>
+					)}
+					{table.getSelectedRowModel().rows.length > 0 && (
+						<>
+							<DeleteAlert />
+						</>
+					)}
+					<AddProject />
+				</div>
 			</div>
-
 			<Table className="rounded-md border-2 text-center border-neutral-400">
 				<TableHeader className="bg-neutral-200">
 					{table.getHeaderGroups().map((headerGroup) => (
@@ -72,7 +88,7 @@ export function DataTable({ columns, data }) {
 							{headerGroup.headers.map((header) => {
 								return (
 									<TableHead
-										className="text-center"
+										className="text-center border-x-1 border-neutral-400"
 										key={header.id}
 									>
 										{header.isPlaceholder
@@ -94,12 +110,16 @@ export function DataTable({ columns, data }) {
 							<TableRow
 								onClick={() => {
 									row.toggleSelected();
+									if (setFunction) setFunction(row.original);
 								}}
 								key={row.id}
 								data-state={row.getIsSelected() && "selected"}
 							>
 								{row.getVisibleCells().map((cell) => (
-									<TableCell key={cell.id}>
+									<TableCell
+										key={cell.id}
+										className="text-center border-x-1 border-neutral-400"
+									>
 										{flexRender(
 											cell.column.columnDef.cell,
 											cell.getContext()

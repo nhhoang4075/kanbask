@@ -15,13 +15,11 @@ import { Button } from "./ui/button";
 const DeleteAlert = () => {
 	return (
 		<AlertDialog className="">
-			<AlertDialogTrigger>
-				<Button
-					variant="outline"
-					className="w-33 bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer hover:text-white"
-				>
-					Delete
-				</Button>
+			<AlertDialogTrigger
+				variant="outline"
+				className="w-33 bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer hover:text-white rounded-md h-9"
+			>
+				Delete
 			</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { FiEye, FiEyeOff } from "react-icons/fi"
+import { FiEye, FiEyeOff,FiLock } from "react-icons/fi"
 import { cn } from "@/lib/utils"
 
 function Input({
@@ -13,6 +13,7 @@ function Input({
 
   return (
     <div className="relative">
+      
       <input
         {...props}
         type={isPassword && !showPassword ? "password" : "text"}
@@ -24,6 +25,7 @@ function Input({
         )}
       />
       {isPassword && (
+        
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}

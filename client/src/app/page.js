@@ -78,134 +78,139 @@ export default function Login() {
 
   return (
     <div className="min-h-screen min-w-screen bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 space-y-6">
-        {showForgotPassword ? (
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold mb-6 text-center">Forgot Password</h2>
-            <Form {...form}>
-              <form onSubmit={handleForgotPassword} className="space-y-4">
-                <FormField
-                  name="email"
-                  control={form.control}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email:</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                          <Input
-                            {...field}
-                            type="email"
-                            placeholder="Enter your email"
-                            required
-                            className="pl-10"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Sending..." : "Send Reset Link"}
-                </Button>
-                <button
-                  type="button"
-                  onClick={() => setShowForgotPassword(false)}
-                  className="text-sm font-medium text-blue-600 hover:text-blue-500 w-full text-center"
-                >
-                  Back to Login
-                </button>
-              </form>
-            </Form>
-          </div>
-        ) : (
-          <>
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    name="username"
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username:</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                            <Input
-                              {...field}
-                              type="text"
-                              placeholder="Type here!"
-                              required
-                              className="pl-10" // Add padding-left to avoid overlapping with the icon
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription>This is your public display name.</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    name="password"
-                    control={form.control}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password:</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                            <Input
-                              {...field}
-                              type="password"
-                              placeholder="Type here!"
-                              required
-                              className="pl-10" // Add padding-left to avoid overlapping with the icon
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription>Password must be at least 8 characters</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {(isValid === 1) && <p className="text-green-500">Login successful!</p>}
-                  {(isValid === 2) && <p className="text-red-500">Invalid username or password!</p>}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="rememberMe"
-                        name="rememberMe"
-                        checked={formData.rememberMe}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
-                        Remember me
-                      </label>
-                    </div>
+      <div className="flex flex-col items-center space-y-6 w-full max-w-md"> 
+        <h1 className="text-6xl font-italic">KANBASK</h1>
+        <div className="w-full max-w-xl ">
+          <div className=" bg-white rounded-xl shadow-lg p-6 space-y-4">
+            {showForgotPassword ? (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold mb-6 text-center">Forgot Password</h2>
+                <Form {...form}>
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <FormField
+                      name="email"
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email:</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                              <Input
+                                {...field}
+                                type="email"
+                                placeholder="Enter your email"
+                                required
+                                className="pl-10 w-80"
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? "Sending..." : "Send Reset Link"}
+                    </Button>
                     <button
                       type="button"
-                      onClick={() => setShowForgotPassword(true)}
-                      className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                      onClick={() => setShowForgotPassword(false)}
+                      className="text-sm font-medium text-blue-600 hover:text-blue-500 w-full text-center"
                     >
-                      Forgot password?
+                      Back to Login
                     </button>
-                  </div>
-                  <Button type="submit" className="w-full">Login</Button>
-                </form>
-              </Form>
-              <p className="mt-4 text-center">
-                Don't have an account? <a href="/register" className="text-blue-500">Register</a>
-              </p>
-            </div>
-          </>
-        )}
+                  </form>
+                </Form>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-5">
+                  <h2 className="text-3xl font-bold mb-6 text-center">Login</h2>
+                  <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 space-x-5 ">
+                      <FormField
+                        name="username"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel className="text-base">Username:</FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                <Input
+                                  {...field}
+                                  type="text"
+                                  placeholder="Type here!"
+                                  required
+                                  className="pl-10 w-full"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormDescription>This is your public display name.</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        name="password"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem className="w-full">
+                            <FormLabel className="text-base">Password:</FormLabel>
+                            <FormControl>
+                              <div className="relative">  
+                                <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                                <Input
+                                  {...field}
+                                  type="password"
+                                  placeholder="Type here!"
+                                  required
+                                  className="pl-10 w-full"
+                                />
+                              </div>
+                            </FormControl>
+                            <FormDescription>Password must be at least 8 characters</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {(isValid === 1) && <p className="text-green-500">Login successful!</p>}
+                      {(isValid === 2) && <p className="text-red-500">Invalid username or password!</p>}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            id="rememberMe"
+                            name="rememberMe"
+                            checked={formData.rememberMe}
+                            onChange={handleChange}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          />
+                          <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-700">
+                            Remember me
+                          </label>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowForgotPassword(true)}
+                          className="text-sm font-medium text-blue-600 hover:text-blue-500"
+                        >
+                          Forgot password?
+                        </button>
+                      </div>
+                      <Button type="submit" className="w-full">Login</Button>
+                    </form>
+                  </Form>
+                  <p className="mt-4 text-center">
+                    Don't have an account? <a href="/register" className="text-blue-500">Register</a>
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+        <ToastContainer position="top-right" autoClose={3000} />
       </div>
-      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

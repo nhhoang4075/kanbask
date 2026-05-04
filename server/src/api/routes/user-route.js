@@ -28,7 +28,6 @@ const userRoute = (router) => {
   router.use(authenticateUser);
 
   router.post("/users/logout", userController.logout);
-
   router.get("/users/me", userController.getMyProfile);
   router.put("/users/me/profile", validateUpdateProfile, userController.updateMyProfile); 
   router.put("/users/me/password", validateChangePassword, userController.changeMyPassword); 

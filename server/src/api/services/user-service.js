@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import crypto from 'crypto';
 import { StatusCodes } from "http-status-codes";
 import ApiError from "../../utils/api-error.js";
 import UserModel from "../models/user-model.js";
@@ -26,7 +27,8 @@ const sanitizeUser = (user) => {
 
 // Đăng ký người dùng mới
 const registerUser = async (userData) => {
-  try {
+  try { 
+    await UserModel.deleteUnverifiedUserByEmail(userData.email);
     const existingUser = await UserModel.getUserByEmail(userData.email);
     if (existingUser) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Email đã tồn tại");
@@ -60,7 +62,9 @@ const verifyUserEmail = async (token) => {
             throw new ApiError(StatusCodes.BAD_REQUEST, "Mã xác thực không hợp lệ hoặc đã hết hạn.");
         }
         await UserModel.setUserVerified(user.id);
-        return { message: "Xác thực email thành công. Bạn có thể đăng nhập." };
+        return { 
+          message: "Xác thực email thành công. Bạn có thể đăng nhập.", 
+        };
     } catch (error) {
         console.error("Verify email service error:", error);
         if (error instanceof ApiError) throw error;
@@ -321,18 +325,21 @@ const resendVerificationEmail = async (email) => {
   }
 
   if (user.email_verified) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'This email address has already been verified.');
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'This email address has already been verified.');
   }
 
   // Tạo token và thời gian hết hạn mới
   const newVerificationToken = crypto.randomBytes(32).toString('hex');
-  const newVerificationExpires = new Date(Date.now() + 5 * 60 * 1000);
+  const newVerificationExpires = new Date(Date.UTC(
+    new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate(),
+    new Date().getUTCHours(), new Date().getUTCMinutes(), new Date().getUTCSeconds(), 0
+  ) + 5 * 60 * 1000)
 
   // Cập nhật token mới vào database 
   await UserModel.setVerificationToken(user.id, newVerificationToken, newVerificationExpires);
 
   // Gửi email với token mới
-  await mailer.sendVerificationEmail(user.email, newVerificationToken);
+  await Mailer.sendVerificationEmail(user.email, newVerificationToken);
 
   return { message: 'A new verification link has been sent to your email address.' };
 };

@@ -15,7 +15,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Hàm gửi email cơ bản
 const sendEmail = async (to, subject, text, html) => {
   try {
     const mailOptions = {

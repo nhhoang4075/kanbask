@@ -8,8 +8,7 @@ const setUserActiveStatus = async (userId, isActive) => {
     try {
         await sql`
             UPDATE users
-            SET is_active = ${isActive},
-                updated_at = CURRENT_TIMESTAMP
+            SET is_active = ${isActive}, updated_at = CURRENT_TIMESTAMP
             WHERE id = ${userId};
         `;
         return true;
@@ -25,8 +24,10 @@ const createUser = async ({ username, email, password, first_name, last_name, av
     const hashedPassword = await bcrypt.hash(password, 10);
     const userId = uuidv4();
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationExpires = new Date(Date.now() + 5 * 60 * 1000);
-
+    const verificationExpires = new Date(Date.UTC(
+      new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate(),
+      new Date().getUTCHours(), new Date().getUTCMinutes(), new Date().getUTCSeconds(), 0
+    ) + 5 * 60 * 1000)
     const [user] = await sql`
       INSERT INTO users (
         id, username, email, password_hash, first_name, last_name, avatar_url,
@@ -58,6 +59,16 @@ const getUserByEmail = async (email) => {
   }
 };
 
+const deleteUnverifiedUserByEmail = async (email) => {
+  try {
+    await sql`DELETE FROM users WHERE email = ${email} AND email_verified = FALSE`;
+    console.log(`Unverified user with email ${email} deleted`);
+  } catch (err) {
+    console.error("Error deleting unverified user by email:", err);
+    throw new Error('Database error deleting unverified user');
+  }
+};
+
 // Lấy user theo ID
 const getUserById = async (id) => {
   try {
@@ -75,9 +86,13 @@ const getUserById = async (id) => {
 // Tìm user bằng verification token
 const findUserByVerificationToken = async (token) => {
     try {
+        const time_now = new Date(Date.UTC(
+          new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate(),
+          new Date().getUTCHours(), new Date().getUTCMinutes(), new Date().getUTCSeconds(), 0
+        ))
         const [user] = await sql`
             SELECT * FROM users
-            WHERE verification_token = ${token} AND verification_expires > NOW()
+            WHERE verification_token = ${token} AND verification_expires > ${time_now}
         `;
         return user;
     } catch (err) {
@@ -108,9 +123,13 @@ const setUserVerified = async (userId) => {
 // Tìm user bằng reset token
 const findUserByResetToken = async (token) => {
     try {
+        const time_now = new Date(Date.UTC(
+          new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate(),
+          new Date().getUTCHours(), new Date().getUTCMinutes(), new Date().getUTCSeconds(), 0
+        ))
         const [user] = await sql`
             SELECT * FROM users
-            WHERE reset_token = ${token} AND reset_token_expires > NOW()
+            WHERE reset_token = ${token} AND reset_token_expires > ${time_now}
         `;
         return user;
     } catch (err) {
@@ -123,7 +142,10 @@ const findUserByResetToken = async (token) => {
 const setResetToken = async (userId) => {
     try {
         const resetToken = crypto.randomBytes(32).toString('hex');
-        const resetTokenExpires = new Date(Date.now() + 5 * 60 * 1000); 
+        const resetTokenExpires = new Date(Date.UTC(
+          new Date().getUTCFullYear(), new Date().getUTCMonth(), new Date().getUTCDate(),
+          new Date().getUTCHours(), new Date().getUTCMinutes(), new Date().getUTCSeconds(), 0
+        ) + 5 * 60 * 1000);
 
         await sql`
             UPDATE users
@@ -270,6 +292,7 @@ const setVerificationToken = async (userId, token, expires) => {
 export default {
   createUser,
   getUserByEmail,
+  deleteUnverifiedUserByEmail,
   getUserById,
   findUserByVerificationToken,
   setVerificationToken,

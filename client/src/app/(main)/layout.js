@@ -1,19 +1,35 @@
+"use client";
+
 import AppSidebar from "@/components/AppSidebar";
 import AppHeader from "@/components/AppHeader";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { useEffect, useState } from "react";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
 
 export default function Layout({ children }) {
+	const [isCollapsed, setIsCollapsed] = useState(false);
+	useEffect(() => {}, [isCollapsed]);
+
 	return (
-		<div className="grid grid-rows-[60px_auto] h-screen w-screen gap-2 bg-gray-100 dark:bg-gray-900">
-			<AppHeader className="flex-none" />
-			<div className="flex flex-1 gap-2 overflow-hidden dark:bg-gray-900 max-h-[calc(100vh-75px)]">
-				<SidebarProvider className="relative flex-none w-64 ">
-					<AppSidebar />
+		<>
+			<div className="h-[100dvh] w-full overflow-hidden bg-white dark:bg-gray-900">
+				<AppHeader />
+				<SidebarProvider className="grid grid-cols-[auto_1fr]">
+					<div
+						className={cn(
+							"flex flex-col h-full",
+							isCollapsed ? "w-16" : "w-55"
+						)}
+					>
+						<AppSidebar
+							isCollapsed={isCollapsed}
+							setIsCollapsed={setIsCollapsed}
+						/>
+					</div>
+					<SidebarInset>{children}</SidebarInset>
 				</SidebarProvider>
-				<div className="relative flex-1 bg-gray-100 dark:bg-gray-900 h-full">
-					{children}
-				</div>
 			</div>
-		</div>
+		</>
 	);
 }

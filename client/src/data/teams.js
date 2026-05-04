@@ -217,7 +217,7 @@ export const projectsData = [
 	{
 		id: "1",
 		teamId: "1",
-		name: "project1",
+		name: "projecttttttttttttttttttttttttttttttttttttttt tttttttttttttttttttttttttttttttttttttttttttt1",
 		description:
 			"Project1 is focused on creating a cutting-edge project management platform that simplifies task tracking, enhances team collaboration, and boosts productivity. The project aims to deliver an intuitive and feature-rich solution for teams of all sizes.",
 		createdBy: "test",

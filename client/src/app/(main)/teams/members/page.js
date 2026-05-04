@@ -20,7 +20,7 @@ const Member = () => {
 	};
 
 	return (
-		<div className="flex h-auto max-h-[calc(100vh-150px)] overflow-hidden w-full bg-white">
+		<div className="grid grid-cols-9 h-full max-h-[calc(100vh-140px)] overflow-hidden w-full bg-white rounded-b-2xl">
 			<MemberSideBar props={props} />
 			<MembersTable props={props} />
 		</div>

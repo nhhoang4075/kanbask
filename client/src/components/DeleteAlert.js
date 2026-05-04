@@ -12,7 +12,11 @@ import {
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 
-const DeleteAlert = () => {
+const DeleteAlert = ({ manage }) => {
+	const handleDelete = () => {
+		// Handle delete action here
+		console.log("Delete " + manage + " triggered");
+	};
 	return (
 		<AlertDialog className="">
 			<AlertDialogTrigger
@@ -33,7 +37,10 @@ const DeleteAlert = () => {
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel>Cancel</AlertDialogCancel>
-					<AlertDialogAction className="bg-red-500 w-18 hover:bg-red-600 hover:cursor-pointer hover:text-white">
+					<AlertDialogAction
+						className="bg-red-500 w-18 hover:bg-red-600 hover:cursor-pointer hover:text-white"
+						onClick={handleDelete}
+					>
 						Delete
 					</AlertDialogAction>
 				</AlertDialogFooter>

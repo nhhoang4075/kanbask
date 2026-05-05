@@ -1,87 +1,72 @@
 import { z } from "zod";
 
-import { handleValidationError } from "../../utils/helper.js";
+import { validate } from "../../config/validator.js";
 
-const validateRegister = async (req, res, next) => {
-  try {
-    const schema = z
+const validateRegister = validate(
+  z.object({
+    body: z
       .object({
         email: z.string().email().max(100),
         password: z.string().min(8).max(255),
         first_name: z.string().min(1).max(100),
         last_name: z.string().min(1).max(100)
       })
-      .strict();
+      .strict(),
+    params: z.object({}).optional(),
+    query: z.object({}).optional()
+  })
+);
 
-    await schema.parseAsync(req.body);
-    next();
-  } catch (error) {
-    next(handleValidationError(error));
-  }
-};
-
-const validateLogin = async (req, res, next) => {
-  try {
-    const schema = z
+const validateLogin = validate(
+  z.object({
+    body: z
       .object({
         email: z.string().email().max(100),
         password: z.string().min(8).max(255)
       })
-      .strict();
+      .strict(),
+    params: z.object({}).optional(),
+    query: z.object({}).optional()
+  })
+);
 
-    await schema.parseAsync(req.body);
-    next();
-  } catch (error) {
-    next(handleValidationError(error));
-  }
-};
-
-const validateEmail = async (req, res, next) => {
-  try {
-    const schema = z
+const validateEmail = validate(
+  z.object({
+    body: z
       .object({
         email: z.string().email().max(100)
       })
-      .strict();
+      .strict(),
+    params: z.object({}).optional(),
+    query: z.object({}).optional()
+  })
+);
 
-    await schema.parseAsync(req.body);
-    next();
-  } catch (error) {
-    next(handleValidationError(error));
-  }
-};
-
-const validateVerification = async (req, res, next) => {
-  try {
-    const schema = z
+const validateVerification = validate(
+  z.object({
+    body: z
       .object({
         email: z.string().email().max(100),
         verification_code: z.string().length(6)
       })
-      .strict();
+      .strict(),
+    params: z.object({}).optional(),
+    query: z.object({}).optional()
+  })
+);
 
-    await schema.parseAsync(req.body);
-    next();
-  } catch (error) {
-    next(handleValidationError(error));
-  }
-};
-
-const validatePasswordReset = async (req, res, next) => {
-  try {
-    const schema = z
+const validatePasswordReset = validate(
+  z.object({
+    body: z
       .object({
         code: z.string(),
         new_password: z.string().min(8).max(255)
       })
-      .strict();
-
-    await schema.parseAsync(req.body);
-    next();
-  } catch (error) {
-    next(handleValidationError(error));
-  }
-};
+      .strict(),
+    params: z.object({}).optional(),
+    query: z.object({}).optional()
+  })
+);
 
 export default {
   validateRegister,

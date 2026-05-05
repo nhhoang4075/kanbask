@@ -5,7 +5,7 @@ import { db } from "../../config/db.js";
 const createOneUser = async ({ email, password_hash, first_name, last_name }) => {
   try {
     const userId = uuidv4();
-    const [createdUser] = await db("users")
+    const [user] = await db("users")
       .insert({
         id: userId,
         email,
@@ -13,9 +13,9 @@ const createOneUser = async ({ email, password_hash, first_name, last_name }) =>
         first_name,
         last_name
       })
-      .returning(["*", db.raw("first_name || ' ' || last_name as full_name")]);
+      .returning("id");
 
-    return createdUser;
+    return user.id;
   } catch (err) {
     throw new Error(err);
   }
@@ -73,12 +73,12 @@ const getAllUsers = async () => {
 
 const updateOneUserById = async (id, updateData) => {
   try {
-    const [updatedUser] = await db("users")
+    const [user] = await db("users")
       .where({ id })
       .update({ ...updateData, updated_at: new Date().toISOString() })
-      .returning(["*", db.raw("first_name || ' ' || last_name as full_name")]);
+      .returning("id");
 
-    return updatedUser;
+    return user.id;
   } catch (err) {
     throw new Error(err);
   }
@@ -86,12 +86,9 @@ const updateOneUserById = async (id, updateData) => {
 
 const deleteOneUserById = async (id) => {
   try {
-    const [deletedUser] = await db("users")
-      .delete()
-      .where({ id })
-      .returning(["*", db.raw("first_name || ' ' || last_name as full_name")]);
+    const [user] = await db("users").delete().where({ id }).returning("id");
 
-    return deletedUser;
+    return user.id;
   } catch (err) {
     throw new Error(err);
   }

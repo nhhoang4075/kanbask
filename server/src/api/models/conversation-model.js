@@ -8,9 +8,9 @@ const createOneConversation = async (type, team_id, project_id) => {
         team_id,
         project_id
       })
-      .returning("*");
+      .returning("id");
 
-    return conversation;
+    return conversation.id;
   } catch (err) {
     throw new Error(err);
   }
@@ -54,7 +54,10 @@ const getOneConversationByProjectId = async (project_id) => {
 
 const getManyConversationsByUserId = async (user_id) => {
   try {
-    const conversations = await db("conversations as c")
+    const conversations = await db("conversations AS c")
+      .leftJoin("teams AS t", "c.team_id", "t.id")
+      .leftJoin("projects AS p", "c.project_id", "p.id")
+      .join("conversation_participants AS cp", "cp.conversation_id", "c.id")
       .select(
         "c.id",
         "c.type",
@@ -62,8 +65,8 @@ const getManyConversationsByUserId = async (user_id) => {
           `CASE
             WHEN c.type = 'direct' THEN (
               SELECT u.first_name || ' ' || u.last_name
-              FROM conversation_participants as cp2
-              JOIN users as u ON cp2.user_id = u.id
+              FROM conversation_participants AS cp2
+              JOIN users AS u ON cp2.user_id = u.id
               WHERE cp2.conversation_id = c.id
                 AND u.id <> ?
               LIMIT 1
@@ -78,9 +81,6 @@ const getManyConversationsByUserId = async (user_id) => {
         "c.last_message_at",
         "c.created_at"
       )
-      .leftJoin("teams as t", "c.team_id", "t.id")
-      .leftJoin("projects as p", "c.project_id", "p.id")
-      .join("conversation_participants as cp", "cp.conversation_id", "c.id")
       .where("cp.user_id", user_id)
       .orderByRaw("COALESCE(c.last_message_at, c.created_at) DESC");
 
@@ -92,9 +92,9 @@ const getManyConversationsByUserId = async (user_id) => {
 
 const deleteOneConversationById = async (id) => {
   try {
-    const [deletedConversation] = await db("conversations").delete().where({ id }).returning("*");
+    const [conversation] = await db("conversations").delete().where({ id }).returning("id");
 
-    return deletedConversation;
+    return conversation.id;
   } catch (err) {
     throw new Error(err);
   }
@@ -102,16 +102,11 @@ const deleteOneConversationById = async (id) => {
 
 const addParticipantsToConversation = async (conversation_id, user_ids) => {
   try {
-    const participants = [];
     for (const user_id of user_ids) {
-      const [participant] = await db("conversation_participants")
-        .insert({ conversation_id, user_id })
-        .returning("*");
-
-      participants.push(participant);
+      await db("conversation_participants").insert({ conversation_id, user_id });
     }
 
-    return participants;
+    return conversation_id;
   } catch (err) {
     throw new Error(err);
   }
@@ -131,17 +126,40 @@ const getParticipantsOfConversation = async (conversation_id) => {
 
 const removeParticipantsFromConversation = async (conversation_id, user_ids) => {
   try {
-    const removedUsers = [];
     for (const user_id of user_ids) {
-      const [user] = await db("conversation_participants")
-        .delete()
-        .where({ conversation_id, user_id })
-        .returning("*");
-
-      removedUsers.push(user);
+      await db("conversation_participants").delete().where({ conversation_id, user_id });
     }
 
-    return removedUsers;
+    return conversation_id;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const countUnreadMessagesByUserId = async (user_id) => {
+  try {
+    const [unreadCount] = await db("conversation_participants AS cp")
+      .join("messages AS m", "m.conversation_id", "=", "cp.conversation_id")
+      .select("cp.conversation_id")
+      .count("m.id AS unread_count")
+      .where("cp.user_id", user_id)
+      .andWhere("m.created_at", ">", db.raw("COALESCE(cp.last_read_at, '1970-01-01'::timestamp)"))
+      .groupBy("cp.conversation_id");
+
+    return unreadCount;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const updateLastReadMessage = async (conversation_id, user_id, message_id) => {
+  try {
+    await db("conversation_participants").where({ conversation_id, user_id }).update({
+      last_read_message_id: message_id,
+      last_read_at: new Date().toISOString()
+    });
+
+    return user_id;
   } catch (err) {
     throw new Error(err);
   }
@@ -156,5 +174,7 @@ export default {
   deleteOneConversationById,
   addParticipantsToConversation,
   getParticipantsOfConversation,
-  removeParticipantsFromConversation
+  removeParticipantsFromConversation,
+  countUnreadMessagesByUserId,
+  updateLastReadMessage
 };

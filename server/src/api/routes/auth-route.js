@@ -19,7 +19,7 @@ const authRoute = (router) => {
     .get(authValidation.validateEmail, authController.sendPasswordResetMail)
     .put(authValidation.validatePasswordReset, authController.resetPassword);
 
-  router.route("/auth/refresh-token").get(authController.refreshToken);
+  router.route("/auth/refresh-token").get(authController.refreshAccessToken);
 };
 
 export default authRoute;

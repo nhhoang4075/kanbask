@@ -3,6 +3,7 @@ import ms from "ms";
 
 import authService from "../services/auth-service.js";
 import jwtProvider from "../../config/jwt-provider.js";
+import ApiError from "../../utils/api-error.js";
 
 const register = async (req, res, next) => {
   try {
@@ -71,11 +72,11 @@ const logout = async (req, res, next) => {
     res.clearCookie("access_token");
     res.clearCookie("refresh_token");
 
-    const user = await authService.logout(req.user.id);
+    const userId = await authService.logout(req.user.id);
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `User logged out successfully - Id: ${user.id}`
+      message: `User ${userId} logged out successfully`
     });
   } catch (error) {
     next(error);
@@ -84,12 +85,11 @@ const logout = async (req, res, next) => {
 
 const sendVerificationMail = async (req, res, next) => {
   try {
-    const { email } = req.body;
-    const user = await authService.sendVerificationMail(email);
+    const userId = await authService.sendVerificationMail(req.body.email);
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Verification mail sent successfully to ${email}`
+      message: `Verification mail sent successfully to user ${userId}`
     });
   } catch (error) {
     next(error);
@@ -98,11 +98,11 @@ const sendVerificationMail = async (req, res, next) => {
 
 const verifyEmail = async (req, res, next) => {
   try {
-    const user = await authService.verifyEmail(req.body);
+    const userId = await authService.verifyEmail(req.body);
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Email verified successfully - Id: ${user.id}`
+      message: `Verified email successfully for user ${userId}`
     });
   } catch (error) {
     next(error);
@@ -111,12 +111,11 @@ const verifyEmail = async (req, res, next) => {
 
 const sendPasswordResetMail = async (req, res, next) => {
   try {
-    const { email } = req.body;
-    const user = await authService.sendPasswordResetMail(email);
+    const userId = await authService.sendPasswordResetMail(req.body.email);
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Password reset mail sent successfully to ${email}`
+      message: `Password reset mail sent successfully to user ${userId}`
     });
   } catch (error) {
     next(error);
@@ -125,18 +124,18 @@ const sendPasswordResetMail = async (req, res, next) => {
 
 const resetPassword = async (req, res, next) => {
   try {
-    const user = await authService.resetPassword(req.body);
+    const userId = await authService.resetPassword(req.body);
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Password reset successfully - Id: ${user.id}`
+      message: `Reset password successfully for user ${userId}`
     });
   } catch (error) {
     next(error);
   }
 };
 
-const refreshToken = async (req, res, next) => {
+const refreshAccessToken = async (req, res, next) => {
   try {
     const refreshToken = req.cookies?.refresh_token;
 
@@ -171,7 +170,7 @@ const refreshToken = async (req, res, next) => {
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: "Refreshed access token"
+      message: "Refreshed access token successfully"
     });
   } catch (error) {
     next(error);
@@ -186,5 +185,5 @@ export default {
   sendVerificationMail,
   sendPasswordResetMail,
   resetPassword,
-  refreshToken
+  refreshAccessToken
 };

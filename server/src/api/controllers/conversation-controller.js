@@ -19,7 +19,7 @@ const createOneConversation = async (req, res, next) => {
 
 const getManyConversationsByUserId = async (req, res, next) => {
   try {
-    const conversations = await conversationService.getManyConversationsByUserId(req.params.userId);
+    const conversations = await conversationService.getManyConversationsByUserId(req.body.user_id);
 
     res.status(StatusCodes.OK).json({
       success: true,

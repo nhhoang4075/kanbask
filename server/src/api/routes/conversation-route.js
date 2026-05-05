@@ -3,14 +3,8 @@ import conversationController from "../controllers/conversation-controller.js";
 
 const conversationRoute = (router) => {
   router
-    .route("/conversations/of/:userId")
-    .get(
-      conversationValidation.validateUserIdParam,
-      conversationController.getManyConversationsByUserId
-    );
-
-  router
     .route("/conversations")
+    .get(conversationValidation.validateUserId, conversationController.getManyConversationsByUserId)
     .post(
       conversationValidation.validateNewConversation,
       conversationController.createOneConversation

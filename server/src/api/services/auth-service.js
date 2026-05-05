@@ -7,9 +7,9 @@ import ApiError from "../../utils/api-error.js";
 import { sendMail } from "../../config/mail-provider.js";
 import { sanitizeUser } from "../../utils/helper.js";
 
-const register = async (reqBody) => {
+const register = async (data) => {
   try {
-    const { email } = reqBody;
+    const { email } = data;
 
     const existedUser = await userModel.getOneUserByEmail(email);
 
@@ -20,18 +20,20 @@ const register = async (reqBody) => {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(reqBody.password, 10);
+    const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    const user = await userModel.createOneUser({
+    const userId = await userModel.createOneUser({
       email,
       password_hash: hashedPassword,
-      first_name: reqBody.first_name,
-      last_name: reqBody.last_name
+      first_name: data.first_name,
+      last_name: data.last_name
     });
 
-    if (!user) {
+    if (!userId) {
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create user");
     }
+
+    const user = await userModel.getOneUserById(userId);
 
     return sanitizeUser(user);
   } catch (err) {
@@ -39,32 +41,27 @@ const register = async (reqBody) => {
   }
 };
 
-const login = async (reqBody) => {
+const login = async (data) => {
   try {
-    const { email } = reqBody;
+    const { email } = data;
 
-    const user = await userModel.getOneUserByEmail(email);
+    const existedUser = await userModel.getOneUserByEmail(email);
 
-    if (!user) {
+    if (!existedUser) {
       throw new ApiError(StatusCodes.NOT_FOUND, `User with email '${email}' haven't existed yet`);
     }
 
-    const isPasswordMatched = await bcrypt.compare(reqBody.password, user.password_hash);
+    const isPasswordMatched = await bcrypt.compare(data.password, existedUser.password_hash);
 
     if (!isPasswordMatched) {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid credentials");
     }
 
-    const updatedUser = await userModel.updateOneUserById(user.id, {
+    await userModel.updateOneUserById(existedUser.id, {
       is_active: true
     });
 
-    if (!updatedUser) {
-      throw new ApiError(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Failed to update user's active status"
-      );
-    }
+    const user = await userModel.getOneUserById(existedUser.id);
 
     return sanitizeUser(user);
   } catch (err) {
@@ -80,19 +77,12 @@ const logout = async (userId) => {
       throw new ApiError(StatusCodes.NOT_FOUND, `User with id '${userId}' not found`);
     }
 
-    const updatedUser = await userModel.updateOneUserById(user.id, {
+    await userModel.updateOneUserById(user.id, {
       is_active: false,
       last_active: new Date().toISOString()
     });
 
-    if (!updatedUser) {
-      throw new ApiError(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        "Failed to update user's active status"
-      );
-    }
-
-    return sanitizeUser(updatedUser);
+    return userId;
   } catch (err) {
     throw err;
   }
@@ -120,14 +110,10 @@ const sendVerificationMail = async (userEmail) => {
 
     const hashedCode = await bcrypt.hash(code, 10);
 
-    const updatedUser = await userModel.updateOneUserById(user.id, {
+    const userId = await userModel.updateOneUserById(user.id, {
       verification_code: hashedCode,
       verification_expires: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
     });
-
-    if (!updatedUser) {
-      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create verification code");
-    }
 
     const data = { user: { name: user.last_name }, verificationCode: code };
 
@@ -138,15 +124,15 @@ const sendVerificationMail = async (userEmail) => {
       data
     });
 
-    return sanitizeUser(user);
+    return userId;
   } catch (err) {
     throw err;
   }
 };
 
-const verifyEmail = async (reqBody) => {
+const verifyEmail = async (data) => {
   try {
-    const user = await userModel.getOneUserByEmail(reqBody.email);
+    const user = await userModel.getOneUserByEmail(data.email);
 
     if (!user) {
       throw new ApiError(
@@ -168,23 +154,19 @@ const verifyEmail = async (reqBody) => {
       throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "Verification code has expired");
     }
 
-    const isCodeMatched = await bcrypt.compare(reqBody.verification_code, verification_code);
+    const isCodeMatched = await bcrypt.compare(data.verification_code, verification_code);
 
     if (!isCodeMatched) {
       throw new ApiError(StatusCodes.FORBIDDEN, "Verification code is not matched");
     }
 
-    const updatedUser = await userModel.updateOneUserById(user.id, {
+    const userId = await userModel.updateOneUserById(user.id, {
       email_verified: true,
       verification_code: null,
       verification_expires: null
     });
 
-    if (!updatedUser) {
-      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to verify user");
-    }
-
-    return sanitizeUser(updatedUser);
+    return userId;
   } catch (err) {
     throw err;
   }
@@ -200,14 +182,10 @@ const sendPasswordResetMail = async (userEmail) => {
 
     const code = uuidv4();
 
-    const updateUser = await userModel.updateOneUserById(user.id, {
+    const userId = await userModel.updateOneUserById(user.id, {
       password_reset_code: code,
       password_reset_expires: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
     });
-
-    if (!updateUser) {
-      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create password reset code");
-    }
 
     const passwordResetUrl = `${process.env.CLIENT_ORIGIN}/auth/reset-password?code=${code}`;
 
@@ -220,15 +198,15 @@ const sendPasswordResetMail = async (userEmail) => {
       data
     });
 
-    return sanitizeUser(user);
+    return userId;
   } catch (err) {
     throw err;
   }
 };
 
-const resetPassword = async (reqBody) => {
+const resetPassword = async (data) => {
   try {
-    const user = await userModel.getOneUserByPasswordResetCode(reqBody.code);
+    const user = await userModel.getOneUserByPasswordResetCode(data.code);
 
     if (!user) {
       throw new ApiError(StatusCodes.NOT_FOUND, `Invalid password reset code`);
@@ -238,19 +216,15 @@ const resetPassword = async (reqBody) => {
       throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "Password reset code has expired");
     }
 
-    const hashedNewPassword = await bcrypt.hash(reqBody.new_password, 10);
+    const hashedNewPassword = await bcrypt.hash(data.new_password, 10);
 
-    const updatedUser = await userModel.updateOneUserById(user.id, {
+    const userId = await userModel.updateOneUserById(user.id, {
       password_hash: hashedNewPassword,
       password_reset_code: null,
       password_reset_expires: null
     });
 
-    if (!updatedUser) {
-      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to reset user password");
-    }
-
-    return sanitizeUser(updatedUser);
+    return userId;
   } catch (err) {
     throw err;
   }

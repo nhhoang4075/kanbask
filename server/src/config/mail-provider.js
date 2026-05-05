@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export const sendMail = async (options) => {
+const sendMail = async (options) => {
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || "587", 10),
@@ -37,3 +37,5 @@ export const sendMail = async (options) => {
 
   await transporter.sendMail(mailOptions);
 };
+
+export { sendMail };

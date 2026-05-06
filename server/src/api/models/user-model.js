@@ -100,11 +100,38 @@ const deleteOneUserById = async (id) => {
   }
 };
 
+const getAllUsers = async () => {
+  try {
+      const users = await db("users")
+          .select(
+              "id",
+              "email",
+              "first_name",
+              "last_name",
+              db.raw("first_name || ' ' || last_name as full_name"), 
+              "avatar_url",
+              "role",
+              "last_active",
+              "is_active",
+              "is_enabled",
+              "email_verified",
+              "created_at",
+              "updated_at"
+          )
+          .orderBy("created_at", "desc"); 
+      return users; 
+  } catch (err) {
+      console.error("Error in getAllUsers:", err);
+      throw new Error(err);
+  }
+};
+
 export default {
   createOneUser,
   getOneUserById,
   getOneUserByEmail,
   getOneUserByPasswordResetCode,
   updateOneUserById,
-  deleteOneUserById
+  deleteOneUserById,
+  getAllUsers
 };

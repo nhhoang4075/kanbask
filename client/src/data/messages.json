@@ -120,22 +120,6 @@
     "createdAt": "2025-03-30T10:05:23.192Z"
   },
   {
-    "id": "msg-1743390329121",
-    "conversationId": "conv-1",
-    "senderId": "user1",
-    "content": "Hello",
-    "status": "read",
-    "createdAt": "2025-03-31T03:05:29.121Z"
-  },
-  {
-    "id": "msg-1743514266416",
-    "conversationId": "conv-1",
-    "senderId": "user1",
-    "content": "testing",
-    "status": "read",
-    "createdAt": "2025-04-01T13:31:06.416Z"
-  },
-  {
     "id": "msg-1743514274727",
     "conversationId": "conv-3",
     "senderId": "user1",

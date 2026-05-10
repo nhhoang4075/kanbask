@@ -47,3 +47,17 @@ export async function PUT(request) {
         return Response.json({ error: 'Failed to send message' }, { status: 500 });
     }
 }
+export async function DELETE(request) {
+    try {
+        const { deleteMessageIds } = await request.json();
+        const data = await fsPromises.readFile(usersFilePath, 'utf-8');
+        const messages = JSON.parse(data);
+        if (deleteMessageIds.length === 0) return Response.json({text: "No messages to delete", status: 400 });
+        const newMessages = messages.filter(message => !deleteMessageIds.includes(message.id));
+        if (newMessages.length === messages.length) return Response.json({text: "No messages deleted", status: 400 });
+        await fsPromises.writeFile(usersFilePath, JSON.stringify(newMessages, null, 2));
+        return Response.json({text: "Success", status: 201 });
+    } catch (error) {
+        return Response.json({ error: 'Failed to send message' }, { status: 500 });
+    }
+}

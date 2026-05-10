@@ -22,9 +22,9 @@ import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
 import Message from "./Message";
 
-export function Chat({ currConv, messages, users, handleSendMessage, handleSeenMessage, loading }) {
+export function Chat({ currConv, messages, users, handleSendMessage, handleSeenMessage, handleDeleteMessage, loading }) {
     const searchParams = useSearchParams();
-    const currUser = searchParams.get("userId");
+    const currUserId = searchParams.get("userId");
     const chatContainerRef = useRef(null);
     const newMessageRef = useRef(null);
     const inputRef = useRef(null);
@@ -38,7 +38,7 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
     const conversationMessages = currConv?.messageIds
         .map(messageId => messages.find(message => message.id === messageId)) || [];
     
-    // The status is bugged so remove it to fix the socket conversation properly
+    // The scroll is bugged so remove it to fix the socket conversation properly
 
     // // Function to show the scroll button if user is not at the bottom of the chat
     // const handleShowScrollButton = (e) => {
@@ -64,7 +64,7 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
     // useEffect(() => {
     //     if (!currConv) return;
         
-    //     const firstUnreadMessage = conversationMessages.find(message => (message.senderId !== currUser && message.status === "received"));
+    //     const firstUnreadMessage = conversationMessages.find(message => (message.senderId !== currUserId && message.status === "received"));
     //     setHasNewMessages(!!firstUnreadMessage);
     //     setFirstUnreadMessageId(firstUnreadMessage?.id || null);
         
@@ -84,14 +84,14 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
     // useEffect(() => {
     //     if (!currConv || firstLoad) return;
 
-    //     const firstUnreadMessage = conversationMessages.find(message => (message.senderId !== currUser && message.status === "received"));
+    //     const firstUnreadMessage = conversationMessages.find(message => (message.senderId !== currUserId && message.status === "received"));
     //     setHasNewMessages(!!firstUnreadMessage);
     //     // Only set the first unread message ID if it hasn't been set yet
     //     setFirstUnreadMessageId(prevId => prevId || firstUnreadMessage?.id || null);
 
     //    // If the last message is from the current user, scroll to bottom
     //    const lastMessage = conversationMessages[conversationMessages.length - 1];
-    //    if (lastMessage && lastMessage.senderId === currUser) {
+    //    if (lastMessage && lastMessage.senderId === currUserId) {
     //        setTimeout(scrollToBottom, 100);
     //    }
     // }, [messages]);
@@ -127,7 +127,7 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
         const newMessage = {
             id: `msg-${timeSent.getTime()}`, // Time unique ID to prevent collisions
             conversationId: currConv.id,
-            senderId: currUser,
+            senderId: currUserId,
             content: mess.trim(),
             status: "sent",
             createdAt: timeSent.toISOString(),
@@ -146,7 +146,7 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
     }
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <ChatHeader currUser={currUser} currConv={currConv} users={users} />
+            <ChatHeader currUserId={currUserId} currConv={currConv} users={users} />
             <Card className="flex-1 my-2 min-h-0 bg-neutral-100 dark:bg-black overflow-hidden">
                 <CardContent className="flex flex-col items-center h-full p-2">
                     <ScrollArea className="h-full w-full overflow-auto"
@@ -171,8 +171,9 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
                                     message={message} 
                                     users={users} 
                                     conversationMessages={conversationMessages} 
-                                    currUser={currUser}
-                                    onMessageSeen={handleSeenMessage}
+                                    currUserId={currUserId}
+                                    handleSeenMessage={handleSeenMessage}
+                                    handleDeleteMessage={handleDeleteMessage}
                                 />  
                             </div>
                             ))}

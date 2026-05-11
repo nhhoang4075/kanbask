@@ -52,7 +52,7 @@ export function DataTable({ columns, data, setFunction, manage }) {
 
 	useEffect(() => {
 		table.resetRowSelection();
-	}, [table.getRowModel().rows]);
+	}, [table.getRowModel()?.rows]);
 
 	return (
 		<div>
@@ -73,16 +73,23 @@ export function DataTable({ columns, data, setFunction, manage }) {
 					{table.getSelectedRowModel()?.rows.length == 1 &&
 						(manage == "project" ? (
 							<EditProject
-								project={table.getSelectedRowModel().rows[0]}
+								project={table.getSelectedRowModel()?.rows[0]}
 							/>
 						) : (
 							<EditMember
-								user={table.getSelectedRowModel().rows[0]}
+								user={table.getSelectedRowModel()?.rows[0]}
 							/>
 						))}
-					{table.getSelectedRowModel().rows.length > 0 && (
+					{table.getSelectedRowModel()?.rows.length > 0 && (
 						<>
-							<DeleteAlert manage={manage} />
+							<DeleteAlert
+								manage={manage}
+								rows={[
+									...table
+										.getSelectedRowModel()
+										?.rows.map((row) => row.original),
+								]}
+							/>
 						</>
 					)}
 					{manage == "project" ? <AddProject /> : <AddMember />}

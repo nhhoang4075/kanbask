@@ -12,10 +12,11 @@ import {
 } from "./ui/alert-dialog";
 import { Button } from "./ui/button";
 
-const DeleteAlert = ({ manage }) => {
+const DeleteAlert = ({ manage, rows }) => {
 	const handleDelete = () => {
 		// Handle delete action here
 		console.log("Delete " + manage + " triggered");
+		console.log(rows.map((row) => row.id));
 	};
 	return (
 		<AlertDialog className="">

@@ -7,7 +7,7 @@ import { Input } from "../ui/input";
 import ProjectMoreButton from "../ProjectDataTable/ProjectMoreButton";
 
 const MemberSideBar = ({ props }) => {
-	const { teamShow, setTeamShow, showData, setShowData } = props;
+	const { setTeamShow, setShowData } = props;
 
 	const [teamList, setTeamList] = useState(teams);
 
@@ -41,7 +41,7 @@ const MemberSideBar = ({ props }) => {
 	};
 
 	return (
-		<div className="w-full col-span-2 bg-neutral-100 px-3 py-2 max-h-[calc(100vh-80px)]">
+		<div className="w-full col-span-2 bg-gray-100 px-3 py-2 max-h-[calc(100vh-80px)]">
 			<h2 className="text-center font-bold text-xl mb-2 py-2">
 				Teams and Members
 			</h2>
@@ -70,7 +70,7 @@ const MemberSideBar = ({ props }) => {
 									setShowData("team");
 								}}
 								key={team.id}
-								className="col-span-6 text-base capitalize px-2 hover:cursor-pointer w-full text-left overflow-hidden text-ellipsis"
+								className="col-span-6 font-semibold text-base capitalize px-2 hover:cursor-pointer w-full text-left overflow-hidden text-ellipsis"
 							>
 								{team.name}
 							</div>

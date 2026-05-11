@@ -32,7 +32,7 @@ export function KanbanColumn({ column, onTaskMove }) {
 	return (
 		<div
 			className={cn(
-				"flex flex-col bg-muted/40 rounded-lg p-3 h-full overflow-hidden",
+				"flex flex-col bg-muted/40 rounded-lg p-3 h-full",
 				isOver && "ring-2 ring-primary/20"
 			)}
 			onDragOver={handleDragOver}
@@ -46,7 +46,7 @@ export function KanbanColumn({ column, onTaskMove }) {
 				</span>
 			</div>
 
-			<div className="flex flex-col gap-2 flex-1 overflow-auto">
+			<div className="flex flex-col gap-2 flex-1">
 				{column.tasks.map((task) => (
 					<KanbanTask
 						key={task.id}

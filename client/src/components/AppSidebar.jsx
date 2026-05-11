@@ -49,21 +49,20 @@ export default function AppSidebar({ isCollapsed, setIsCollapsed }) {
 	return (
 		<Sidebar
 			collapsible="icon"
-			className="relative w-50 h-[calc(100vh-70px)] my-2 mx-3 bg-gray-200 border-3 border-r-5 border-gray-300"
+			className="relative w-50 h-[calc(100vh-60px)]"
 		>
-			<SidebarContent className="bg-neutral-200">
+			<SidebarContent className="bg-prussian-blue">
 				<SidebarMenu className="flex flex-col space-y-2 items-center px-2 py-2">
 					<SidebarTrigger
-						className="self-start bg-white text-black"
+						className="self-start bg-transparent text-white hover:bg-white hover:text-black"
 						onClick={handleToggleSidebar}
 					/>
 					{navItems.map((item) => (
 						<SidebarMenuButton
 							key={item.name}
 							className={cn(
-								"w-full px-4 py-5.5 text-base bg-white text-black justify-start text-left hover:bg-gray-300 hover:cursor-pointer",
-								pathname === item.href &&
-									"bg-gray-400 text-white"
+								"w-full px-4 py-5.5 text-base justify-start bg-transparent text-white hover:bg-white hover:text-black hover:cursor-pointer",
+								pathname === item.href && "bg-white text-black"
 							)}
 							onClick={() => {
 								router.push(
@@ -73,7 +72,7 @@ export default function AppSidebar({ isCollapsed, setIsCollapsed }) {
 							isActive={item.isActive}
 						>
 							<item.icon className="w-6 h-6 mr-2" />
-							<span className="text-base font-medium">
+							<span className="text-base font-bold">
 								{item.name}
 							</span>
 						</SidebarMenuButton>

@@ -9,7 +9,7 @@ import {
 	CardFooter,
 	CardHeader,
 } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import React from "react";
 
 const KanbanTask = ({ task, columnId }) => {
@@ -23,15 +23,6 @@ const KanbanTask = ({ task, columnId }) => {
 		low: "bg-green-100 text-green-800 hover:bg-green-100/80",
 		medium: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100/80",
 		high: "bg-red-100 text-red-800 hover:bg-red-100/80",
-	};
-
-	const formatDate = (dateString) => {
-		if (!dateString) return null;
-		const date = new Date(dateString);
-		return new Intl.DateTimeFormat("en-US", {
-			month: "short",
-			day: "numeric",
-		}).format(date);
 	};
 
 	const dueDate = formatDate(task.dueDate);

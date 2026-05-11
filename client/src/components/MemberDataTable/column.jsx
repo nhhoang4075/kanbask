@@ -135,7 +135,7 @@ export const columns = [
 						</DropdownMenuItem>
 						<EditMember user={row} />
 						<DropdownMenuSeparator />
-						<DeleteAlert manage={"member"} />
+						<DeleteAlert manage={"member"} rows={[user]} />
 					</DropdownMenuContent>
 				</DropdownMenu>
 			);

@@ -2,8 +2,8 @@
 
 import MemberSideBar from "@/components//MemberDataTable/MemberSideBar";
 import MembersTable from "@/components/MemberDataTable/MembersTable";
-import { teams } from "@/data/teams";
-import React, { useState } from "react";
+import { projectMember, teams, teamsMember, users } from "@/data/teams";
+import React, { useEffect, useState } from "react";
 
 const Member = () => {
 	// showData is used to show teams or project

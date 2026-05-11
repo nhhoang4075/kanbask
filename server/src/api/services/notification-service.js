@@ -1,6 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import notificationModel from "../models/notification-model.js";
 import ApiError from "../../utils/api-error.js";
+import { emitNewNotification, emitNotificationUpdate } from "../../socket/notification-socket.js";
 
 const createAndSendNotification = async (data) => {
   try {
@@ -23,7 +24,8 @@ const createAndSendNotification = async (data) => {
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create notification in database");
     }
 
-    console.log(`Notification created for user ${user_id}. Socket emit skipped.`);
+    emitNewNotification(user_id, newNotification);
+    console.log(`Notification created and emitted via WebSocket for user ${user_id}.`);
 
     return newNotification;
   } catch (err) {
@@ -126,7 +128,8 @@ const getNotificationsForUser = async (userId, queryParams) => {
 
     return { notifications: processedNotifications, unreadCount };
   } catch (err) {
-    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to fetch notifications");
+    console.error(`Error fetching notifications for user ${userId}:`, err);
+    throw err instanceof ApiError ? err : new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to fetch notifications");
   }
 };
 
@@ -137,20 +140,31 @@ const markNotificationAsRead = async (userId, notificationId) => {
         throw new ApiError(StatusCodes.NOT_FOUND, `Notification with id '${notificationId}' not found or you don't have permission.`);
     }
 
-    console.log(`Notification ${updatedId} marked as read. Socket emit skipped.`);
+    emitNotificationUpdate(userId, { type: 'read', id: updatedId });
+    console.log(`Notification ${updatedId} marked as read and update emitted via WebSocket.`);
+
     return updatedId;
   } catch (err) {
-    throw err instanceof ApiError ? err : new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to mark notification as read");
+     console.error(`Error marking notification ${notificationId} as read for user ${userId}:`, err);
+     throw err instanceof ApiError ? err : new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to mark notification as read");
   }
 };
 
 const markAllNotificationsAsRead = async (userId) => {
   try {
     const count = await notificationModel.markAllNotificationsAsRead(userId);
-    console.log(`Marked ${count} notifications as read for user ${userId}. Socket emit skipped.`);
+
+    if (count > 0) {
+        emitNotificationUpdate(userId, { type: 'read_all' });
+        console.log(`Marked ${count} notifications as read for user ${userId} and update emitted via WebSocket.`);
+    } else {
+        console.log(`No unread notifications to mark as read for user ${userId}.`);
+    }
+
     return count;
   } catch (err) {
-    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to mark all notifications as read");
+     console.error(`Error marking all notifications as read for user ${userId}:`, err);
+     throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to mark all notifications as read");
   }
 };
 
@@ -161,21 +175,34 @@ const deleteNotification = async (userId, notificationId) => {
     if (deletedCount === 0) {
       throw new ApiError(StatusCodes.NOT_FOUND, `Notification with id '${notificationId}' not found or you don't have permission.`);
     }
+
+    emitNotificationUpdate(userId, { type: 'delete', id: notificationId });
+    console.log(`Notification ${notificationId} deleted for user ${userId} and update emitted via WebSocket.`);
+
     return notificationId;
   } catch (err) {
-    throw err instanceof ApiError ? err : new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to delete notification");
+     console.error(`Error deleting notification ${notificationId} for user ${userId}:`, err);
+     throw err instanceof ApiError ? err : new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to delete notification");
   }
 };
 
 const deleteAllNotifications = async (userId) => {
     try {
         const deletedCount = await notificationModel.deleteAllNotificationsByUserId(userId);
+
+        if (deletedCount > 0) {
+             emitNotificationUpdate(userId, { type: 'delete_all' });
+             console.log(`Deleted ${deletedCount} notifications for user ${userId} and update emitted via WebSocket.`);
+        } else {
+            console.log(`No notifications to delete for user ${userId}.`);
+        }
+
         return deletedCount;
     } catch (err) {
+        console.error(`Error deleting all notifications for user ${userId}:`, err);
         throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, err.message || "Failed to delete all notifications");
     }
 };
-
 
 export default {
   createAndSendNotification,
@@ -183,5 +210,5 @@ export default {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
-  deleteAllNotifications, 
+  deleteAllNotifications,
 };

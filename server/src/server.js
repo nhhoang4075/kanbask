@@ -1,70 +1,53 @@
-// Load environment variables from .env file
-require("dotenv").config();
+import "dotenv/config";
+import express, { json } from "express";
+import { createServer } from "http";
+import cors from "cors";
+import { StatusCodes } from "http-status-codes";
+import cookieParser from "cookie-parser";
 
-const express = require("express");
-const http = require("http");
-const StatusCodes = require("http-status-codes").StatusCodes;
-const socketIo = require("socket.io");
+import apiRouter from "./api/routes/index.js";
+import setupSocket from "./socket/index.js";
 
 /**
- * Initializes and starts the HTTP server.
- *
- * This function creates an Express application and sets up the following routes:
- *
- * - GET "/" : Responds with a JSON object containing a test message.
- * - GET "/health-check" : Responds with a JSON object confirming that the health check has passed.
- *
- * The function then creates an HTTP server from the Express app and listens on a port specified by the
- * `APP_PORT` environment variable (defaulting to 8000 if not defined). When the server starts, it logs
- * a message displaying the host and port.
+ * Starts the server with Express and HTTP.
  *
  * @function startServer
+ * @description Initializes an Express application, sets up an HTTP server, and configures routes.
  */
-function startServer() {
+const startServer = () => {
   const app = express();
-  const server = http.createServer(app);
-  const io = socketIo(server, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"],
-    },
-  });
+  const server = createServer(app);
 
-  app.use(express.json());
+  // Middlewares
+  app.use(json());
+  app.use(
+    cors({
+      origin: process.env.CLIENT_ORIGIN || "http://localhost:3000",
+      credentials: true
+    })
+  );
+  app.use(cookieParser());
 
-  io.on("connection", (socket) => {
-    console.log("A user connected: " + socket.id);
+  app.use("/api", apiRouter());
+  setupSocket(server);
 
-    // Lắng nghe sự kiện 'chat message' từ client
-    socket.on("chat message", (msg) => {
-      console.log("Message received: ", msg);
-      // Phát lại tin nhắn đến tất cả client
-      io.emit("chat message", msg);
-    });
-
-    // Xử lý khi client ngắt kết nối
-    socket.on("disconnect", () => {
-      console.log("User disconnected: " + socket.id);
-    });
-  });
-
-  app.get("/", function (req, res) {
+  app.get("/health-check", async (req, res) => {
     res.status(StatusCodes.OK).json({
-      message: "Test GET API",
-    });
-  });
-
-  app.get("/health-check", async function (req, res) {
-    res.status(StatusCodes.OK).json({
-      message: "Healthcheck API passed!",
+      success: true,
+      message: "Healthcheck passed!"
     });
   });
 
   server.listen(process.env.APP_PORT || 8000, () => {
-    console.log(
-      `Server is running at http://${process.env.APP_HOST}:${process.env.APP_PORT}`
-    );
+    console.log(`Server is running at http://${process.env.APP_HOST}:${process.env.APP_PORT}`);
   });
-}
+};
 
-startServer();
+(() => {
+  try {
+    startServer();
+  } catch (error) {
+    console.error(error);
+    process.exit(0);
+  }
+})();

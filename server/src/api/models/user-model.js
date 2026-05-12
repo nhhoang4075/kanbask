@@ -2,16 +2,13 @@ import { v4 as uuidv4 } from "uuid";
 
 import { db } from "../../config/db.js";
 
-const createOneUser = async ({ email, password_hash, first_name, last_name }) => {
+const createOneUser = async (data) => {
   try {
     const userId = uuidv4();
     const [user] = await db("users")
       .insert({
         id: userId,
-        email,
-        password_hash,
-        first_name,
-        last_name
+        ...data
       })
       .returning("id");
 
@@ -65,6 +62,7 @@ const getAllUsers = async () => {
     const users = await db("users")
       .select("*", db.raw("first_name || ' ' || last_name as full_name"))
       .orderBy("created_at", "desc");
+
     return users;
   } catch (err) {
     throw new Error(err);

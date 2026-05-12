@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "printWidth": 100,
   "useTabs": false,
   "tabWidth": 2,
@@ -9,15 +8,4 @@
   "bracketSpacing": true,
   "arrowParens": "always",
   "endOfLine": "lf"
-=======
-	"printWidth": 100,
-	"useTabs": false,
-	"tabWidth": 2,
-	"semi": true,
-	"singleQuote": false,
-	"trailingComma": "none",
-	"bracketSpacing": true,
-	"arrowParens": "always",
-	"endOfLine": "lf"
->>>>>>> c71d701 (create conversation back-end api)
 }

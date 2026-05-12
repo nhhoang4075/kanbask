@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS task_comments (
     task_id INT REFERENCES tasks(id) NOT NULL,
     user_id UUID REFERENCES users(id) NOT NULL,
     content TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -85,16 +85,7 @@ CREATE TABLE IF NOT EXISTS conversations (
     type VARCHAR(30) NOT NULL,
     team_id INT REFERENCES teams(id),
     project_id INT REFERENCES projects(id),
-    last_message_at TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS conversation_participants (
-    conversation_id INT REFERENCES conversations(id),
-    user_id UUID REFERENCES users(id),
-    last_read_message_id INT REFERENCES messages(id),
-    last_read_at TIMESTAMP WITH TIME ZONE
-    PRIMARY KEY (conversation_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -102,8 +93,16 @@ CREATE TABLE IF NOT EXISTS messages (
     conversation_id INT REFERENCES conversations(id),
     sender_id UUID REFERENCES users(id) NOT NULL,
     content TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS conversation_participants (
+    conversation_id INT REFERENCES conversations(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    last_read_message_id INT REFERENCES messages(id) ON DELETE CASCADE,
+    last_read_at TIMESTAMP WITH TIME ZONE,
+    PRIMARY KEY (conversation_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS notifications (
@@ -123,3 +122,25 @@ CREATE TABLE IF NOT EXISTS activity_logs (
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE OR REPLACE VIEW conversation_latest_activity_view AS
+SELECT
+    c.id AS conversation_id,
+    c.type,
+    c.team_id,
+    c.project_id,
+    c.created_at,
+    lm.id AS latest_message_id,
+    lm.content AS latest_message_content,
+    lm.created_at AS latest_message_at,
+    lm.sender_id AS latest_sender_id,
+    u.first_name || ' ' || u.last_name AS latest_sender_full_name
+FROM conversations c
+LEFT JOIN LATERAL (
+    SELECT m.*
+    FROM messages m
+    WHERE m.conversation_id = c.id
+    ORDER BY m.created_at DESC
+    LIMIT 1
+) lm ON TRUE
+LEFT JOIN users u ON u.id = lm.sender_id;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Check, ChevronsUpDown, User } from "lucide-react";
 import { format } from "date-fns";
 
 import { Button } from "@/components/ui/button";
@@ -25,13 +25,24 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { projects } from "@/data/tasks";
+import { projects, users } from "@/data/tasks";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from "../ui/command";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 const NewTasks = ({ open, onOpenChange, handleAddTask, selectedProject }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
   const [date, setDate] = useState(undefined);
+  const [assignees, setAssignees] = useState([]);
+  const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -42,7 +53,8 @@ const NewTasks = ({ open, onOpenChange, handleAddTask, selectedProject }) => {
       title: title.trim(),
       description: description.trim(),
       priority,
-      dueDate: date ? date.toISOString().split("T")[0] : null
+      dueDate: date ? date.toISOString().split("T")[0] : null,
+      assignedTo: assignees
     };
 
     handleAddTask(newTask);
@@ -54,9 +66,23 @@ const NewTasks = ({ open, onOpenChange, handleAddTask, selectedProject }) => {
     setDescription("");
     setPriority("medium");
     setDate(undefined);
+    setAssignees([]);
   };
 
-  const currentProject = projects.find((project) => project.id === selectedProject);
+  const handleAssigneeToggle = (user) => {
+    setAssignees((prev) => {
+      // Check if user is already assigned
+      const isAssigned = prev.some((assignee) => assignee.id === user.id);
+
+      if (isAssigned) {
+        // Remove user from assignees
+        return prev.filter((assignee) => assignee.id !== user.id);
+      } else {
+        // Add user to assignees
+        return [...prev, user];
+      }
+    });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -101,7 +127,106 @@ const NewTasks = ({ open, onOpenChange, handleAddTask, selectedProject }) => {
                 </SelectContent>
               </Select>
             </div>
+            <div className="grid gap-2">
+              <Label>Assignees</Label>
+              <Popover open={assigneePopoverOpen} onOpenChange={setAssigneePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={assigneePopoverOpen}
+                    className="justify-between"
+                  >
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      {assignees.length > 0 ? (
+                        <span>
+                          {assignees.length} {assignees.length === 1 ? "assignee" : "assignees"}
+                        </span>
+                      ) : (
+                        "Select assignees"
+                      )}
+                    </div>
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full p-0">
+                  <Command>
+                    <CommandInput placeholder="Search users..." />
+                    <CommandList>
+                      <CommandEmpty>No users found.</CommandEmpty>
+                      <CommandGroup>
+                        {users.map((user) => {
+                          const isSelected = assignees.some((assignee) => assignee.id === user.id);
+                          return (
+                            <CommandItem
+                              key={user.id}
+                              value={user.id}
+                              onSelect={() => handleAssigneeToggle(user)}
+                              className="flex items-center gap-2"
+                            >
+                              <div className={cn("flex-1 flex items-center gap-2")}>
+                                <Avatar className="h-6 w-6">
+                                  <AvatarImage
+                                    src={user.avatar || "/placeholder.svg"}
+                                    alt={user.name}
+                                  />
+                                  <AvatarFallback className="text-xs">
+                                    {user.name
+                                      .split(" ")
+                                      .map((n) => n[0])
+                                      .join("")}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span>{user.name}</span>
+                              </div>
+                              <Check
+                                className={cn("h-4 w-4", isSelected ? "opacity-100" : "opacity-0")}
+                              />
+                            </CommandItem>
+                          );
+                        })}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
 
+              {assignees.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {assignees.map((assignee) => (
+                    <div
+                      key={assignee.id}
+                      className="flex items-center gap-1 bg-secondary text-secondary-foreground px-2 py-1 rounded-md text-xs"
+                    >
+                      <Avatar className="h-4 w-4">
+                        <AvatarImage
+                          src={assignee.avatar || "/placeholder.svg"}
+                          alt={assignee.name}
+                        />
+                        <AvatarFallback className="text-[8px]">
+                          {assignee.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span>{assignee.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-4 w-4 p-0 ml-1"
+                        onClick={() => handleAssigneeToggle(assignee)}
+                      >
+                        <X className="h-3 w-3" />
+                        <span className="sr-only">Remove {assignee.name}</span>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="grid gap-2">
               <Label htmlFor="dueDate">Due Date</Label>
               <Popover>

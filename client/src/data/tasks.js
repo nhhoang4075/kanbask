@@ -1,5 +1,68 @@
+// Sample projects data
+export const projects = [
+  {
+    id: "project-1",
+    name: "Website Redesign",
+    description: "Redesign the company website with new branding",
+    color: "#3b82f6" // blue
+  },
+  {
+    id: "project-2",
+    name: "Mobile App Development",
+    description: "Develop a new mobile app for customers",
+    color: "#10b981" // green
+  },
+  {
+    id: "project-3",
+    name: "Marketing Campaign",
+    description: "Q4 marketing campaign for product launch",
+    color: "#f59e0b" // amber
+  },
+  {
+    id: "project-4",
+    name: "Infrastructure Upgrade",
+    description: "Upgrade server infrastructure and cloud services",
+    color: "#8b5cf6" // violet
+  }
+];
+
+// Sample users data
+export const users = [
+  {
+    id: "user-1",
+    name: "John Doe",
+    avatar: "/placeholder.svg?height=40&width=40"
+  },
+  {
+    id: "user-2",
+    name: "Alex Johnson",
+    avatar: "/placeholder.svg?height=40&width=40"
+  },
+  {
+    id: "user-3",
+    name: "Emily Chen",
+    avatar: "/placeholder.svg?height=40&width=40"
+  },
+  {
+    id: "user-4",
+    name: "Sam Taylor",
+    avatar: "/placeholder.svg?height=40&width=40"
+  },
+  {
+    id: "user-5",
+    name: "Jamie Smith",
+    avatar: "/placeholder.svg?height=40&width=40"
+  },
+  {
+    id: "user-6",
+    name: "Taylor Wong",
+    avatar: "/placeholder.svg?height=40&width=40"
+  }
+];
+
 // Sample data as a flat array of task objects
 export const initialData = [
+  // Project 1 tasks
   {
     id: "task-1",
     projectId: "project-1",
@@ -10,13 +73,20 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-2",
-      name: "Alex Johnson",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-2",
+        name: "Alex Johnson",
+        avatar: "/placeholder.svg?height=40&width=40"
+      },
+      {
+        id: "user-3",
+        name: "Emily Chen",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-11-15",
     completedAt: null,
     createdAt: "2023-10-15T10:30:00Z",
@@ -32,9 +102,9 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: null,
+    assignedTo: [],
     dueDate: "2023-11-20",
     completedAt: null,
     createdAt: "2023-10-16T09:15:00Z",
@@ -50,13 +120,15 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-4",
-      name: "Sam Taylor",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-4",
+        name: "Sam Taylor",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-11-10",
     completedAt: null,
     createdAt: "2023-10-17T14:20:00Z",
@@ -72,13 +144,15 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-5",
-      name: "Jamie Smith",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-5",
+        name: "Jamie Smith",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-11-12",
     completedAt: null,
     createdAt: "2023-10-18T11:45:00Z",
@@ -94,13 +168,20 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-2",
-      name: "Alex Johnson",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-2",
+        name: "Alex Johnson",
+        avatar: "/placeholder.svg?height=40&width=40"
+      },
+      {
+        id: "user-5",
+        name: "Jamie Smith",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: null,
     completedAt: null,
     createdAt: "2023-10-19T16:10:00Z",
@@ -116,13 +197,15 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-6",
-      name: "Taylor Wong",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-6",
+        name: "Taylor Wong",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-11-08",
     completedAt: null,
     createdAt: "2023-10-22T13:25:00Z",
@@ -138,13 +221,15 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-5",
-      name: "Jamie Smith",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-5",
+        name: "Jamie Smith",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-10-30",
     completedAt: "2023-10-28T11:20:00Z",
     createdAt: "2023-10-20T09:30:00Z",
@@ -160,18 +245,22 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-4",
-      name: "Sam Taylor",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-4",
+        name: "Sam Taylor",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-10-25",
     completedAt: "2023-10-23T16:45:00Z",
     createdAt: "2023-10-15T14:20:00Z",
     updatedAt: "2023-10-23T16:45:00Z"
   },
+
+  // Project 2 tasks
   {
     id: "task-9",
     projectId: "project-2",
@@ -182,13 +271,15 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-4",
-      name: "Sam Taylor",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-4",
+        name: "Sam Taylor",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-11-18",
     completedAt: null,
     createdAt: "2023-10-20T09:30:00Z",
@@ -204,13 +295,20 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-5",
-      name: "Jamie Smith",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-5",
+        name: "Jamie Smith",
+        avatar: "/placeholder.svg?height=40&width=40"
+      },
+      {
+        id: "user-6",
+        name: "Taylor Wong",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-11-25",
     completedAt: null,
     createdAt: "2023-10-22T11:45:00Z",
@@ -226,13 +324,15 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-4",
-      name: "Sam Taylor",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-4",
+        name: "Sam Taylor",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-10-30",
     completedAt: "2023-10-29T15:20:00Z",
     createdAt: "2023-10-15T14:20:00Z",
@@ -250,13 +350,15 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-6",
-      name: "Taylor Wong",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-6",
+        name: "Taylor Wong",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-11-20",
     completedAt: null,
     createdAt: "2023-10-25T09:30:00Z",
@@ -272,13 +374,20 @@ export const initialData = [
     createdBy: {
       id: "user-3",
       name: "Emily Chen",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-4",
-      name: "Sam Taylor",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-4",
+        name: "Sam Taylor",
+        avatar: "/placeholder.svg?height=40&width=40"
+      },
+      {
+        id: "user-2",
+        name: "Alex Johnson",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-11-15",
     completedAt: null,
     createdAt: "2023-10-20T14:20:00Z",
@@ -296,13 +405,15 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-5",
-      name: "Jamie Smith",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-5",
+        name: "Jamie Smith",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-11-30",
     completedAt: null,
     createdAt: "2023-10-28T11:45:00Z",
@@ -318,13 +429,20 @@ export const initialData = [
     createdBy: {
       id: "user-1",
       name: "John Doe",
-      avatar: " "
+      avatar: "/placeholder.svg?height=40&width=40"
     },
-    assignedTo: {
-      id: "user-2",
-      name: "Alex Johnson",
-      avatar: " "
-    },
+    assignedTo: [
+      {
+        id: "user-2",
+        name: "Alex Johnson",
+        avatar: "/placeholder.svg?height=40&width=40"
+      },
+      {
+        id: "user-6",
+        name: "Taylor Wong",
+        avatar: "/placeholder.svg?height=40&width=40"
+      }
+    ],
     dueDate: "2023-12-05",
     completedAt: null,
     createdAt: "2023-10-30T09:15:00Z",
@@ -366,26 +484,3 @@ export function getGroupedTasks(tasks) {
 
   return columns;
 }
-
-export const projects = [
-  {
-    id: "project-1",
-    name: "Website Redesign",
-    description: "Redesign the company website with new branding"
-  },
-  {
-    id: "project-2",
-    name: "Mobile App Development",
-    description: "Develop a new mobile app for customers"
-  },
-  {
-    id: "project-3",
-    name: "Marketing Campaign",
-    description: "Q4 marketing campaign for product launch"
-  },
-  {
-    id: "project-4",
-    name: "Infrastructure Upgrade",
-    description: "Upgrade server infrastructure and cloud services"
-  }
-];

@@ -49,7 +49,7 @@ export default function AppSidebar({ isCollapsed, setIsCollapsed }) {
 	return (
 		<Sidebar
 			collapsible="icon"
-			className="relative w-50 h-[calc(100vh-60px)]"
+			className="relative w-50 h-[calc(100vh-50px)]"
 		>
 			<SidebarContent className="bg-prussian-blue">
 				<SidebarMenu className="flex flex-col space-y-2 items-center px-2 py-2">

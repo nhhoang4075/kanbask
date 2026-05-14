@@ -57,7 +57,8 @@ const updateOneMessageById = async (id, updateData) => {
     const [message] = await db("messages")
       .where({ id })
       .update({
-        ...updateData
+        ...updateData,
+        updated_at: new Date().toISOString()
       })
       .returning("id");
 

@@ -17,15 +17,15 @@ const validateNewConversation = validate(
   })
 );
 
-const validateUserId = validate(
+const validateUserIdQuery = validate(
   z.object({
-    body: z
+    body: z.object({}).optional(),
+    params: z.object({}).optional(),
+    query: z
       .object({
         user_id: z.string().uuid()
       })
-      .strict(),
-    params: z.object({}).optional(),
-    query: z.object({}).optional()
+      .strict()
   })
 );
 
@@ -43,6 +43,6 @@ const validateConversationIdParam = validate(
 
 export default {
   validateNewConversation,
-  validateUserId,
+  validateUserIdQuery,
   validateConversationIdParam
 };

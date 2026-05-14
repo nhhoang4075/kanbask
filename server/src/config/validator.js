@@ -13,10 +13,10 @@ const validate = (schema) => (req, res, next) => {
       const errorMessages = error.errors
         .map((issue) =>
           issue.path.length
-            ? `'${issue.path.join(".")}' is ${issue.message}`
+            ? `req.${issue.path.join(".")}: ${issue.message}`
             : "All required data is empty"
         )
-        .join(". ");
+        .join("; ");
 
       next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, errorMessages));
     } else {

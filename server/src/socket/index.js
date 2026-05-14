@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 
+import registerConversationHandlers from "./conversation-socket.js";
 import registerMessageHandlers from "./message-socket.js";
 
 const setupSocket = (server) => {
@@ -13,6 +14,12 @@ const setupSocket = (server) => {
   io.on("connection", (socket) => {
     console.log("A client connected: " + socket.id);
 
+    socket.on("setup", ({ user_id }) => {
+      socket.join(`user_${user_id}`);
+      // console.log(`User ${user_id} joined personal room`);
+    });
+
+    registerConversationHandlers(io, socket);
     registerMessageHandlers(io, socket);
 
     socket.on("disconnect", () => {

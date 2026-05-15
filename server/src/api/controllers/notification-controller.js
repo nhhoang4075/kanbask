@@ -1,119 +1,107 @@
 import { StatusCodes } from "http-status-codes";
 import notificationService from "../services/notification-service.js";
 
-const getNotifications = async (req, res, next) => {
+const createOneNotification = async (req, res, next) => {
+  try {
+    const notification = await notificationService.createOneNotification(req.body);
+
+    res.status(StatusCodes.CREATED).json({
+      success: true,
+      data: { notification }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getManyNotificationsByUserId = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const queryParams = req.query;
+    const options = req.query;
 
-    const { notifications, unreadCount } = await notificationService.getNotificationsForUser(userId, queryParams);
+    const { unreadCount, notifications } = await notificationService.getManyNotificationsByUserId(
+      userId,
+      options
+    );
 
     res.status(StatusCodes.OK).json({
       success: true,
       data: {
-        notifications,
-        unread_count: unreadCount
-      },
+        unread_count: unreadCount,
+        notifications
+      }
     });
   } catch (error) {
     next(error);
   }
 };
 
-const markAsRead = async (req, res, next) => {
+const markOneNotificationAsRead = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const notificationId = parseInt(req.params.id, 10);
+    const notificationId = req.params.id;
 
-    const updatedId = await notificationService.markNotificationAsRead(userId, notificationId);
+    const id = await notificationService.markOneNotificationAsRead(notificationId, userId);
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Notification ${updatedId} marked as read.`,
+      message: `Marked notification ${id} as read`
     });
   } catch (error) {
     next(error);
   }
 };
 
-const markAllAsRead = async (req, res, next) => {
+const markAllNotificationsAsRead = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const count = await notificationService.markAllNotificationsAsRead(userId);
+    await notificationService.markAllNotificationsAsRead(userId);
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Marked ${count} notifications as read.`,
+      message: `Marked all notifications of user ${userId} as read`
     });
   } catch (error) {
     next(error);
   }
 };
 
-const createNotification = async (req, res, next) => {
-  try {
-    const { user_id, content, type, reference_id } = req.body;
-
-    const notificationData = {
-      user_id,
-      content,
-      type,
-      reference_id
-    };
-
-    const newNotification = await notificationService.createAndSendNotification(notificationData);
-
-    res.status(StatusCodes.CREATED).json({
-      success: true,
-      data: newNotification,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const deleteNotification = async (req, res, next) => {
+const deleteOneNotification = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const notificationId = parseInt(req.params.id, 10);
+    const notificationId = req.params.id;
 
-    const deletedId = await notificationService.deleteNotification(userId, notificationId);
+    const id = await notificationService.deleteOneNotification(notificationId, userId);
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Notification ${deletedId} deleted successfully.`,
+      message: `Deleted notification ${id} successfully`
     });
-
   } catch (error) {
     next(error);
   }
 };
 
 const deleteAllNotifications = async (req, res, next) => {
-    try {
-        const userId = req.user.id;
+  try {
+    const userId = req.user.id;
 
-        const deletedCount = await notificationService.deleteAllNotifications(userId);
+    await notificationService.deleteAllNotifications(userId);
 
-        res.status(StatusCodes.OK).json({
-            success: true,
-            message: `Deleted all (${deletedCount}) notifications successfully.`,
-            data: {
-                deleted_count: deletedCount
-            }
-        });
-
-    } catch (error) {
-        next(error);
-    }
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Deleted all notifications of user ${userId} successfully`
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-
 export default {
-  getNotifications,
-  markAsRead,
-  markAllAsRead,
-  createNotification,
-  deleteNotification,
-  deleteAllNotifications, 
+  createOneNotification,
+  getManyNotificationsByUserId,
+  markOneNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteOneNotification,
+  deleteAllNotifications
 };

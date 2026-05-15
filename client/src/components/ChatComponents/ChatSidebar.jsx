@@ -13,13 +13,27 @@
 import { ScrollArea } from "../ui/scroll-area"
 import { Input } from "../ui/input"
 import { Separator } from "../ui/separator"
+import { useChatData } from "@/hooks/use-chatdata"
 import SearchChatSidebar from "./SearchChatSidebar";
 import Conversation from "./Conversation";
 
-export function ChatSidebar({ currentUserId, currConv, setCurrConv, conversations, messages, users, searchText, setSearchText, convContainerRef }) {
-    const searchUsers = users.filter(user => user.id !== currentUserId).filter(user => user.fullname.toLowerCase().startsWith(searchText.toLowerCase()));
+export function ChatSidebar({ currentUserId, currConv, setCurrConv, searchText, setSearchText, convContainerRef }) {
+    // Filter out the current user from the list of users
+    //const searchUsers = users.filter(user => user.id !== currentUserId).filter(user => user.fullname.toLowerCase().startsWith(searchText.toLowerCase()));
+    const { conversations, allParticipants, loading, dataLoaded } = useChatData();
+    if (loading && !dataLoaded) {
+        return (
+            <div className="flex flex-col h-full w-full pl-2">
+                <div className="py-4 px-3 text-2xl font-bold">All Messages</div>
+                <Separator className="bg-black dark:bg-white"/>
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-gray-500">Loading conversations...</p>
+                </div>
+            </div>
+        );
+    }
     // Only render if conversations, messages, and users are available else render this
-    if (!conversations?.length || !messages?.length || !users?.length) {
+    if (!conversations?.length) {
         return (
             <div className="flex flex-col h-full w-full pl-2">
                 <div className="py-4 px-3 text-2xl font-bold">All Messages</div>
@@ -55,7 +69,6 @@ export function ChatSidebar({ currentUserId, currConv, setCurrConv, conversation
                 <div ref={convContainerRef}></div>
                 <div className="flex flex-col gap-2 pr-2">
                     {conversations
-                        .filter(conversation => conversation?.participants?.includes(currentUserId))
                         .map(conversation => (
                             <Conversation 
                                 key={conversation.id} 
@@ -63,13 +76,11 @@ export function ChatSidebar({ currentUserId, currConv, setCurrConv, conversation
                                 currentUserId={currentUserId} 
                                 currConv={currConv}
                                 setCurrConv={setCurrConv} 
-                                messages={messages} 
-                                users={users}
+                                participants={allParticipants[conversations.indexOf(conversation)]}
                             />
                         ))
                     }
                 </div>
-                
             </ScrollArea>
         </div>
     )

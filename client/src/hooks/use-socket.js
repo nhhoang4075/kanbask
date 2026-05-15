@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 const SocketContext = createContext(null);
-const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000"
+const socketUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL}`;
 const socketOptions = {
     transports: ["websocket"],
     reconnectionAttempts: 5,

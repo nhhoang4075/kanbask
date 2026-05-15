@@ -12,31 +12,34 @@
  */
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { ScrollArea } from "../ui/scroll-area";
 import { Card, CardContent } from "../ui/card";
 // import { Button } from "../ui/button";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
+import { useChatData } from "@/hooks/use-chatdata";
 // import { ChevronDown } from "lucide-react";
 import ChatHeader from "./ChatHeader";
 import ChatInput from "./ChatInput";
 import Message from "./Message";
 
-export function Chat({ currConv, messages, users, handleSendMessage, handleSeenMessage, handleDeleteMessage, loading }) {
-    const searchParams = useSearchParams();
-    const currUserId = searchParams.get("userId");
+export function Chat({ 
+                    currentUserId, 
+                    currConv,  
+                    handleSendMessage, 
+                    // handleSeenMessage, 
+                    // handleDeleteMessage, 
+                }) {
+
     const chatContainerRef = useRef(null);
     const newMessageRef = useRef(null);
     const inputRef = useRef(null);
     const [mess, setMess] = useState("");
+    const { messages, loading } = useChatData();
+
     // const [hasNewMessages, setHasNewMessages] = useState(false);
     // const [showScrollButton, setShowScrollButton] = useState(false);
     // const [firstUnreadMessageId, setFirstUnreadMessageId] = useState(null);
     // const [firstLoad, setFirstLoad] = useState(true);
-
-    // Get messages for current conversation
-    const conversationMessages = currConv?.messageIds
-        .map(messageId => messages.find(message => message.id === messageId)) || [];
     
     // The scroll is bugged so remove it to fix the socket conversation properly
 
@@ -64,7 +67,7 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
     // useEffect(() => {
     //     if (!currConv) return;
         
-    //     const firstUnreadMessage = conversationMessages.find(message => (message.senderId !== currUserId && message.status === "received"));
+    //     const firstUnreadMessage = messages.find(message => (message.senderId !== currentUserId && message.status === "received"));
     //     setHasNewMessages(!!firstUnreadMessage);
     //     setFirstUnreadMessageId(firstUnreadMessage?.id || null);
         
@@ -84,14 +87,14 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
     // useEffect(() => {
     //     if (!currConv || firstLoad) return;
 
-    //     const firstUnreadMessage = conversationMessages.find(message => (message.senderId !== currUserId && message.status === "received"));
+    //     const firstUnreadMessage = messages.find(message => (message.senderId !== currentUserId && message.status === "received"));
     //     setHasNewMessages(!!firstUnreadMessage);
     //     // Only set the first unread message ID if it hasn't been set yet
     //     setFirstUnreadMessageId(prevId => prevId || firstUnreadMessage?.id || null);
 
     //    // If the last message is from the current user, scroll to bottom
-    //    const lastMessage = conversationMessages[conversationMessages.length - 1];
-    //    if (lastMessage && lastMessage.senderId === currUserId) {
+    //    const lastMessage = messages[messages.length - 1];
+    //    if (lastMessage && lastMessage.senderId === currentUserId) {
     //        setTimeout(scrollToBottom, 100);
     //    }
     // }, [messages]);
@@ -126,8 +129,8 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
         const timeSent = new Date();
         const newMessage = {
             id: `msg-${timeSent.getTime()}`, // Time unique ID to prevent collisions
-            conversationId: currConv.id,
-            senderId: currUserId,
+            conversation_id: currConv.id,
+            sender_id: currentUserId,
             content: mess.trim(),
             status: "sent",
             createdAt: timeSent.toISOString(),
@@ -146,14 +149,14 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
     }
     return (
         <div className="flex flex-col h-full overflow-hidden">
-            <ChatHeader currUserId={currUserId} currConv={currConv} users={users} />
+            <ChatHeader currConv={currConv} currrntUserId={currentUserId}/>
             <Card className="flex-1 my-2 min-h-0 bg-neutral-100 dark:bg-black overflow-hidden">
                 <CardContent className="flex flex-col items-center h-full p-2">
                     <ScrollArea className="h-full w-full overflow-auto"
                                 // onScroll={handleShowScrollButton}
                     >
                         <div className="flex flex-col">
-                            {conversationMessages.map(message => (
+                            {messages?.map(message => (
                             <div key={message?.id}>
                                 {/* {(message?.id === firstUnreadMessageId) ? (
                                     <div ref={newMessageRef} className="relative py-2">
@@ -168,12 +171,11 @@ export function Chat({ currConv, messages, users, handleSendMessage, handleSeenM
                                     </div>
                                 ) : null} */}
                                 <Message 
-                                    message={message} 
-                                    users={users} 
-                                    conversationMessages={conversationMessages} 
-                                    currUserId={currUserId}
-                                    handleSeenMessage={handleSeenMessage}
-                                    handleDeleteMessage={handleDeleteMessage}
+                                    message={message}
+                                    messages={messages} 
+                                    currentUserId={currentUserId}
+                                    // handleSeenMessage={handleSeenMessage}
+                                    // handleDeleteMessage={handleDeleteMessage}
                                 />  
                             </div>
                             ))}

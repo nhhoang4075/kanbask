@@ -15,13 +15,34 @@
  */
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
+import { getParticipantsOfConversation } from "@/lib/ConversationActions"
+import { getOneUserById } from "@/lib/UserActions"
+import { useEffect, useState } from "react"
 
-export default function ChatHeader({ currUser, currConv, users}) {
+const getUser = async (userId) => {
+    const user = await getOneUserById(userId);
+    return user;
+}
+
+export default function ChatHeader({ currConv, currentUserId }) {
+    const [participants, setParticipants] = useState([])
+    const [receiverUsers, setReceiverUsers] = useState([])
+    useEffect(() => {
+        const fetchParticipants = async () => {
+            const participants = await getParticipantsOfConversation(currConv.id)
+            setParticipants(participants)
+        }
+        fetchParticipants()
+    }, [currConv.id]);
     // Get the receiver user(s) for the current conversation
-    const receiverUsers = currConv.participants
-        .filter(id => id !== currUser)
-        .map(id => users.find(user => user.id === id));
-
+    useEffect(() => {
+        const fetchUsers = async () => {
+            const filtered = participants?.filter(user => user.user_id !== currentUserId);
+            const receiverUsers = await Promise.all(filtered.map(user => getUser(user.user_id)));
+            setReceiverUsers(receiverUsers);
+        };
+        fetchUsers();
+    }, [participants, currentUserId]);
     return (
         <Card className="flex-none bg-neutral-200 dark:bg-black py-2">
             <CardContent className="flex w-full gap-3">

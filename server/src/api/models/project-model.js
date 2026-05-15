@@ -94,6 +94,21 @@ const createProject = async (team_id, user_id, name, description) => {
   }
 };
 
+const getUserProjectRole = async (project_id, user_id) => {
+  try {
+    const result = await db("project_members")
+      .where({
+        project_id,
+        user_id
+      })
+      .select("role")
+      .first();
+    return result?.role;
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 const ensureUserInProject = async (project_id, user_id) => {
   try {
     const result = await db("project_members")
@@ -148,6 +163,7 @@ const updateUserProjectRole = async (project_id, user_id, role) => {
 
 export default {
   createProject,
+  getUserProjectRole,
   ensureUserInProject,
   addUserToProject,
   deleteUserFromProject,

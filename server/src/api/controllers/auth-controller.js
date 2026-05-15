@@ -46,14 +46,14 @@ const login = async (req, res, next) => {
       maxAge: ms("1h"),
       httpOnly: true,
       secure: true,
-      sameSite: "strict"
+      sameSite: "none"
     });
 
     res.cookie("refresh_token", refreshToken, {
       maxAge: ms("7 days"),
       httpOnly: true,
       secure: true,
-      sameSite: "strict"
+      sameSite: "none"
     });
 
     res.status(StatusCodes.OK).json({
@@ -85,7 +85,7 @@ const logout = async (req, res, next) => {
 
 const sendVerificationMail = async (req, res, next) => {
   try {
-    const userId = await authService.sendVerificationMail(req.body.email);
+    const userId = await authService.sendVerificationMail(req.query.email);
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -111,7 +111,7 @@ const verifyEmail = async (req, res, next) => {
 
 const sendPasswordResetMail = async (req, res, next) => {
   try {
-    const userId = await authService.sendPasswordResetMail(req.body.email);
+    const userId = await authService.sendPasswordResetMail(req.query.email);
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -165,7 +165,7 @@ const refreshAccessToken = async (req, res, next) => {
       maxAge: ms("1h"),
       httpOnly: true,
       secure: true,
-      sameSite: "strict"
+      sameSite: "none"
     });
 
     res.status(StatusCodes.OK).json({

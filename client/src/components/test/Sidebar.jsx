@@ -6,7 +6,7 @@ import io from "socket.io-client";
 
 import { cn } from "@/lib/utils";
 
-const socket = io("http://localhost:8080");
+const socket = io(process.env.NEXT_PUBLIC_API_URL);
 
 const Sidebar = ({ userId, conversationData, currentConversationId }) => {
   const [conversations, setConversations] = useState(conversationData);

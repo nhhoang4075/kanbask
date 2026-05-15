@@ -19,17 +19,40 @@ export async function POST(request) {
         const userGet = await request.json();
         const data = await fsPromises.readFile(usersFilePath, 'utf-8');
         const users = JSON.parse(data);
-        // Check if the username already exists
-        const userExists = users.some(user => user.username === userGet.username);
+        const userExists = users.some(user => user.email === userGet.email);
         if (userExists) {
-            return Response.json({ error: 'Username already exists' }, { status: 409 });
+            return Response.json({ error: 'Email already exists' }, { status: 409 });
         }
-        const newId = users.length + 1
-        const newUser = { ...userGet, id: newId.toString(), role: "user", avatar_url: ""};
+        const newNumberId = users.length + 1
+        const newId = "user" + newNumberId.toString();
+        const newUser = { ...userGet, id: newId, role: "user", avatar_url: null};
         users.push(newUser);
         await fsPromises.writeFile(usersFilePath, JSON.stringify(users, null, 2));
         return Response.json(newUser, { status: 201 });
     } catch (error) {
         return Response.json({ error: 'Failed to create user' }, { status: 500 });
+    }
+}
+
+export async function PUT(request) {
+    try {
+        const updatedUser = await request.json();
+        const data = await fsPromises.readFile(usersFilePath, 'utf-8'); 
+        const users = JSON.parse(data);
+
+   
+        const userIndex = users.findIndex(user => user.id === updatedUser.id);
+        if (userIndex === -1) {
+            return Response.json({ error: 'User not found' }, { status: 404 });
+        }
+
+     
+        users[userIndex] = { ...users[userIndex], ...updatedUser };
+
+       
+        await fsPromises.writeFile(usersFilePath, JSON.stringify(users, null, 2));
+        return Response.json(users[userIndex], { status: 200 });
+    } catch (error) {
+        return Response.json({ error: 'Failed to update user' }, { status: 500 });
     }
 }

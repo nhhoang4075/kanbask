@@ -30,46 +30,6 @@ export default function Login() {
     setRandomGreeting(greetings[randomIndex]);
   }, []);
 
-  const loginSchema = z.object({
-    email: z
-      .string({ required_error: "Email is required" })
-      .min(1, "Email is required")
-      .email("Invalid email")
-      .trim(),
-    password: z
-      .string({ required_error: "Password must have at least 8 characters" })
-      .min(8, "Password must have at least 8 characters")
-      .trim(),
-  });
-
-  const form = useForm({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  const searchParams = useSearchParams();
-  const router = useRouter();
-
-  const onSubmit = async (data) => {
-    try {
-      const user = await validateUser(data.email, data.password);
-      if (!user) {
-        toast.error("Login failed! Try 'Forgot password?' ");
-      } else {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("userId", user.id);
-        toast.success("Login successful!");
-        router.push("/dashboard?" + params.toString());
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Wrong password or email. Please try again.");
-    }
-  };
-
   return (
     <div className="min-h-screen min-w-screen bg-stone-200 flex">
       <div className="flex flex-col items-center ">

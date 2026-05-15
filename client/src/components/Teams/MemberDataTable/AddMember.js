@@ -1,8 +1,16 @@
 import React from "react";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-
+import { Button } from "../../ui/button";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from "../../ui/select";
 import {
 	Dialog,
 	DialogContent,
@@ -11,10 +19,9 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "../ui/dialog";
-import { Textarea } from "../ui/textarea";
+} from "../../ui/dialog";
 
-const AddProject = () => {
+const AddMember = () => {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
@@ -22,12 +29,12 @@ const AddProject = () => {
 					variant="outline"
 					className="bg-blue-600  hover:bg-blue-800 hover:cursor-pointer text-white hover:text-white"
 				>
-					Add Project
+					Add Member
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
-					<DialogTitle>Add new project</DialogTitle>
+					<DialogTitle>Add new member to team</DialogTitle>
 					<DialogDescription>
 						Make changes to your profile here. Click save when
 						you're done.
@@ -48,12 +55,12 @@ const AddProject = () => {
 							/>
 						</div>
 						<div className="grid grid-cols-4 items-center gap-4">
-							<Label htmlFor="description" className="text-right">
-								Description
+							<Label htmlFor="username" className="text-right">
+								Email
 							</Label>
-							<Textarea
-								id="description"
-								placeholder="Enter project description"
+							<Input
+								id="email"
+								placeholder="Enter member email"
 								className="col-span-3"
 								type="email"
 								required
@@ -63,6 +70,30 @@ const AddProject = () => {
 							<Label htmlFor="role" className="text-right">
 								Role
 							</Label>
+							<Select
+								id="role"
+								className="col-span-3"
+								placeholder="Select a role"
+								defaultValue="member"
+							>
+								<SelectTrigger className="w-[180px]">
+									<SelectValue placeholder="Select a role" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectGroup>
+										<SelectLabel>Role</SelectLabel>
+										<SelectItem value="owner">
+											Owner
+										</SelectItem>
+										<SelectItem value="admin">
+											Admin
+										</SelectItem>
+										<SelectItem value="member">
+											Member
+										</SelectItem>
+									</SelectGroup>
+								</SelectContent>
+							</Select>
 						</div>
 					</div>
 					<DialogFooter className="flex justify-between">
@@ -76,7 +107,7 @@ const AddProject = () => {
 							className="bg-blue-600  hover:bg-blue-800 hover:cursor-pointer"
 							type="submit"
 						>
-							Add Project
+							Save changes
 						</Button>
 					</DialogFooter>
 				</form>
@@ -85,4 +116,4 @@ const AddProject = () => {
 	);
 };
 
-export default AddProject;
+export default AddMember;

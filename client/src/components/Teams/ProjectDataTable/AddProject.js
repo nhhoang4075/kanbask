@@ -1,16 +1,8 @@
 import React from "react";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-	SelectValue,
-} from "../ui/select";
+import { Button } from "../../ui/button";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
+
 import {
 	Dialog,
 	DialogContent,
@@ -19,21 +11,23 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "../ui/dialog";
+} from "../../ui/dialog";
+import { Textarea } from "../../ui/textarea";
 
-const EditMember = ({ user }) => {
+const AddProject = () => {
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<Button variant="outline" className="w-33">
-					Edit
+				<Button
+					variant="outline"
+					className="bg-blue-600  hover:bg-blue-800 hover:cursor-pointer text-white hover:text-white"
+				>
+					Add Project
 				</Button>
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-[425px]">
 				<DialogHeader>
-					<DialogTitle>
-						Edit user profile: {user.original.id}
-					</DialogTitle>
+					<DialogTitle>Add new project</DialogTitle>
 					<DialogDescription>
 						Make changes to your profile here. Click save when
 						you're done.
@@ -47,19 +41,19 @@ const EditMember = ({ user }) => {
 							</Label>
 							<Input
 								id="name"
-								defaultValue={user.original.name}
+								placeholder="Enter member name"
 								className="col-span-3"
 								type="text"
 								required
 							/>
 						</div>
 						<div className="grid grid-cols-4 items-center gap-4">
-							<Label htmlFor="username" className="text-right">
-								Email
+							<Label htmlFor="description" className="text-right">
+								Description
 							</Label>
-							<Input
-								id="email"
-								defaultValue={user.original.email}
+							<Textarea
+								id="description"
+								placeholder="Enter project description"
 								className="col-span-3"
 								type="email"
 								required
@@ -69,29 +63,6 @@ const EditMember = ({ user }) => {
 							<Label htmlFor="role" className="text-right">
 								Role
 							</Label>
-							<Select
-								id="role"
-								className="col-span-3"
-								defaultValue={user.original.role}
-							>
-								<SelectTrigger className="w-[180px]">
-									<SelectValue placeholder="Select a role" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectGroup>
-										<SelectLabel>Role</SelectLabel>
-										<SelectItem value="owner">
-											Owner
-										</SelectItem>
-										<SelectItem value="admin">
-											Admin
-										</SelectItem>
-										<SelectItem value="member">
-											Member
-										</SelectItem>
-									</SelectGroup>
-								</SelectContent>
-							</Select>
 						</div>
 					</div>
 					<DialogFooter className="flex justify-between">
@@ -105,7 +76,7 @@ const EditMember = ({ user }) => {
 							className="bg-blue-600  hover:bg-blue-800 hover:cursor-pointer"
 							type="submit"
 						>
-							Save changes
+							Add Project
 						</Button>
 					</DialogFooter>
 				</form>
@@ -114,4 +85,4 @@ const EditMember = ({ user }) => {
 	);
 };
 
-export default EditMember;
+export default AddProject;

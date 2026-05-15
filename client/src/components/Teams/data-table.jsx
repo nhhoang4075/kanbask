@@ -20,13 +20,14 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { useEffect, useState } from "react";
-import DeleteAlert from "@/components/DeleteAlert";
-import EditProject from "@/components/ProjectDataTable/EditProject";
-import AddProject from "@/components/ProjectDataTable/AddProject";
+import DeleteAlert from "@/components/Teams/DeleteAlert";
+import EditProject from "@/components/Teams/ProjectDataTable/EditProject";
+import AddProject from "@/components/Teams/ProjectDataTable/AddProject";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import EditMember from "./MemberDataTable/EditMember";
 import AddMember from "./MemberDataTable/AddMember";
+import { Search } from "lucide-react";
 
 export function DataTable({ columns, data, setFunction, manage }) {
 	const [rowSelection, setRowSelection] = useState({});
@@ -56,17 +57,18 @@ export function DataTable({ columns, data, setFunction, manage }) {
 
 	return (
 		<div>
-			<div className="flex flex-row justify-between h-fit align-center py-2">
-				<div className="flex items-center">
+			<div className="flex flex-row pl-1 justify-between h-fit items-center">
+				<div className="relative rounded-md bg-white">
+					<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
 					<Input
-						placeholder="Filter name..."
 						value={table.getColumn("name")?.getFilterValue() ?? ""}
 						onChange={(event) =>
 							table
 								.getColumn("name")
 								?.setFilterValue(event.target.value)
 						}
-						className="w-xs"
+						placeholder="Filter name"
+						className="pl-8"
 					/>
 				</div>
 				<div className="flex flex-row justify-end gap-3 my-2">
@@ -88,7 +90,7 @@ export function DataTable({ columns, data, setFunction, manage }) {
 					{manage == "project" ? <AddProject /> : <AddMember />}
 				</div>
 			</div>
-			<Table className="rounded-md border-2 text-center border-neutral-400">
+			<Table className="rounded-md border-2 text-center bg-white border-neutral-400">
 				<TableHeader className="bg-neutral-200">
 					{table.getHeaderGroups().map((headerGroup) => (
 						<TableRow key={headerGroup.id}>

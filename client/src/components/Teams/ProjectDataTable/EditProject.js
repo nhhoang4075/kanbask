@@ -1,7 +1,7 @@
 import React from "react";
-import { Button } from "../ui/button";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
+import { Button } from "../../ui/button";
+import { Label } from "../../ui/label";
+import { Input } from "../../ui/input";
 import {
 	Select,
 	SelectContent,
@@ -10,7 +10,7 @@ import {
 	SelectLabel,
 	SelectTrigger,
 	SelectValue,
-} from "../ui/select";
+} from "../../ui/select";
 import {
 	Dialog,
 	DialogContent,
@@ -19,8 +19,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 	DialogTrigger,
-} from "../ui/dialog";
-import { Textarea } from "../ui/textarea";
+} from "../../ui/dialog";
+import { Textarea } from "../../ui/textarea";
 
 const EditProject = ({ project }) => {
 	return (

@@ -145,7 +145,6 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
         }
       )
       .select([
-        "v.conversation_id",
         "v.type",
         "v.team_id",
         "v.project_id",

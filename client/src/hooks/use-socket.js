@@ -1,61 +1,44 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useRef, useEffect } from "react";
 import { io } from "socket.io-client";
+import { useSession } from "@/hooks/use-session";
 
+// Create a Context to share socket instance
 const SocketContext = createContext(null);
-const socketUrl = `${process.env.NEXT_PUBLIC_SOCKET_URL}`;
-const socketOptions = {
-    transports: ["websocket"],
-    reconnectionAttempts: 5,
-    reconnectionDelay: 1000,
-};
 
 export function useSocket() {
-    const context = useContext(SocketContext);
-    if (!context) {
-        throw new Error("useSocket must be used within a SocketProvider");
-    }
-    return context;
+  const context = useContext(SocketContext);
+  if (context === null) {
+    throw new Error("useSocket must be used within a SocketProvider");
+  }
+  return context;
 }
 
 export function SocketProvider({ children }) {
-  const [socket, setSocket] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
+  const { user, loading } = useSession(); // get current user from session
+  const socketRef = useRef(null);
 
   useEffect(() => {
-    const initSocket = () => {
-      const newSocket = io(socketUrl, socketOptions);
-      setSocket(newSocket);
-
-      newSocket.on("connect", () => {
-        setIsConnected(true);
-        console.log("Connected to socket server");
+    // Only connect when session is loaded and user is present
+    if (!loading && user) {
+      // Initialize Socket.IO client with credentials
+      socketRef.current = io(process.env.NEXT_PUBLIC_API_URL, {
+        withCredentials: true
       });
 
-      newSocket.on("disconnect", () => {
-        setIsConnected(false);
-        console.log("Disconnected from socket server");
-      });
+      // Emit setup event with userId to authenticate socket
+      socketRef.current.emit("setup");
+    }
 
-      newSocket.on("connect_error", (error) => {
-        console.error("Socket connection error:", error);
-      });
-
-      newSocket.on("connect_timeout", (timeout) => {
-        console.error("Socket connection timeout:", timeout);
-      });
-    };
-    initSocket();
+    // On unmount or when user changes, disconnect previous socket
     return () => {
-      if (socket) {
-        socket.disconnect();
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
       }
     };
-  }, []);
-  return (
-    <SocketContext.Provider value={{ socket, isConnected }}>
-      {children}
-    </SocketContext.Provider>
-  );
+  }, [loading, user]); // rerun when loading or user changes
+
+  return <SocketContext.Provider value={socketRef.current}>{children}</SocketContext.Provider>;
 }

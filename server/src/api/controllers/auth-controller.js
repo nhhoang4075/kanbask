@@ -22,7 +22,9 @@ const register = async (req, res, next) => {
 
 const login = async (req, res, next) => {
   try {
-    const user = await authService.login(req.body);
+    const { email, password, remember } = req.body;
+
+    const user = await authService.login({ email, password });
 
     const userPayload = {
       id: user.id,
@@ -36,11 +38,6 @@ const login = async (req, res, next) => {
       process.env.ACCESS_TOKEN_SECRET,
       "1h"
     );
-    const refreshToken = jwtProvider.generateToken(
-      userPayload,
-      process.env.REFRESH_TOKEN_SECRET,
-      "7 days"
-    );
 
     res.cookie("access_token", accessToken, {
       maxAge: ms("1h"),
@@ -49,12 +46,20 @@ const login = async (req, res, next) => {
       sameSite: "none"
     });
 
-    res.cookie("refresh_token", refreshToken, {
-      maxAge: ms("7 days"),
-      httpOnly: true,
-      secure: true,
-      sameSite: "none"
-    });
+    if (remember) {
+      const refreshToken = jwtProvider.generateToken(
+        userPayload,
+        process.env.REFRESH_TOKEN_SECRET,
+        "7 days"
+      );
+
+      res.cookie("refresh_token", refreshToken, {
+        maxAge: ms("7 days"),
+        httpOnly: true,
+        secure: true,
+        sameSite: "none"
+      });
+    }
 
     res.status(StatusCodes.OK).json({
       success: true,

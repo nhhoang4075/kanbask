@@ -38,6 +38,7 @@ const TaskDetails = ({ task, open, onSave, onOpenChange, initialEditMode }) => {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
+        className="overflow-y-auto"
         onInteractOutside={(e) => {
           // Prevent the event from propagating to avoid focus issues
           e.stopPropagation();

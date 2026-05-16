@@ -1,7 +1,7 @@
 "use client";
 
 import KanbanBoard from "@/components/Tasks/Kanban/KanbanBoard";
-import { ListView } from "@/components/Tasks/List/List";
+import { ListView } from "@/components/Tasks/List/ListView";
 import NewTasks from "@/components/Tasks/NewTasks";
 import ProjectSelector from "@/components/Tasks/ProjectSelector";
 import ToggleView from "@/components/Tasks/ToggleView";
@@ -12,7 +12,6 @@ import { Plus } from "lucide-react";
 import React, { useState } from "react";
 
 const page = () => {
-  // 2 view modes: kanban and list
   const [viewMode, setViewMode] = useState("kanban");
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = useState(false);
   const [tasks, setTasks] = useState(initialData);
@@ -22,7 +21,7 @@ const page = () => {
   const handleAddTask = (taskData) => {
     const newTask = {
       id: `task-${Date.now()}`,
-      projectId: projectId,
+      projectId: selectedProject.id,
       title: taskData.title,
       description: taskData.description,
       status: "To Do",
@@ -116,7 +115,7 @@ const page = () => {
           selectedProject={selectedProject}
         />
       </div>
-      <div className="flex justify-between items-center mb-1.5">
+      <div className="flex justify-between items-center my-1.5">
         <div className="text-sm text-muted-foreground">
           {`${filteredTasks.length} ${filteredTasks.length === 1 ? "task" : "tasks"} in ${
             selectedProject.name

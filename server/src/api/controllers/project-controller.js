@@ -18,6 +18,41 @@ const createProject = async (req, res, next) => {
   }
 };
 
+const getProjectById = async (req, res, next) => {
+  try {
+    const { project_id } = req.params;
+
+    const project = await projectService.getProjectInfoById(project_id);
+    const members = await projectService.getProjectMembersById(project_id);
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      data: {
+        project,
+        members
+      }
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const updateProject = async (req, res, next) => {
+  try {
+    const { project_id } = req.params;
+    const { name, description } = req.body;
+
+    await projectService.updateProject(project_id, name, description);
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Update name and description for project ${project_id} successfully`
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 const addUserToProject = async (req, res, next) => {
   try {
     const { project_id, user_id } = req.params;
@@ -61,7 +96,7 @@ const updateUserProjectRole = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json({
       success: true,
-      message: `Update user ${user_id} 's role to  ${role} in project ${project_id}`
+      message: `Update user ${user_id} 's role to ${role} in project ${project_id}`
     });
   } catch (error) {
     return next(error);
@@ -70,6 +105,8 @@ const updateUserProjectRole = async (req, res, next) => {
 
 export default {
   createProject,
+  getProjectById,
+  updateProject,
   addUserToProject,
   deleteUserFromProject,
   updateUserProjectRole

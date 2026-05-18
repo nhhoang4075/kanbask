@@ -1,11 +1,23 @@
-import projectService from "../api/services/project-service";
+import projectService from "../api/services/project-service.js";
 
 const authorizeAdmin = async (req, res, next) => {
   try {
     const { project_id } = req.params;
     const user_id = req.user.id;
 
-    await projectService.checkUserProjectAdmin(project_id, user_id);
+    await projectService.checkProjectAdmin(project_id, user_id);
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+const authorizeMember = async (req, res, next) => {
+  try {
+    const { project_id } = req.params;
+    const user_id = req.user.id;
+
+    await projectService.ensureUserInProject(project_id, user_id);
     next();
   } catch (error) {
     next(error);
@@ -13,5 +25,6 @@ const authorizeAdmin = async (req, res, next) => {
 };
 
 export default {
-  authorizeAdmin
+  authorizeAdmin,
+  authorizeMember
 };

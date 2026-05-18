@@ -1,5 +1,5 @@
 import { StatusCodes } from "http-status-codes";
-import ApiError from "../../utils/api-erroror.js";
+import ApiError from "../../utils/api-error.js";
 import projectModel from "../models/project-model.js";
 
 const createProject = async (team_id, user_id, name, description) => {
@@ -11,6 +11,42 @@ const createProject = async (team_id, user_id, name, description) => {
     }
 
     return project;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getProjectInfoById = async (project_id) => {
+  try {
+    const project = await projectModel.getProjectInfoById(project_id);
+
+    if (!project) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `Project ${project_id} not found`);
+    }
+
+    return project;
+  } catch (error) {
+    throw error;
+  }
+};
+
+const updateProject = async (project_id, name, description) => {
+  try {
+    await projectModel.updateProject(project_id, name, description);
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getProjectMembersById = async (project_id) => {
+  try {
+    const members = await projectModel.getProjectMembersById(project_id);
+
+    if (!members) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `Project ${project_id} not found`);
+    }
+
+    return members;
   } catch (error) {
     throw error;
   }
@@ -28,7 +64,7 @@ const ensureUserInProject = async (project_id, user_id) => {
   }
 };
 
-const checkUserProjectAdmin = async (project_id, user_id) => {
+const checkProjectAdmin = async (project_id, user_id) => {
   try {
     const role = await projectModel.getUserProjectRole(project_id, user_id);
 
@@ -49,7 +85,6 @@ const addUserToProject = async (project_id, user_id) => {
     }
 
     projectModel.addUserToProject(project_id, user_id);
-    return member;
   } catch (error) {
     throw error;
   }
@@ -70,8 +105,6 @@ const updateUserProjectRole = async (project_id, user_id, role) => {
     await ensureUserInProject(project_id, user_id);
 
     await projectModel.updateUserProjectRole(project_id, user_id, role);
-
-    return updated;
   } catch (error) {
     throw error;
   }
@@ -79,7 +112,10 @@ const updateUserProjectRole = async (project_id, user_id, role) => {
 
 export default {
   createProject,
-  checkUserProjectAdmin,
+  getProjectInfoById,
+  updateProject,
+  getProjectMembersById,
+  checkProjectAdmin,
   ensureUserInProject,
   addUserToProject,
   deleteUserFromProject,

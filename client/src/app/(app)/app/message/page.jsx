@@ -1,9 +1,25 @@
-"use client";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { ChatProvider } from "@/hooks/use-chat";
+import ChatSidebar from "@/components/chat/chat-sidebar";
+import ChatWindow from "@/components/chat/chat-window";
+import ChatHeader from "@/components/chat/chat-header";
+import { getConversations } from "@/actions/conversation-actions";
 
-import { useSession } from "@/hooks/use-session";
+export default async function ChatPage() {
+  const data = await getConversations();
 
-export default function AppPage() {
-  const { user, loading } = useSession();
-
-  return <h1>Message: {loading ? "loading" : JSON.stringify(user)}</h1>;
+  return (
+    <ChatProvider initialConversations={data.conversations}>
+      <ResizablePanelGroup direction="horizontal" className="max-h-[97dvh]">
+        <ResizablePanel defaultSize={25} className="rounded-l-md">
+          <ChatSidebar />
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel defaultSize={75} className="rounded-r-md">
+          <ChatHeader />
+          <ChatWindow />
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </ChatProvider>
+  );
 }

@@ -54,12 +54,11 @@ export default function NavMain() {
       <SidebarMenu>
         {items.map((item) => {
           const isActive = item.url === pathname;
-
           return (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton isActive={isActive} tooltip={item.title} asChild>
                 <Link href={item.url}>
-                  {item.icon && <item.icon className={cn(isActive ? "text-blue-green" : "")} />}
+                  {item.icon && <item.icon className={cn(isActive && "text-blue-green")} />}
                   <span>{item.title}</span>
                 </Link>
               </SidebarMenuButton>
@@ -70,15 +69,3 @@ export default function NavMain() {
     </SidebarGroup>
   );
 }
-
-// (
-
-//   <SidebarMenuItem key={item.title}>
-//     <SidebarMenuButton isActive={item.url === pathname} tooltip={item.title} asChild>
-//       <Link href={item.url}>
-//         {item.icon && <item.icon />}
-//         <span>{item.title}</span>
-//       </Link>
-//     </SidebarMenuButton>
-//   </SidebarMenuItem>
-// )

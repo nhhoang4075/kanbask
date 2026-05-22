@@ -1,7 +1,7 @@
 import conversationService from "../api/services/conversation-service.js";
 
 const registerConversationHandlers = (io, socket) => {
-  socket.on("join_conversation", async ({ conversation_id, user_id }) => {
+  socket.on("join_conversation", async ({ conversation_id }) => {
     try {
       const oldRoomId = socket.data?.conversation_room?.conversation_id;
 
@@ -18,7 +18,9 @@ const registerConversationHandlers = (io, socket) => {
         // console.log(`User ${user_id} joined conversation_${conversation_id}`);
       }
 
-      socket.data.conversation_room = { conversation_id, user_id };
+      socket.data.conversation_id = conversation_id;
+
+      const { id: user_id } = socket.data.user;
 
       await conversationService.updateLastReadMessage(conversation_id, user_id);
     } catch (error) {

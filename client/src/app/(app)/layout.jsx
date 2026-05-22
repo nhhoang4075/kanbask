@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 
 import { SessionProvider } from "@/hooks/use-session";
 import { SocketProvider } from "@/hooks/use-socket";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/app/app-sidebar";
 
 export default async function Layout({ children }) {
@@ -13,11 +13,10 @@ export default async function Layout({ children }) {
     <SessionProvider>
       <SocketProvider>
         <SidebarProvider defaultOpen={defaultOpen}>
-          <AppSidebar />
-          <main>
-            <SidebarTrigger />
-            {children}
-          </main>
+          <AppSidebar variant="inset" />
+          <SidebarInset>
+            <main className="flex-1 min-h-[95dvh] bg-prussian-blue">{children}</main>
+          </SidebarInset>
         </SidebarProvider>
       </SocketProvider>
     </SessionProvider>

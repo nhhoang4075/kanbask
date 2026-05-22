@@ -22,7 +22,8 @@ const validateLogin = validate(
     body: z
       .object({
         email: z.string().email().max(100),
-        password: z.string().min(8).max(255)
+        password: z.string().min(8).max(255),
+        remember: z.boolean()
       })
       .strict(),
     params: z.object({}).optional(),
@@ -30,28 +31,23 @@ const validateLogin = validate(
   })
 );
 
-const validateEmail = validate(
+const validateEmailQuery = validate(
   z.object({
-    body: z
+    body: z.object({}).optional(),
+    params: z.object({}).optional(),
+    query: z
       .object({
         email: z.string().email().max(100)
       })
-      .strict(),
-    params: z.object({}).optional(),
-    query: z.object({}).optional()
+      .strict()
   })
 );
 
-const validateVerification = validate(
+const validateVerificationCodeQuery = validate(
   z.object({
-    body: z
-      .object({
-        email: z.string().email().max(100),
-        verification_code: z.string().length(6)
-      })
-      .strict(),
+    body: z.object({}).optional(),
     params: z.object({}).optional(),
-    query: z.object({}).optional()
+    query: z.object({ code: z.string().length(6) }).strict()
   })
 );
 
@@ -71,7 +67,7 @@ const validatePasswordReset = validate(
 export default {
   validateRegister,
   validateLogin,
-  validateEmail,
-  validateVerification,
+  validateEmailQuery,
+  validateVerificationCodeQuery,
   validatePasswordReset
 };

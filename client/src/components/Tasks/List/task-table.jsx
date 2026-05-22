@@ -18,7 +18,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getTaskColumns } from "./column";
-import TaskDetails from "../TaskDetails";
+import TaskDetails from "../TaskDetailsSheet/TaskDetails";
 import {
   closestCenter,
   DndContext,

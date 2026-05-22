@@ -7,7 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { cn, formatDate, priorityColors } from "@/lib/utils";
 import React, { useRef, useState } from "react";
 
-import TaskDetails from "../TaskDetails";
+import TaskDetails from "../TaskDetailsSheet/TaskDetails";
 import { AvatarGroup } from "@/components/ui/avatar-group";
 import MoreActions from "../MoreActions";
 

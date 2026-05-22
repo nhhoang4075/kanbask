@@ -31,11 +31,12 @@ const page = () => {
         name: "John Doe",
         avatar: ""
       },
-      assignedTo: null,
+      assignedTo: taskData.assignedTo || [],
       dueDate: taskData.dueDate,
       completedAt: null,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      comments: []
     };
 
     setTasks((prevTasks) => [...prevTasks, newTask]);

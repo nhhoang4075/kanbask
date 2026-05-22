@@ -1,4 +1,6 @@
-const login = async ({ email, password, remember }) => {
+// import { fetchWithAuth } from "@/actions/fetch-with-auth";
+
+async function login({ email, password, remember }) {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
       method: "POST",
@@ -23,7 +25,7 @@ const login = async ({ email, password, remember }) => {
   } catch (err) {
     throw err;
   }
-};
+}
 
 async function getSession() {
   try {
@@ -41,8 +43,8 @@ async function getSession() {
 
       return json.data;
     } else if (res.status === 401) {
-      const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh-token`, {
-        method: "GET",
+      const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`, {
+        method: "POST",
         credentials: "include"
       });
 
@@ -86,7 +88,7 @@ async function logout() {
         throw new Error(json.message);
       }
 
-      return json.data;
+      return json.message;
     } else {
       throw new Error("logout API Error");
     }

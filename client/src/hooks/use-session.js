@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+
 import { getSession, logout } from "@/actions/auth-actions";
 
 // Context to hold session state and actions
@@ -20,6 +22,7 @@ export function useSession() {
 export function SessionProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   /**
    * refreshSession: uses imported getSession()
@@ -46,6 +49,7 @@ export function SessionProvider({ children }) {
   const logoutHandler = useCallback(async () => {
     try {
       await logout();
+      router.push("/auth/login");
     } catch (err) {
       console.error("logout error:", err);
     } finally {

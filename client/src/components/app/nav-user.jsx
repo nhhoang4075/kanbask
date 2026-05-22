@@ -20,9 +20,10 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/hooks/use-session";
+import { getInitials } from "@/lib/user-utils";
 
 export default function NavUser() {
-  const { isMobile } = useSidebar();
+  const { isMobile, open } = useSidebar();
   const { user, loading, logout } = useSession();
 
   return (
@@ -31,31 +32,38 @@ export default function NavUser() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
-              size="xl"
+              size="lg"
               className="flex items-center data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               {loading ? (
-                <Skeleton className="h-10 w-10 rounded-lg" />
+                <Skeleton className="h-8 w-8 rounded-md" />
               ) : (
-                <Avatar className="h-10 w-10 rounded-lg">
-                  <AvatarImage src={user?.avatar_url} alt={user?.full_name} />
-                  <AvatarFallback className="rounded-lg bg-mustard">
-                    <span className="text-prussian-blue">KB</span>
+                <Avatar className="h-8 w-8 rounded-md overflow-hidden">
+                  <AvatarImage
+                    src={user?.avatar_url}
+                    alt={user?.full_name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="rounded-md bg-mustard text-prussian-blue">
+                    {getInitials(user?.full_name)}
                   </AvatarFallback>
                 </Avatar>
               )}
-              {loading ? (
+              {loading && open && (
                 <div className="space-y-1">
-                  <Skeleton className="h-4 w-[150px] rounded-lg" />
-                  <Skeleton className="h-4 w-[120px] rounded-lg" />
-                </div>
-              ) : (
-                <div className="grid flex-1 text-left text-sm leading-tight space-y-1">
-                  <span className="truncate font-medium">{user?.full_name}</span>
-                  <span className="truncate text-xs">{user?.email}</span>
+                  <Skeleton className="h-3 w-[150px] rounded-lg" />
+                  <Skeleton className="h-3 w-[120px] rounded-lg" />
                 </div>
               )}
-              <MoreVerticalIcon className="ml-auto size-4" />
+              {!loading && (
+                <>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-medium">{user?.full_name}</span>
+                    <span className="truncate text-xs">{user?.email}</span>
+                  </div>
+                  <MoreVerticalIcon className="ml-auto size-4" />
+                </>
+              )}
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
@@ -66,10 +74,14 @@ export default function NavUser() {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user?.avatar} alt={user?.full_name} />
-                  <AvatarFallback className="rounded-lg bg-mustard">
-                    <span className="text-prussian-blue">KB</span>
+                <Avatar className="h-8 w-8 rounded-md overflow-hidden">
+                  <AvatarImage
+                    src={user?.avatar_url}
+                    alt={user?.full_name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="rounded-md bg-mustard text-prussian-blue">
+                    {getInitials(user?.full_name)}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">

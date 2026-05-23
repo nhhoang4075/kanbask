@@ -1,107 +1,121 @@
 import { StatusCodes } from "http-status-codes";
 import teamService from "../services/team-service.js";
 
-
 const createOneTeam = async (req, res, next) => {
   try {
-    const { name, code, description, userId } = req.body;
+    const team = await teamService.createOneTeam(req.body, req.user.id);
 
-
-    const teamId = await teamService.createOneTeam({
-      name,
-      code,
-      description,
-      userId
-    });
-
-
-    return res.status(StatusCodes.CREATED).json({
+    res.status(StatusCodes.CREATED).json({
       success: true,
-      messsage: "Team created successfully"
+      data: { team }
     });
   } catch (error) {
-    console.error("Error creating team:", error);
-    return next(error);
+    next(error);
   }
 };
 
+const getManyTeamsByUserId = async (req, res, next) => {
+  try {
+    const teams = await teamService.getManyTeamsByUserId(req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: { teams }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateOneTeamById = async (req, res, next) => {
+  try {
+    const teamId = await teamService.updateOneTeamById(req.params.id, req.body, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Updated successfully team with id ${teamId}`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteOneTeamById = async (req, res, next) => {
+  try {
+    const teamId = await teamService.deleteOneTeamById(req.params.id, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Deleted successfully team with id ${teamId}`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const addMembersToTeam = async (req, res, next) => {
   try {
-    const { teamId, userIds } = req.body;
-    const members = await teamService.addMembersToTeam(teamId, userIds);
-    return res
-      .status(StatusCodes.OK)
-      .json({ success: true, message: "Members added successfully" });
+    const teamId = await teamService.addMembersToTeam(req.params.id, req.body.user_ids);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Added members successfully to team ${teamId}`
+    });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
+const getMembersOfTeam = async (req, res, next) => {
+  try {
+    const members = await teamService.getMembersOfTeam(req.params.id, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: { members }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const deleteMembersFromTeam = async (req, res, next) => {
   try {
-    const { teamId, userIds, deleterId } = req.body;
+    const teamId = await teamService.deleteMembersFromTeam(
+      req.params.id,
+      req.body.user_ids,
+      req.user.id
+    );
 
-
-    const deletedMemberIds = await teamService.deleteMembersFromTeam(teamId, userIds, deleterId);
-    return res
-      .status(StatusCodes.OK)
-      .json({ success: true, message: "Members deleted successfully" });
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Deleted members successfully from team ${teamId}`
+    });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
-
-const getTeamsByUserId = async (req, res, next) => {
+const updateTeamRoleOfUser = async (req, res, next) => {
   try {
-    const teams = await teamService.getTeamsByUserId(req.params.userId);
-    return res.status(StatusCodes.OK).json({ success: true, data: { teams } });
+    const teamId = await teamService.updateTeamRoleOfUser(teamId, req.body, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Updated successfully team role of user ${req.body.user_id} in team ${teamId}`
+    });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
-
-
-const getMembersByTeamId = async (req, res, next) => {
-  try {
-    const { members, membersCount } = await teamService.getMembersByTeamId(req.params.teamId);
-    return res.status(StatusCodes.OK).json({ success: true, data: { members, membersCount } });
-  } catch (error) {
-    return next(error);
-  }
-};
-
-
-const deleteTeam = async (req, res, next) => {
-  try {
-    const { teamId, deleterId } = req.body;
-    const deletedteamID = await teamService.deleteTeam(teamId, deleterId);
-    return res.status(StatusCodes.OK).json({ success: true, message: "Team deleted successfully" });
-  } catch (error) {
-    return next(error);
-  }
-};
-
-
-const addAdmin = async (req, res, next) => {
-  try {
-    const { teamId, userIds, adderId } = req.body;
-    const newadmin = await teamService.addAdmin(teamId, userIds, adderId);
-    return res.status(StatusCodes.OK).json({ success: true, message: "Admin added successfully" });
-  } catch (error) {
-    return next(error);
-  }
-};
-
 
 export default {
   createOneTeam,
-  deleteTeam,
-  addAdmin,
+  getManyTeamsByUserId,
+  updateOneTeamById,
+  deleteOneTeamById,
   addMembersToTeam,
+  getMembersOfTeam,
   deleteMembersFromTeam,
-  getTeamsByUserId,
-  getMembersByTeamId
+  updateTeamRoleOfUser
 };

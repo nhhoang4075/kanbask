@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(100) NOT NULL,
     first_name VARCHAR(100),
     last_name VARCHAR(100),
     avatar_url VARCHAR(255),
@@ -123,6 +124,14 @@ CREATE TABLE IF NOT EXISTS activity_logs (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE OR REPLACE VIEW users_public_view AS
+SELECT 
+    u.id,
+    u.email,
+    u.full_name,
+    u.avatar_url
+FROM users u
+
 CREATE OR REPLACE VIEW conversation_latest_activity_view AS
 SELECT
     c.id AS conversation_id,
@@ -134,7 +143,7 @@ SELECT
     lm.content AS latest_message_content,
     lm.created_at AS latest_message_at,
     lm.sender_id AS latest_sender_id,
-    u.first_name || ' ' || u.last_name AS latest_sender_full_name
+    u.full_name AS latest_sender_full_name
 FROM conversations c
 LEFT JOIN LATERAL (
     SELECT m.*

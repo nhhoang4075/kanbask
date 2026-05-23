@@ -77,9 +77,11 @@ const deleteOneConversationById = async (id) => {
 
 const addParticipantsToConversation = async (conversation_id, user_ids) => {
   try {
-    for (const user_id of user_ids) {
-      await db("conversation_participants").insert({ conversation_id, user_id });
-    }
+    await db.transaction(async (trx) => {
+      for (const user_id of user_ids) {
+        await trx("conversation_participants").insert({ conversation_id, user_id });
+      }
+    });
 
     return conversation_id;
   } catch (err) {
@@ -101,9 +103,10 @@ const getParticipantsOfConversation = async (conversation_id) => {
 
 const removeParticipantsFromConversation = async (conversation_id, user_ids) => {
   try {
-    for (const user_id of user_ids) {
-      await db("conversation_participants").delete().where({ conversation_id, user_id });
-    }
+    await db("conversation_participants AS cp")
+      .delete()
+      .whereIn("cp.user_id", user_ids)
+      .andWhere({ conversation_id });
 
     return conversation_id;
   } catch (err) {

@@ -1,16 +1,26 @@
 import teamController from "../controllers/team-controller.js";
 import teamValidation from "../validations/team-validation.js";
-
+import authMiddleware from "../../middlewares/auth-middleware.js";
 
 const teamRoute = (router) => {
-  router.route("/teams/createteam").post(teamValidation.validateCreateTeam, teamController.createOneTeam);
-  router.route("/teams/:userId/getteam").get( teamController.getTeamsByUserId);
-  router.route("/teams/:teamId/getmembers").get(teamController.getMembersByTeamId);
-  router.route("/teams/:teamId/addmembers").post(teamValidation.validateAddMembers,teamController.addMembersToTeam);
-  router.route("/teams/:teamId/deletemembers").delete(teamValidation.validateDeleteMembers, teamController.deleteMembersFromTeam);
-  router.route("/teams/:teamId/deleteteam").delete(teamValidation.validateDeleteTeam, teamController.deleteTeam);
-  router.route("/teams/:teamId/addadmin").patch(teamValidation.validateAddAdmin, teamController.addAdmin);
-};
+  router.use("/team", authMiddleware.authenticate);
 
+  router
+    .route("/teams")
+    .get(teamController.getManyTeamsByUserId)
+    .post(teamValidation.validateCreateTeam, teamController.createOneTeam);
+
+  router
+    .route("/teams/:id")
+    .put(teamValidation.validateUpdateTeam, teamController.updateOneTeamById)
+    .delete(teamValidation.validateTeamIdParam, teamController.deleteOneTeamById);
+
+  router
+    .route("/teams/:id/members")
+    .get(teamValidation.validateTeamIdParam, teamController.getMembersOfTeam)
+    // .post(teamValidation.validateAddMembers, teamController.addMembersToTeam)
+    .delete(teamValidation.validateDeleteMembers, teamController.deleteMembersFromTeam)
+    .put(teamValidation.validateUpdateRole, teamController.updateTeamRoleOfUser);
+};
 
 export default teamRoute;

@@ -34,21 +34,27 @@ const getOneTeamByCode = async (code) => {
 
 const getManyTeamsByUserId = async (user_id) => {
   try {
-    const teamIds = await db("team_members AS tm")
-      .join("teams AS t", "t.id", "=", "tm.team_id")
+    const teams = await db("teams AS t")
+      .join("team_members AS tm", "tm.team_id", "=", "t.id")
       .select("t.*", "tm.role")
       .where("tm.user_id", user_id);
 
-    return teamIds.map((team) => team.team_id);
+    return teams;
   } catch (err) {
     throw new Error(err);
   }
 };
 
+const isUserInTeam = async (team_id, user_id) => {
+  const record = await db("team_members").where({ team_id, user_id }).first("user_id");
+
+  return !!record;
+};
+
 const updateOneTeamById = async (id, data) => {
   try {
     const [team] = await db("teams")
-      .update({ ...data, updated_at: new Date().toISOString() })
+      .update({ ...data, updated_at: db.fn.now() })
       .where({ id })
       .returning("id");
 
@@ -72,10 +78,14 @@ const addMembersToTeam = async (team_id, user_ids) => {
   try {
     await db.transaction(async (trx) => {
       for (const user_id of user_ids) {
-        await trx("team_members").insert({
-          team_id,
-          user_id
-        });
+        await trx("team_members")
+          .insert({
+            team_id,
+            user_id,
+            joined_at: db.fn.now()
+          })
+          .onConflict(["user_id", "team_id"])
+          .ignore();
       }
     });
 
@@ -88,7 +98,7 @@ const addMembersToTeam = async (team_id, user_ids) => {
 const getMembersOfTeam = async (team_id) => {
   try {
     const members = await db("team_members AS tm")
-      .join("users_public_view AS v", "v.id", "=", "tm.user_id")
+      .join("user_public_view AS v", "v.id", "=", "tm.user_id")
       .select("v.*", "tm.role")
       .where({ team_id });
 
@@ -108,7 +118,7 @@ const deleteMembersFromTeam = async (team_id, user_ids) => {
 
     return team_id;
   } catch (err) {
-    throw new Error("Error deleting members from team: " + err.message);
+    throw new Error(err);
   }
 };
 
@@ -132,16 +142,91 @@ const updateTeamRoleOfUser = async (team_id, user_id, role) => {
   }
 };
 
+const createOneTeamJoinRequest = async (team_id, user_id) => {
+  try {
+    const [request] = await db("team_join_requests").insert({ team_id, user_id }).returning("id");
+
+    return request.id;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const getOneTeamJoinRequestById = async (id) => {
+  try {
+    const [request] = await db("team_join_requests").select("*").where({ id }).limit(1);
+
+    return request;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const getManyTeamJoinRequestsOfTeam = async (team_id) => {
+  try {
+    const requests = await db("team_join_requests").select("*").where({ team_id });
+
+    return requests;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const isTeamJoinRequestPending = async (team_id, user_id) => {
+  try {
+    const record = await db("team_join_requests")
+      .where({ team_id, user_id, status: "pending" })
+      .first("id");
+
+    return !!record;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const updateTeamJoinRequestStatus = async (request_id, status) => {
+  try {
+    const [request] = await db("team_join_requests")
+      .where({ id: request_id })
+      .update({ status, updated_at: db.fn.now() })
+      .returning("id");
+
+    return request.id;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const updateTeamJoinRequestsOfTeam = async (team_id, status) => {
+  try {
+    const [request] = await db("team_join_requests")
+      .where({ team_id })
+      .update({ status, updated_at: db.fn.now() })
+      .returning("id");
+
+    return request.id;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 export default {
   createOneTeam,
   getOneTeamById,
   getOneTeamByCode,
   getManyTeamsByUserId,
+  isUserInTeam,
   updateOneTeamById,
   deleteOneTeamById,
   addMembersToTeam,
   getMembersOfTeam,
   deleteMembersFromTeam,
   getTeamRoleOfUser,
-  updateTeamRoleOfUser
+  updateTeamRoleOfUser,
+  createOneTeamJoinRequest,
+  getOneTeamJoinRequestById,
+  getManyTeamJoinRequestsOfTeam,
+  isTeamJoinRequestPending,
+  updateTeamJoinRequestStatus,
+  updateTeamJoinRequestsOfTeam
 };

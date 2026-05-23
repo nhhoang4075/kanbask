@@ -45,7 +45,12 @@ const getAllUsers = async () => {
 
 const updateUserProfile = async (userId, data) => {
   try {
-    const allowedData = sanitizeAllowedFields(data, ["first_name", "last_name", "avatar_url"]);
+    const allowedData = sanitizeAllowedFields(data, [
+      "full_name",
+      "first_name",
+      "last_name",
+      "avatar_url"
+    ]);
 
     if (Object.keys(allowedData).length === 0) {
       throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "No allowed field to update");

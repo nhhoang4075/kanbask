@@ -30,23 +30,6 @@ const validateUpdateTeam = validate(
   })
 );
 
-// const validateAddMembers = validate(
-//   z.object({
-//     body: z
-//       .object({
-//         teamId: z.coerce.number(),
-//         userIds: z.array(z.string().uuid())
-//       })
-//       .strict(),
-//     params: z
-//       .object({
-//         teamId: z.coerce.number()
-//       })
-//       .strict(),
-//     query: z.object({}).optional()
-//   })
-// );
-
 const validateDeleteMembers = validate(
   z.object({
     body: z
@@ -56,14 +39,14 @@ const validateDeleteMembers = validate(
       .strict(),
     params: z
       .object({
-        id: z.coerce.number()
+        id: z.coerce.number().int().positive()
       })
       .strict(),
     query: z.object({}).optional()
   })
 );
 
-const validateUpdateRole = validate(
+const validateUpdateTeamRole = validate(
   z.object({
     body: z
       .object({
@@ -73,7 +56,7 @@ const validateUpdateRole = validate(
       .strict(),
     params: z
       .object({
-        team_id: z.coerce.number()
+        id: z.coerce.number().int().positive()
       })
       .strict(),
     query: z.object({}).optional()
@@ -85,10 +68,42 @@ const validateTeamIdParam = validate(
     body: z.object({}).optional(),
     params: z
       .object({
-        id: z.coerce.number().int()
+        id: z.coerce.number().int().positive()
       })
       .strict(),
     query: z.object({}).optional()
+  })
+);
+
+const validateTeamJoinRequestIdParam = validate(
+  z.object({
+    body: z.object({}).optional(),
+    params: z
+      .object({
+        id: z.coerce.number().int().positive()
+      })
+      .strict(),
+    query: z.object({}).optional()
+  })
+);
+
+const validateTeamCodeQuery = validate(
+  z.object({
+    body: z.object({}).optional(),
+    params: z.object({}).strict(),
+    query: z.object({ code: z.string().length(8) }).strict()
+  })
+);
+
+const validateTeamIdQuery = validate(
+  z.object({
+    body: z.object({}).optional(),
+    params: z.object({}).strict(),
+    query: z
+      .object({
+        team_id: z.coerce.number().int().positive()
+      })
+      .strict()
   })
 );
 
@@ -96,6 +111,9 @@ export default {
   validateCreateTeam,
   validateUpdateTeam,
   validateDeleteMembers,
-  validateUpdateRole,
-  validateTeamIdParam
+  validateUpdateTeamRole,
+  validateTeamIdParam,
+  validateTeamJoinRequestIdParam,
+  validateTeamCodeQuery,
+  validateTeamIdQuery
 };

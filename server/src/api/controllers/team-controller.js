@@ -14,7 +14,7 @@ const createOneTeam = async (req, res, next) => {
   }
 };
 
-const getManyTeamsByUserId = async (req, res, next) => {
+const getTeamsOfUser = async (req, res, next) => {
   try {
     const teams = await teamService.getManyTeamsByUserId(req.user.id);
 
@@ -96,9 +96,9 @@ const deleteMembersFromTeam = async (req, res, next) => {
   }
 };
 
-const updateTeamRoleOfUser = async (req, res, next) => {
+const updateTeamRoleOfMember = async (req, res, next) => {
   try {
-    const teamId = await teamService.updateTeamRoleOfUser(teamId, req.body, req.user.id);
+    const teamId = await teamService.updateTeamRoleOfUser(req.params.id, req.body, req.user.id);
 
     res.status(StatusCodes.OK).json({
       success: true,
@@ -109,13 +109,86 @@ const updateTeamRoleOfUser = async (req, res, next) => {
   }
 };
 
+const joinOneTeamByCode = async (req, res, next) => {
+  try {
+    const teamId = await teamService.joinOneTeamByCode(req.query.code, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Requested to join team ${teamId} successfully`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const leaveOneTeamById = async (req, res, next) => {
+  try {
+    const teamId = await teamService.leaveOneTeamById(req.params.id, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Leaved join team ${teamId} successfully`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getManyTeamJoinRequestsOfTeam = async (req, res, next) => {
+  try {
+    const requests = await teamService.getManyTeamJoinRequestsOfTeam(
+      req.query.team_id,
+      req.user.id
+    );
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: { requests }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const approveTeamJoinRequest = async (req, res, next) => {
+  try {
+    await teamService.approveTeamJoinRequest(req.params.id, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Aprroved team join request successfully`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const rejectTeamJoinRequest = async (req, res, next) => {
+  try {
+    await teamService.rejectTeamJoinRequest(req.params.id, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Rejected team join request successfully`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   createOneTeam,
-  getManyTeamsByUserId,
+  getTeamsOfUser,
   updateOneTeamById,
   deleteOneTeamById,
   addMembersToTeam,
   getMembersOfTeam,
   deleteMembersFromTeam,
-  updateTeamRoleOfUser
+  updateTeamRoleOfMember,
+  joinOneTeamByCode,
+  leaveOneTeamById,
+  getManyTeamJoinRequestsOfTeam,
+  approveTeamJoinRequest,
+  rejectTeamJoinRequest
 };

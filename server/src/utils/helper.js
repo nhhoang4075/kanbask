@@ -49,6 +49,7 @@ export const generateTeamCode = () => {
   for (let i = 0; i < length; i++) {
     code += chars[randomBytes[i] % chars.length];
   }
+
   return code;
 };
 

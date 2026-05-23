@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useEffect, useState } from "react";
 import { MoveDown } from "lucide-react";
 
@@ -16,7 +15,6 @@ const SCROLL_THRESHOLD = 300;
 
 export default function ChatWindow() {
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-  const [groupedMessages, setGroupedMessages] = useState(null);
 
   const { messages, conversations, selectedConversationId, loading: loadingMessages } = useChat();
   const { user } = useSession();
@@ -27,12 +25,8 @@ export default function ChatWindow() {
   const curConversation = conversations.find((c) => c.id === selectedConversationId);
 
   useEffect(() => {
-    if (messages.length !== 0) {
-      setGroupedMessages(groupMessages(messages));
-    }
-
     if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "auto" });
+      bottomRef.current.scrollIntoView({ behavior: "instant" });
     }
   }, [messages]);
 
@@ -47,26 +41,24 @@ export default function ChatWindow() {
   };
 
   return (
-    <div className="relative flex flex-col h-8/9 overflow-hidden bg-white rounded-none shadow-md">
-      {!loadingMessages &&
-        groupedMessages &&
-        groupedMessages[0].conversation_id === selectedConversationId && (
-          <ScrollArea
-            ref={scrollAreaRef}
-            onScroll={handleScroll}
-            className="flex-1 p-8 pb-31 space-y-4 overflow-y-auto rounded-t-lg overflow-hidden"
-          >
-            {groupedMessages.map((msgGroup, index) => (
-              <MessageBubble
-                key={index}
-                msgGroup={msgGroup}
-                isMe={msgGroup.sender_id === user?.id}
-                curConversation={curConversation}
-              />
-            ))}
-            <div className="bg-fuchsia-400" ref={bottomRef} />
-          </ScrollArea>
-        )}
+    <div className="relative flex flex-col h-8/9 max-h-[calc(98vh)] overflow-hidden bg-white rounded-none shadow-md">
+      {!loadingMessages && messages.length !== 0 && (
+        <ScrollArea
+          ref={scrollAreaRef}
+          onScroll={handleScroll}
+          className="flex-1 p-8 pb-31 space-y-4 overflow-y-auto rounded-t-lg overflow-hidden"
+        >
+          {groupMessages(messages)?.map((msgGroup, index) => (
+            <MessageBubble
+              key={index}
+              msgGroup={msgGroup}
+              isMe={msgGroup.sender_id === user?.id}
+              curConversation={curConversation}
+            />
+          ))}
+          <div className="bg-fuchsia-400" ref={bottomRef} />
+        </ScrollArea>
+      )}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-full max-w-3xl">
         {showScrollToBottom && (
           <Button

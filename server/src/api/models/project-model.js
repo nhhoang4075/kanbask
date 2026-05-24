@@ -1,146 +1,161 @@
 import { db } from "../../config/db.js";
 
-const createProject = async (team_id, user_id, name, description) => {
+const createOneProject = async (data) => {
   try {
-    return await db.transaction(async (trx) => {
-      const [project] = await trx("projects")
-        .insert({
-          team_id,
-          name,
-          description,
-          created_by: user_id
-        })
-        .returning("*");
+    const [project] = await db("projects").insert(data).returning("id");
 
-      await trx("project_members").insert({
-        project_id: project.id,
-        user_id: user_id,
-        role: "owner"
-      });
-
-      return project;
-    });
-  } catch (error) {
-    throw new Error(error);
+    return project.id;
+  } catch (err) {
+    throw new Error(err);
   }
 };
 
-const getProjectInfoById = async (project_id) => {
+const getOneProjectById = async (id) => {
   try {
-    const project = await db("projects")
-      .where({
-        id: project_id
-      })
-      .first();
+    const project = await db("projects").select("*").where({ id }).limit(1);
+
     return project;
-  } catch (error) {
-    throw new Error(error);
+  } catch (err) {
+    throw new Error(err);
   }
 };
 
-const updateProject = async (project_id, name, description) => {
+const getManyProjectsByUserId = async (user_id) => {
   try {
-    await db("projects")
+    const projects = await db("projects AS p")
+      .join("project_members AS pm", "pm.project_id", "=", "t.id")
+      .select("t.*", "pm.role")
+      .where("pm.user_id", user_id);
+
+    return projects;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const isUserInProject = async (project_id, user_id) => {
+  try {
+    const record = await db("project_members")
       .where({
-        id: project_id
+        project_id,
+        user_id
       })
+      .first("user_id");
+
+    return !!record;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const updateOneProjectById = async (id, data) => {
+  try {
+    const [project] = await db("projects")
       .update({
-        name: db.raw("COALESCE(?, name)", [name]),
-        description: db.raw("COALESCE(?, description)", [description])
-      });
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
-const getProjectMembersById = async (project_id) => {
-  try {
-    const members = await db("project_members")
-      .where({
-        project_id
+        ...data,
+        updated_at: db.fn.now()
       })
-      .select("user_id");
-    return members;
-  } catch (error) {
-    throw new Error(error);
+      .where({ id })
+      .returning("id");
+
+    return project.id;
+  } catch (err) {
+    throw new Error(err);
   }
 };
 
-const getUserProjectRole = async (project_id, user_id) => {
+const deleteOneProjectById = async (id) => {
   try {
-    const result = await db("project_members")
-      .where({
-        project_id,
-        user_id
-      })
-      .select("role")
-      .first();
-    return result?.role;
-  } catch (error) {
-    throw new Error(error);
+    const [project] = await db("projects").delete().where({ id }).returning("id");
+
+    return project.id;
+  } catch (err) {
+    throw new Error(err);
   }
 };
 
-const ensureUserInProject = async (project_id, user_id) => {
+const addMembersToProject = async (project_id, user_ids) => {
   try {
-    const result = await db("project_members")
-      .where({
-        project_id,
-        user_id
-      })
-      .first();
-    return result;
-  } catch (error) {
-    throw new Error(error);
-  }
-};
-
-const addUserToProject = async (project_id, user_id) => {
-  try {
-    await db("project_members").insert({
-      project_id,
-      user_id,
-      role: "member"
+    await db.transaction(async (trx) => {
+      for (const user_id of user_ids) {
+        await db("project_members")
+          .insert({
+            project_id,
+            user_id
+          })
+          .onConflict(["user_id", "project_id"])
+          .ignore();
+      }
     });
-  } catch (error) {
-    throw new Error(error);
+
+    return project_id;
+  } catch (err) {
+    throw new Error(err);
   }
 };
 
-const deleteUserFromProject = async (project_id, user_id) => {
+const getMembersOfProject = async (project_id) => {
   try {
-    await db("project_members")
+    const members = await db("project_members AS pm")
+      .join("user_public_view AS v", "v.id", "=", "pm.user_id")
+      .select("v.*", "pm.role")
+      .where({ project_id });
+
+    return members;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const removeMembersFromProject = async (project_id, user_ids) => {
+  try {
+    await db("project_members").delete().whereIn("user_id", user_ids).andWhere({ project_id });
+
+    return project_id;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const getProjectRoleOfUser = async (project_id, user_id) => {
+  try {
+    const [user] = await db("project_members")
+      .select("role")
       .where({
         project_id,
         user_id
       })
-      .delete();
-  } catch (error) {
-    throw new Error(error);
+      .limit(1);
+
+    return user.role;
+  } catch (err) {
+    throw new Error(err);
   }
 };
 
-const updateUserProjectRole = async (project_id, user_id, role) => {
+const updateProjectRoleOfUser = async (project_id, user_id, role) => {
   try {
-    await db("project_members")
-      .where({
-        project_id,
-        user_id
-      })
-      .update({ role });
-  } catch (error) {
-    throw new Error(error);
+    await db("project_members").update({ role }).where({
+      project_id,
+      user_id
+    });
+
+    return user_id;
+  } catch (err) {
+    throw new Error(err);
   }
 };
 
 export default {
-  createProject,
-  getProjectInfoById,
-  updateProject,
-  getProjectMembersById,
-  getUserProjectRole,
-  ensureUserInProject,
-  addUserToProject,
-  deleteUserFromProject,
-  updateUserProjectRole
+  createOneProject,
+  getOneProjectById,
+  getManyProjectsByUserId,
+  isUserInProject,
+  updateOneProjectById,
+  deleteOneProjectById,
+  addMembersToProject,
+  getMembersOfProject,
+  removeMembersFromProject,
+  getProjectRoleOfUser,
+  updateProjectRoleOfUser
 };

@@ -3,14 +3,12 @@
 
 # env files
 .env
-<<<<<<< HEAD
 .env.local
 .env.development*
 .env.test*
 .env.production*
-=======
->>>>>>> c71d701 (create conversation back-end api)
 
 # misc
 .DS_Store
 
+certificates

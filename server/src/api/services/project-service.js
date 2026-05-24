@@ -1,123 +1,206 @@
 import { StatusCodes } from "http-status-codes";
-import ApiError from "../../utils/api-error.js";
+
+import ApiError from "../../utils/api-err.js";
 import projectModel from "../models/project-model.js";
+import teamModel from "../models/team-model.js";
+import { sanitizeAllowedFields } from "../../utils/helper";
 
-const createProject = async (team_id, user_id, name, description) => {
+const createOneProject = async (data, actorId) => {
   try {
-    const project = await projectModel.createProject(team_id, user_id, name, description);
+    const allowedData = sanitizeAllowedFields(data, ["name", "description", "team_id"]);
 
-    if (!project.id) {
-      throw new ApiError(StatusCodes.INTERNAL_SERVER_errorOR, "Failed to create a project");
+    if (Object.keys(allowedData).length === 0) {
+      throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "No allowed field to update");
     }
+
+    const projectId = await projectModel.createOneProject({
+      ...allowedData,
+      created_by: actorId
+    });
+
+    if (!projectId) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the project");
+    }
+
+    await projectModel.addMembersToProject(projectId, [actorId]);
+    await projectModel.updateProjectRoleOfUser(projectId, actorId, "owner");
+
+    const project = projectModel.getOneProjectById(projectId);
 
     return project;
-  } catch (error) {
-    throw error;
+  } catch (err) {
+    throw err;
   }
 };
 
-const getProjectInfoById = async (project_id) => {
+const getManyProjectsByUserId = async (userId) => {
   try {
-    const project = await projectModel.getProjectInfoById(project_id);
+    const projects = await projectModel.getManyProjectsByUserId(userId);
 
-    if (!project) {
-      throw new ApiError(StatusCodes.NOT_FOUND, `Project ${project_id} not found`);
+    return projects;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const updateOneProjectById = async (projectId, updateData, actorId) => {
+  try {
+    const isProjectMember = await projectModel.isUserInProject(projectId, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
     }
 
-    return project;
-  } catch (error) {
-    throw error;
-  }
-};
+    const role = await projectModel.getProjectRoleOfUser(projectId, actorId);
 
-const updateProject = async (project_id, name, description) => {
-  try {
-    await projectModel.updateProject(project_id, name, description);
-  } catch (error) {
-    throw error;
-  }
-};
-
-const getProjectMembersById = async (project_id) => {
-  try {
-    const members = await projectModel.getProjectMembersById(project_id);
-
-    if (!members) {
-      throw new ApiError(StatusCodes.NOT_FOUND, `Project ${project_id} not found`);
+    if (role != "owner") {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can update project info");
     }
+
+    const allowedData = sanitizeAllowedFields(updateData, ["name", "description"]);
+
+    if (Object.keys(allowedData).length === 0) {
+      throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "No allowed field to update");
+    }
+
+    await projectModel.updateOneProjectById(projectId, allowedData);
+
+    return projectId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const deleteOneProjectById = async (projectId, actorId) => {
+  try {
+    const isProjectMember = await projectModel.isUserInProject(projectId, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
+    }
+
+    const role = await projectModel.getProjectRoleOfUser(projectId, actorId);
+
+    if (role != "owner") {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can delete project");
+    }
+
+    await projectModel.deleteOneProjectById(projectId);
+
+    return projectId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const addMembersToProject = async (projectId, userIds, actorId) => {
+  try {
+    const isProjectMember = await projectModel.isUserInProject(projectId, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
+    }
+
+    const role = await projectModel.getProjectRoleOfUser(projectId, actorId);
+
+    if (role != "owner") {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can add members to project");
+    }
+
+    const project = await projectModel.getOneProjectById(projectId);
+    const sanitizedUserIds = [];
+
+    for (const userId of userIds) {
+      const isTeamMember = await teamModel.isUserInTeam(project.team_id, userId);
+
+      if (isTeamMember) {
+        sanitizedUserIds.push(userId);
+      }
+    }
+
+    await projectModel.addMembersToProject(projectId, sanitizedUserIds);
+
+    return projectId;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getMembersOfProject = async (projectId, actorId) => {
+  try {
+    const isProjectMember = await projectModel.isUserInProject(projectId, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
+    }
+
+    const members = await projectModel.getMembersOfProject(projectId);
 
     return members;
-  } catch (error) {
-    throw error;
+  } catch (err) {
+    throw err;
   }
 };
 
-const ensureUserInProject = async (project_id, user_id) => {
+const removeMembersFromProject = async (projectId, userIds, actorId) => {
   try {
-    const exists = await projectModel.ensureUserInProject(project_id, user_id);
+    const isProjectMember = await projectModel.isUserInProject(projectId, actorId);
 
-    if (!exists) {
-      throw new ApiError(StatusCodes.NOT_FOUND, "User is not a member of this project");
-    }
-  } catch (error) {
-    throw error;
-  }
-};
-
-const checkProjectAdmin = async (project_id, user_id) => {
-  try {
-    const role = await projectModel.getUserProjectRole(project_id, user_id);
-
-    if (role != "owner" && role != "admin") {
-      throw new ApiError(StatusCodes.FORBIDDEN, "Access denied. Admins only");
-    }
-  } catch (error) {
-    throw error;
-  }
-};
-
-const addUserToProject = async (project_id, user_id) => {
-  try {
-    const exists = await projectModel.ensureUserInProject(project_id, user_id);
-
-    if (exists) {
-      throw new ApiError(StatusCodes.CONFLICT, "The user is already a member of the project");
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
     }
 
-    projectModel.addUserToProject(project_id, user_id);
-  } catch (error) {
-    throw error;
+    const role = await projectModel.getProjectRoleOfUser(projectId, actorId);
+
+    if (role !== "owner") {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can delete members from project");
+    }
+
+    if (userIds.includes(actorId)) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not delete self");
+    }
+
+    await projectModel.removeMembersFromProject(projectId, userIds);
+
+    return projectId;
+  } catch (err) {
+    throw err;
   }
 };
 
-const deleteUserFromProject = async (project_id, user_id) => {
+const updateProjectRoleOfUser = async (projectId, updateData, actorId) => {
   try {
-    await ensureUserInProject(project_id, user_id);
+    const isProjectMember = await projectModel.isUserInProject(projectId, actorId);
 
-    await projectModel.deleteUserFromProject(project_id, user_id);
-  } catch (error) {
-    throw error;
-  }
-};
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
+    }
 
-const updateUserProjectRole = async (project_id, user_id, role) => {
-  try {
-    await ensureUserInProject(project_id, user_id);
+    const role = await projectModel.getProjectRoleOfUser(projectId, actorId);
 
-    await projectModel.updateUserProjectRole(project_id, user_id, role);
-  } catch (error) {
-    throw error;
+    if (role !== "owner") {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can update project member's role");
+    }
+
+    if (actorId === updateData.user_id) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not update self");
+    }
+
+    await projectModel.updateProjectRoleOfUser(projectId, updateData.user_id, updateData.role);
+
+    return projectId;
+  } catch (err) {
+    throw err;
   }
 };
 
 export default {
-  createProject,
-  getProjectInfoById,
-  updateProject,
-  getProjectMembersById,
-  checkProjectAdmin,
-  ensureUserInProject,
-  addUserToProject,
-  deleteUserFromProject,
-  updateUserProjectRole
+  createOneProject,
+  getManyProjectsByUserId,
+  updateOneProjectById,
+  deleteOneProjectById,
+  addMembersToProject,
+  getMembersOfProject,
+  removeMembersFromProject,
+  updateProjectRoleOfUser
 };

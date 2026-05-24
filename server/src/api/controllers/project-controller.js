@@ -2,12 +2,9 @@ import { StatusCodes } from "http-status-codes";
 
 import projectService from "../services/project-service.js";
 
-const createProject = async (req, res, next) => {
+const createOneProject = async (req, res, next) => {
   try {
-    const { team_id, name, description } = req.body;
-    const user_id = req.user.id;
-
-    const project = await projectService.createProject(team_id, user_id, name, description);
+    const project = await projectService.createOneProject(req.body, req.user.id);
 
     return res.status(StatusCodes.CREATED).json({
       success: true,
@@ -18,18 +15,14 @@ const createProject = async (req, res, next) => {
   }
 };
 
-const getProjectById = async (req, res, next) => {
+const getProjectsOfUser = async (req, res, next) => {
   try {
-    const { project_id } = req.params;
-
-    const project = await projectService.getProjectInfoById(project_id);
-    const members = await projectService.getProjectMembersById(project_id);
+    const projects = await projectService.getManyProjectsByUserId(req.user.id);
 
     return res.status(StatusCodes.OK).json({
       success: true,
       data: {
-        project,
-        members
+        projects
       }
     });
   } catch (error) {
@@ -37,77 +30,107 @@ const getProjectById = async (req, res, next) => {
   }
 };
 
-const updateProject = async (req, res, next) => {
+const updateOneProjectById = async (req, res, next) => {
   try {
-    const { project_id } = req.params;
-    const { name, description } = req.body;
-
-    await projectService.updateProject(project_id, name, description);
+    const projectId = await projectService.updateOneProjectById(
+      req.params.id,
+      req.body,
+      req.user.id
+    );
 
     return res.status(StatusCodes.OK).json({
       success: true,
-      message: `Update name and description for project ${project_id} successfully`
+      message: `Updated successfully project with id ${projectId}`
     });
   } catch (error) {
     return next(error);
   }
 };
 
-const addUserToProject = async (req, res, next) => {
+const deleteOneProjectById = async (req, res, next) => {
   try {
-    const { project_id, user_id } = req.params;
+    const projectId = await projectService.deleteOneProjectById(req.params.id, req.user.id);
 
-    await projectService.addUserToProject(project_id, user_id);
-
-    return res.status(StatusCodes.OK).json({
+    res.status(StatusCodes.OK).json({
       success: true,
-      message: `Add user ${user_id} to project ${project_id} successfully`
+      message: `Deleted successfully project with id ${projectId}`
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
-const deleteUserFromProject = async (req, res, next) => {
+const addMembersToProject = async (req, res, next) => {
   try {
-    const { project_id, user_id } = req.params;
+    const projectId = await projectService.addMembersToProject(
+      req.params.id,
+      req.body.user_ids,
+      req.user.id
+    );
 
-    await projectService.deleteUserFromProject(project_id, user_id);
-
-    return res.status(StatusCodes.OK).json({
+    res.status(StatusCodes.OK).json({
       success: true,
-      message: `Delete user ${user_id} from project ${project_id} successfully`
+      message: `Added members successfully to project ${projectId}`
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
-const updateUserProjectRole = async (req, res, next) => {
+const getMembersOfProject = async (req, res, next) => {
   try {
-    const { project_id, user_id } = req.params;
-    const { role } = req.body;
+    const members = await projectService.getMembersOfProject(req.params.id, req.user.id);
 
-    if (!role) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, "Missing role to update");
-    }
-
-    await projectService.updateUserProjectRole(project_id, user_id, role);
-
-    return res.status(StatusCodes.OK).json({
+    res.status(StatusCodes.OK).json({
       success: true,
-      message: `Update user ${user_id} 's role to ${role} in project ${project_id}`
+      data: { members }
     });
   } catch (error) {
-    return next(error);
+    next(error);
+  }
+};
+
+const removeMembersFromProject = async (req, res, next) => {
+  try {
+    const projectId = await projectService.removeMembersFromProject(
+      req.params.id,
+      req.body.user_ids,
+      req.user.id
+    );
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Deleted members successfully from project ${projectId}`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateProjectRoleOfMember = async (req, res, next) => {
+  try {
+    const projectId = await projectService.updateProjectRoleOfUser(
+      req.params.id,
+      req.body,
+      req.user.id
+    );
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Updated successfully project role of user ${req.body.user_id} in project ${projectId}`
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
 export default {
-  createProject,
-  getProjectById,
-  updateProject,
-  addUserToProject,
-  deleteUserFromProject,
-  updateUserProjectRole
+  createOneProject,
+  getProjectsOfUser,
+  updateOneProjectById,
+  deleteOneProjectById,
+  addMembersToProject,
+  getMembersOfProject,
+  removeMembersFromProject,
+  updateProjectRoleOfMember
 };

@@ -95,7 +95,7 @@ const updateLastReadMessage = async (conversationId, userId) => {
       conversation.latest_message_id
     );
 
-    return userId;
+    return conversationId;
   } catch (err) {
     throw err;
   }

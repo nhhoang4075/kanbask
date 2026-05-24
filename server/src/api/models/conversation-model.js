@@ -77,9 +77,11 @@ const deleteOneConversationById = async (id) => {
 
 const addParticipantsToConversation = async (conversation_id, user_ids) => {
   try {
-    for (const user_id of user_ids) {
-      await db("conversation_participants").insert({ conversation_id, user_id });
-    }
+    await db.transaction(async (trx) => {
+      for (const user_id of user_ids) {
+        await trx("conversation_participants").insert({ conversation_id, user_id });
+      }
+    });
 
     return conversation_id;
   } catch (err) {
@@ -101,9 +103,10 @@ const getParticipantsOfConversation = async (conversation_id) => {
 
 const removeParticipantsFromConversation = async (conversation_id, user_ids) => {
   try {
-    for (const user_id of user_ids) {
-      await db("conversation_participants").delete().where({ conversation_id, user_id });
-    }
+    await db("conversation_participants AS cp")
+      .delete()
+      .whereIn("cp.user_id", user_ids)
+      .andWhere({ conversation_id });
 
     return conversation_id;
   } catch (err) {
@@ -145,7 +148,6 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
         }
       )
       .select([
-        "v.conversation_id",
         "v.type",
         "v.team_id",
         "v.project_id",
@@ -160,15 +162,31 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
         db.raw(
           `CASE
             WHEN v.type = 'direct' THEN (
-              SELECT u2.first_name || ' ' || u2.last_name
+              SELECT uv.full_name
               FROM conversation_participants cp2
-              JOIN users u2 ON cp2.user_id = u2.id
-              WHERE cp2.conversation_id = v.conversation_id AND u2.id <> ?
+              JOIN user_public_view uv ON cp2.user_id = uv.id
+              WHERE cp2.conversation_id = v.conversation_id AND uv.id <> ?
               LIMIT 1
             )
             WHEN v.type = 'team' THEN t.name
             WHEN v.type = 'project' THEN p.name
           END AS title`,
+          [user_id]
+        ),
+        db.raw(
+          `
+          CASE
+            WHEN v.type = 'direct' THEN (
+              SELECT uv.avatar_url
+              FROM conversation_participants cp2
+              JOIN user_public_view uv ON cp2.user_id = uv.id
+              WHERE cp2.conversation_id = v.conversation_id
+                AND uv.id <> ?
+              LIMIT 1
+            )
+            ELSE NULL
+          END AS avatar_url
+        `,
           [user_id]
         ),
         db.raw("COALESCE(um.unread_count, 0) AS unread_count")
@@ -186,7 +204,7 @@ const updateLastReadMessage = async (conversation_id, user_id, message_id) => {
   try {
     await db("conversation_participants").where({ conversation_id, user_id }).update({
       last_read_message_id: message_id,
-      last_read_at: new Date().toISOString()
+      last_read_at: db.fn.now()
     });
 
     return user_id;

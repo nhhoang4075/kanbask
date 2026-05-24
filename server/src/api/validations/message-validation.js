@@ -8,7 +8,7 @@ const validateConversationIdParam = validate(
     query: z.object({}).optional(),
     params: z
       .object({
-        conversation_id: z.coerce.number().int()
+        conversation_id: z.coerce.number().int().positive()
       })
       .strict()
   })

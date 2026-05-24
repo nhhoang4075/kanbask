@@ -17,24 +17,12 @@ const validateNewConversation = validate(
   })
 );
 
-const validateUserIdQuery = validate(
-  z.object({
-    body: z.object({}).optional(),
-    params: z.object({}).optional(),
-    query: z
-      .object({
-        user_id: z.string().uuid()
-      })
-      .strict()
-  })
-);
-
 const validateConversationIdParam = validate(
   z.object({
     body: z.object({}).optional(),
     params: z
       .object({
-        id: z.coerce.number().int()
+        id: z.coerce.number().int().positive()
       })
       .strict(),
     query: z.object({}).optional()
@@ -43,6 +31,5 @@ const validateConversationIdParam = validate(
 
 export default {
   validateNewConversation,
-  validateUserIdQuery,
   validateConversationIdParam
 };

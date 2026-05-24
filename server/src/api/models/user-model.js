@@ -20,10 +20,7 @@ const createOneUser = async (data) => {
 
 const getOneUserById = async (id) => {
   try {
-    const [user] = await db("users")
-      .select("*", db.raw("first_name || ' ' || last_name as full_name"))
-      .where({ id })
-      .limit(1);
+    const [user] = await db("users").select("*").where({ id }).limit(1);
 
     return user;
   } catch (err) {
@@ -33,10 +30,7 @@ const getOneUserById = async (id) => {
 
 const getOneUserByEmail = async (email) => {
   try {
-    const [user] = await db("users")
-      .select("*", db.raw("first_name || ' ' || last_name as full_name"))
-      .where({ email })
-      .limit(1);
+    const [user] = await db("users").select("*").where({ email }).limit(1);
 
     return user;
   } catch (err) {
@@ -46,10 +40,7 @@ const getOneUserByEmail = async (email) => {
 
 const getOneUserByPasswordResetCode = async (code) => {
   try {
-    const [user] = await db("users")
-      .select("*", db.raw("first_name || ' ' || last_name as full_name"))
-      .where({ password_reset_code: code })
-      .limit(1);
+    const [user] = await db("users").select("*").where({ password_reset_code: code }).limit(1);
 
     return user;
   } catch (err) {
@@ -59,9 +50,7 @@ const getOneUserByPasswordResetCode = async (code) => {
 
 const getAllUsers = async () => {
   try {
-    const users = await db("users")
-      .select("*", db.raw("first_name || ' ' || last_name as full_name"))
-      .orderBy("created_at", "desc");
+    const users = await db("users").select("*").orderBy("created_at", "desc");
 
     return users;
   } catch (err) {
@@ -69,11 +58,11 @@ const getAllUsers = async () => {
   }
 };
 
-const updateOneUserById = async (id, updateData) => {
+const updateOneUserById = async (id, data) => {
   try {
     const [user] = await db("users")
+      .update({ ...data, updated_at: db.fn.now() })
       .where({ id })
-      .update({ ...updateData, updated_at: new Date().toISOString() })
       .returning("id");
 
     return user.id;

@@ -19,12 +19,8 @@ const createOneMessage = async ({ conversation_id, sender_id, content }) => {
 const getOneMessageById = async (id) => {
   try {
     const [message] = await db("messages")
-      .leftJoin("users", "messages.sender_id", "=", "users.id")
-      .select(
-        "messages.*",
-        db.raw("users.first_name || ' ' || users.last_name AS sender_full_name"),
-        "users.avatar_url AS sender_avatar_url"
-      )
+      .leftJoin("user_public_view AS v", "messages.sender_id", "=", "v.id")
+      .select("messages.*", "v.full_name AS sender_full_name", "v.avatar_url AS sender_avatar_url")
       .where("messages.id", id)
       .limit(1);
 
@@ -37,12 +33,8 @@ const getOneMessageById = async (id) => {
 const getManyMessagesByConversationId = async (conversation_id) => {
   try {
     const messages = await db("messages")
-      .leftJoin("users", "messages.sender_id", "=", "users.id")
-      .select(
-        "messages.*",
-        db.raw("users.first_name || ' ' || users.last_name AS sender_full_name"),
-        "users.avatar_url AS sender_avatar_url"
-      )
+      .leftJoin("user_public_view AS v", "messages.sender_id", "=", "v.id")
+      .select("messages.*", "v.full_name AS sender_full_name", "v.avatar_url AS sender_avatar_url")
       .where({ conversation_id })
       .orderBy("messages.created_at", "asc");
 
@@ -52,14 +44,14 @@ const getManyMessagesByConversationId = async (conversation_id) => {
   }
 };
 
-const updateOneMessageById = async (id, updateData) => {
+const updateOneMessageById = async (id, data) => {
   try {
     const [message] = await db("messages")
-      .where({ id })
       .update({
-        ...updateData,
-        updated_at: new Date().toISOString()
+        ...data,
+        updated_at: db.fn.now()
       })
+      .where({ id })
       .returning("id");
 
     return message.id;

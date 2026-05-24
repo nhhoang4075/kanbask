@@ -108,7 +108,7 @@ const getMembersOfTeam = async (team_id) => {
   }
 };
 
-const deleteMembersFromTeam = async (team_id, user_ids) => {
+const removeMembersFromTeam = async (team_id, user_ids) => {
   try {
     await db("team_members")
       .delete()
@@ -220,7 +220,7 @@ export default {
   deleteOneTeamById,
   addMembersToTeam,
   getMembersOfTeam,
-  deleteMembersFromTeam,
+  removeMembersFromTeam,
   getTeamRoleOfUser,
   updateTeamRoleOfUser,
   createOneTeamJoinRequest,

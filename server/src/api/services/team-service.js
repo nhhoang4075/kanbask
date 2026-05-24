@@ -104,16 +104,6 @@ const deleteOneTeamById = async (teamId, actorId) => {
   }
 };
 
-const addMembersToTeam = async (teamId, userIds) => {
-  try {
-    await teamModel.addMembersToTeam(teamId, userIds);
-
-    return teamId;
-  } catch (err) {
-    throw err;
-  }
-};
-
 const getMembersOfTeam = async (teamId, actorId) => {
   try {
     const isTeamMember = await teamModel.isUserInTeam(teamId, actorId);
@@ -130,7 +120,7 @@ const getMembersOfTeam = async (teamId, actorId) => {
   }
 };
 
-const deleteMembersFromTeam = async (teamId, userIds, actorId) => {
+const removeMembersFromTeam = async (teamId, userIds, actorId) => {
   try {
     const isTeamMember = await teamModel.isUserInTeam(teamId, actorId);
 
@@ -148,7 +138,7 @@ const deleteMembersFromTeam = async (teamId, userIds, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not delete self");
     }
 
-    await teamModel.deleteMembersFromTeam(teamId, userIds);
+    await teamModel.removeMembersFromTeam(teamId, userIds);
 
     return teamId;
   } catch (err) {
@@ -314,9 +304,8 @@ export default {
   getManyTeamsByUserId,
   updateOneTeamById,
   deleteOneTeamById,
-  addMembersToTeam,
   getMembersOfTeam,
-  deleteMembersFromTeam,
+  removeMembersFromTeam,
   updateTeamRoleOfUser,
   joinOneTeamByCode,
   leaveOneTeamById,

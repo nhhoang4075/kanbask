@@ -10,7 +10,7 @@ Kanbask là một nền tảng quản lý dự án hỗ trợ các cá nhân và
 
 ### a. Communication & Collaboration
 
-- **One-one Chat:** Nhắn tin trực tiếp giữa các thành viên.
+- **Personal Chat:** Nhắn tin trực tiếp giữa các thành viên.
 - **Team Chat:** Nhóm chat chung cho toàn bộ team.
 - **Project Chat:** Nhóm chat riêng cho các thành viên của mỗi dự án.
 - **Notification System:** Gửi thông báo khi có cập nhật quan trọng.

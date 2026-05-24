@@ -19,7 +19,7 @@ const teamRoute = (router) => {
   router
     .route("/teams/:id/members")
     .get(teamValidation.validateTeamIdParam, teamController.getMembersOfTeam)
-    .delete(teamValidation.validateDeleteMembers, teamController.deleteMembersFromTeam)
+    .delete(teamValidation.validateUpdateTeamMembers, teamController.removeMembersFromTeam)
     .put(teamValidation.validateUpdateTeamRole, teamController.updateTeamRoleOfMember);
 
   router.use("/team-requests", authMiddleware.authenticate);

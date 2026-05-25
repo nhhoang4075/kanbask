@@ -89,7 +89,7 @@ const updateTeamRoleOfMember = async (req, res, next) => {
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Updated successfully team role of user ${req.body.user_id} in team ${teamId}`
+      message: `Updated successfully role of user ${req.body.user_id} in team ${teamId}`
     });
   } catch (error) {
     next(error);

@@ -1,6 +1,6 @@
 import { db } from "../../config/db.js";
 
-const createOneConversation = async (type, team_id, project_id) => {
+const createOneConversation = async ({ type, team_id = null, project_id = null }) => {
   try {
     const [conversation] = await db("conversations")
       .insert({
@@ -91,8 +91,9 @@ const addParticipantsToConversation = async (conversation_id, user_ids) => {
 
 const getParticipantsOfConversation = async (conversation_id) => {
   try {
-    const participants = await db("conversation_participants")
-      .select("*")
+    const participants = await db("conversation_participants AS cp")
+      .join("user_public_view AS v", "v.id", "=", "cp.user_id")
+      .select("v.*")
       .where({ conversation_id });
 
     return participants;
@@ -151,7 +152,7 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
         "v.type",
         "v.team_id",
         "v.project_id",
-        "v.created_at",
+        "v.conversation_created_at AS created_at",
         "v.latest_message_id",
         "v.latest_message_content",
         "v.latest_message_at",

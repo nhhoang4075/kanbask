@@ -77,10 +77,23 @@ const validateProjectIdParam = validate(
   })
 );
 
+const validateTeamIdQuery = validate(
+  z.object({
+    body: z.object({}).optional(),
+    params: z.object({}).strict(),
+    query: z
+      .object({
+        team_id: z.coerce.number().int().positive()
+      })
+      .strict()
+  })
+);
+
 export default {
   validateCreateProject,
   validateUpdateProject,
   validateUpdateProjectMembers,
   validateUpdateProjectRole,
-  validateProjectIdParam
+  validateProjectIdParam,
+  validateTeamIdQuery
 };

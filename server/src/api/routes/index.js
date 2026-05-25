@@ -6,6 +6,7 @@ import teamRoute from "./team-route.js";
 import conversationRoute from "./conversation-route.js";
 import messageRoute from "./message-route.js";
 import notificationRoute from "./notification-route.js";
+import searchRoute from "./search-route.js";
 
 const router = Router();
 
@@ -16,6 +17,7 @@ function apiRouter() {
   conversationRoute(router);
   messageRoute(router);
   notificationRoute(router);
+  searchRoute(router);
 
   return router;
 }

@@ -11,6 +11,7 @@ import { fileURLToPath } from "url";
 import { handleApiError } from "./middlewares/error-middleware.js";
 import apiRouter from "./api/routes/index.js";
 import setupSocket from "./socket/index.js";
+import { initialize as initializeEmbeddingService } from "./config/embedding.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,7 +46,7 @@ const startServer = () => {
   );
 
   app.use("/api", apiRouter());
-  app.use(handleApiError);
+  //app.use(handleApiError);
 
   app.get("/", async (req, res) => {
     res.status(StatusCodes.OK).json({
@@ -64,6 +65,14 @@ const startServer = () => {
   server.listen(process.env.APP_PORT || 8080, () => {
     console.log(`Server is running at https://${process.env.APP_HOST}:${process.env.APP_PORT}`);
   });
+
+  initializeEmbeddingService()
+    .then(() => {
+      console.log("Embedding service pre-initialization process started successfully.");
+    })
+    .catch((err) => {
+      throw err;
+    });
 };
 
 (() => {

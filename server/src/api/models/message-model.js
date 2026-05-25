@@ -1,12 +1,14 @@
 import { db } from "../../config/db.js";
+import pgvector from "pgvector/knex";
 
-const createOneMessage = async ({ conversation_id, sender_id, content }) => {
+const createOneMessage = async ({ conversation_id, sender_id, content, embedding }) => {
   try {
     const [message] = await db("messages")
       .insert({
         conversation_id,
         sender_id,
-        content
+        content,
+        embedding: pgvector.toSql(embedding)
       })
       .returning("id");
 
@@ -48,7 +50,8 @@ const updateOneMessageById = async (id, data) => {
   try {
     const [message] = await db("messages")
       .update({
-        ...data,
+        content: data.content,
+        embedding: pgvector.toSql(data.embedding),
         updated_at: db.fn.now()
       })
       .where({ id })

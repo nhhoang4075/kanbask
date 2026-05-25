@@ -2,13 +2,16 @@ import { v4 as uuidv4 } from "uuid";
 
 import { db } from "../../config/db.js";
 
+import pgvector from "pgvector/knex";
+
 const createOneUser = async (data) => {
   try {
     const userId = uuidv4();
     const [user] = await db("users")
       .insert({
         id: userId,
-        ...data
+        ...data,
+        embedding: pgvector.toSql(data.embedding)
       })
       .returning("id");
 
@@ -58,11 +61,22 @@ const getAllUsers = async () => {
   }
 };
 
-const updateOneUserById = async (id, data) => {
+const updateOneUserById = async (id, updateData) => {
   try {
+    const finalUpdate = {
+      ...updateData,
+      updated_at: db.fn.now()
+    };
+
+    if ("embedding" in finalUpdate) {
+      finalUpdate.embedding = pgvector.toSql(finalUpdate.embedding);
+    }
+
     const [user] = await db("users")
-      .update({ ...data, updated_at: db.fn.now() })
       .where({ id })
+      .update({
+        ...finalUpdate
+      })
       .returning("id");
 
     return user.id;

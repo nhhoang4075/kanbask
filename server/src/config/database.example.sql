@@ -270,5 +270,44 @@ LEFT JOIN LATERAL (
 LEFT JOIN users u ON u.id = lm.sender_id;
 
 -- =============================================
+-- 16. Bảng lưu trữ thông tin file (từ Supabase)
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS files (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
+    supabase_path VARCHAR(1024) UNIQUE NOT NULL, 
+    original_name VARCHAR(255) NOT NULL,
+    mime_type VARCHAR(100),
+    size_bytes BIGINT,
+    uploaded_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    task_id INT REFERENCES tasks(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+-- =============================================
+-- 17. Bảng lưu trữ thông tin ảnh/video (từ Cloudinary)
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS media_assets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
+    cloudinary_public_id VARCHAR(255) UNIQUE NOT NULL,
+    secure_url VARCHAR(1024) NOT NULL, 
+    asset_type VARCHAR(20) NOT NULL CHECK (asset_type IN ('image', 'video')),
+    format VARCHAR(20), 
+    width INT,
+    height INT,
+    bytes BIGINT,
+    duration NUMERIC,
+    uploaded_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    message_id INT REFERENCES messages(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE INDEX idx_media_assets_uploaded_by ON media_assets (uploaded_by);
+CREATE INDEX idx_media_assets_asset_type ON media_assets (asset_type);
+
+-- =============================================
 -- END init_database.sql
 -- =============================================

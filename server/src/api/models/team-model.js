@@ -36,7 +36,17 @@ const getManyTeamsByUserId = async (user_id) => {
   try {
     const teams = await db("teams AS t")
       .join("team_members AS tm", "tm.team_id", "=", "t.id")
-      .select("t.*", "tm.role")
+      .select(
+        "t.*",
+        "tm.role",
+        db.raw(`
+          (
+            SELECT COUNT(*)
+            FROM team_members tm2
+            WHERE tm2.team_id = t.id
+          )::int AS member_count
+        `)
+      )
       .where("tm.user_id", user_id);
 
     return teams;
@@ -46,7 +56,7 @@ const getManyTeamsByUserId = async (user_id) => {
 };
 
 const isUserInTeam = async (team_id, user_id) => {
-  const record = await db("team_members").where({ team_id, user_id }).first("user_id");
+  const [record] = await db("team_members").where({ team_id, user_id }).limit(1);
 
   return !!record;
 };

@@ -65,6 +65,18 @@ const getManyConversationsByUserId = async (user_id) => {
   }
 };
 
+const isUserInConversation = async (conversation_id, user_id) => {
+  try {
+    const [record] = await db("conversation_participants")
+      .where({ conversation_id, user_id })
+      .limit(1);
+
+    return !!record;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const deleteOneConversationById = async (id) => {
   try {
     const [conversation] = await db("conversations").delete().where({ id }).returning("id");
@@ -220,6 +232,7 @@ export default {
   getOneConversationByTeamId,
   getOneConversationByProjectId,
   getManyConversationsByUserId,
+  isUserInConversation,
   deleteOneConversationById,
   addParticipantsToConversation,
   getParticipantsOfConversation,

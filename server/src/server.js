@@ -11,7 +11,7 @@ import { fileURLToPath } from "url";
 import { handleApiError } from "./middlewares/error-middleware.js";
 import apiRouter from "./api/routes/index.js";
 import setupSocket from "./socket/index.js";
-import { initialize as initializeEmbeddingService } from "./config/embedding.js";
+import { initialize as initializeEmbeddingService } from "./config/embedding-provider.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

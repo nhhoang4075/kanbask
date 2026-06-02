@@ -7,10 +7,9 @@ const validateSearchUsersQuery = validate(
       .object({
         q: z.string().max(255).optional(),
         limit: z.coerce.number().int().positive().optional(),
-        offset: z.coerce.number().int().nonnegative().optional(),
-        conversation_id: z.coerce.number().int().nonnegative().optional()
+        offset: z.coerce.number().int().nonnegative().optional()
       })
-      .strict("Chỉ chấp nhận các query params: q, limit, offset, conversation_id"),
+      .strict(),
     params: z.object({}).optional(),
     body: z.object({}).optional()
   })
@@ -25,7 +24,7 @@ const validateSearchTasksQuery = validate(
         limit: z.coerce.number().int().positive().optional(),
         offset: z.coerce.number().int().nonnegative().optional()
       })
-      .strict("Chỉ chấp nhận các query params: q, status, limit, offset"),
+      .strict(),
     params: z.object({}).optional(),
     body: z.object({}).optional()
   })
@@ -40,7 +39,7 @@ const validateSearchMessagesQuery = validate(
         limit: z.coerce.number().int().positive().optional(),
         offset: z.coerce.number().int().nonnegative().optional()
       })
-      .strict("Chỉ chấp nhận các query params: q, conversation_id, limit, offset"),
+      .strict(),
     params: z.object({}).optional(),
     body: z.object({}).optional()
   })

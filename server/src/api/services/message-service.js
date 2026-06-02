@@ -3,9 +3,8 @@ import { StatusCodes } from "http-status-codes";
 import messageModel from "../models/message-model.js";
 import conversationModel from "../models/conversation-model.js";
 import ApiError from "../../utils/api-error.js";
+import { generateEmbedding } from "../../config/embedding-provider.js";
 import { sanitizeAllowedFields } from "../../utils/helper.js";
-
-import { generateEmbedding } from "../../config/embedding.js";
 
 const createOneMessage = async (data) => {
   try {

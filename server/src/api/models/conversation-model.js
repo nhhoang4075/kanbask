@@ -151,7 +151,6 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
         "v.type",
         "v.team_id",
         "v.project_id",
-        "v.created_at",
         "v.latest_message_id",
         "v.latest_message_content",
         "v.latest_message_at",

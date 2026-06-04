@@ -12,17 +12,17 @@ import {
 } from "../ui/alert-dialog";
 import { Button } from "../ui/button";
 
-const DeleteAlert = ({ manage, rows }) => {
+const DeleteAlert = ({ manage, row }) => {
   const handleDelete = () => {
     // Handle delete action here
     console.log("Delete " + manage + " triggered");
-    console.log(rows.map((row) => row.id));
+    console.log(row);
   };
   return (
     <AlertDialog className="">
       <AlertDialogTrigger
         variant="outline"
-        className="w-33 bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer hover:text-white rounded-md h-9"
+        className="w-full bg-red-500 text-white hover:bg-red-600 hover:cursor-pointer hover:text-white rounded-md h-9"
       >
         Delete
       </AlertDialogTrigger>

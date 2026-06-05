@@ -97,10 +97,6 @@ export function TasksTable({ tasks, setTasks, handleDeleteTask, handleEditTask }
     }
   });
 
-  //   useEffect(() => {
-  //     table.resetRowSelection();
-  //   }, [table.getRowModel()?.rows]);
-
   // Set up DnD sensors
   const sensors = useSensors(
     useSensor(PointerSensor, {

@@ -6,6 +6,7 @@ import { Input } from "../ui/input";
 import { Bell } from "lucide-react";
 import { Sidebar, SidebarClose } from "lucide-react";
 import { useSidebar } from "@/components/ui/sidebar";
+import NotificationButton from "@/components/NotificationButton";
 import { useRouter } from "next/navigation";
 
 export default function AppHeader({ isCollapsed, setIsCollapsed }) {
@@ -18,6 +19,26 @@ export default function AppHeader({ isCollapsed, setIsCollapsed }) {
     setIsCollapsed(!isCollapsed);
     toggleSidebar();
   };
+  const mockNotifications = [
+    {
+      user_id: "user1",
+      content: "Đây là nội dung thông báo mới 1.",
+      type: "custom_event",
+      reference_id: 101
+    },
+    {
+      user_id: "user2",
+      content: "Đây là nội dung thông báo mới 2.",
+      type: "reminder",
+      reference_id: 102
+    },
+    {
+      user_id: "user3",
+      content: "Thông báo về sự kiện sắp tới.",
+      type: "event",
+      reference_id: 103
+    }
+  ];
 
   const navigateToDashboard = () => {
     router.push("/dashboard");
@@ -62,22 +83,7 @@ export default function AppHeader({ isCollapsed, setIsCollapsed }) {
         Kanbask
       </button>
       <div className="flex-1/5 flex items-center justify-end gap-4 relative">
-        <Button
-          className="flex-none hover:bg-gray-300"
-          variant="ghost"
-          onClick={toggleNotifications} // Add onClick to toggle notifications
-          aria-label="Show Notifications"
-        >
-          <Bell />
-        </Button>
-        {showNotifications && (
-          <div
-            ref={notificationRef} // Attach ref to the notification dropdown
-            className="fixed top-16 right-4 w-64 bg-white shadow-lg rounded-md p-4 dark:bg-gray-700 border border-black z-[9999]"
-          >
-            <p className="text-sm font-medium dark:text-white">You have no new notifications.</p>
-          </div>
-        )}
+        <NotificationButton notifications={mockNotifications} />
         <Input
           type="text"
           placeholder="Search..."

@@ -53,19 +53,6 @@ const deleteOneTeamById = async (req, res, next) => {
   }
 };
 
-const addMembersToTeam = async (req, res, next) => {
-  try {
-    const teamId = await teamService.addMembersToTeam(req.params.id, req.body.user_ids);
-
-    res.status(StatusCodes.OK).json({
-      success: true,
-      message: `Added members successfully to team ${teamId}`
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 const getMembersOfTeam = async (req, res, next) => {
   try {
     const members = await teamService.getMembersOfTeam(req.params.id, req.user.id);
@@ -79,9 +66,9 @@ const getMembersOfTeam = async (req, res, next) => {
   }
 };
 
-const deleteMembersFromTeam = async (req, res, next) => {
+const removeMembersFromTeam = async (req, res, next) => {
   try {
-    const teamId = await teamService.deleteMembersFromTeam(
+    const teamId = await teamService.removeMembersFromTeam(
       req.params.id,
       req.body.user_ids,
       req.user.id
@@ -102,7 +89,7 @@ const updateTeamRoleOfMember = async (req, res, next) => {
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Updated successfully team role of user ${req.body.user_id} in team ${teamId}`
+      message: `Updated successfully role of user ${req.body.user_id} in team ${teamId}`
     });
   } catch (error) {
     next(error);
@@ -182,9 +169,8 @@ export default {
   getTeamsOfUser,
   updateOneTeamById,
   deleteOneTeamById,
-  addMembersToTeam,
   getMembersOfTeam,
-  deleteMembersFromTeam,
+  removeMembersFromTeam,
   updateTeamRoleOfMember,
   joinOneTeamByCode,
   leaveOneTeamById,

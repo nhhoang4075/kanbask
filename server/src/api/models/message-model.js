@@ -1,12 +1,15 @@
+import pgvector from "pgvector/knex";
+
 import { db } from "../../config/db.js";
 
-const createOneMessage = async ({ conversation_id, sender_id, content }) => {
+const createOneMessage = async ({ conversation_id, sender_id, content, embedding }) => {
   try {
     const [message] = await db("messages")
       .insert({
         conversation_id,
         sender_id,
-        content
+        content,
+        embedding: pgvector.toSql(embedding)
       })
       .returning("id");
 
@@ -18,10 +21,19 @@ const createOneMessage = async ({ conversation_id, sender_id, content }) => {
 
 const getOneMessageById = async (id) => {
   try {
-    const [message] = await db("messages")
-      .leftJoin("user_public_view AS v", "messages.sender_id", "=", "v.id")
-      .select("messages.*", "v.full_name AS sender_full_name", "v.avatar_url AS sender_avatar_url")
-      .where("messages.id", id)
+    const [message] = await db("messages AS m")
+      .leftJoin("user_public_view AS v", "v.id", "=", "m.sender_id")
+      .select(
+        "m.id",
+        "m.conversation_id",
+        "m.sender_id",
+        "v.full_name AS sender_full_name",
+        "v.avatar_url AS sender_avatar_url",
+        "m.content",
+        "m.created_at",
+        "m.updated_at"
+      )
+      .where("m.id", id)
       .limit(1);
 
     return message;
@@ -32,13 +44,32 @@ const getOneMessageById = async (id) => {
 
 const getManyMessagesByConversationId = async (conversation_id) => {
   try {
-    const messages = await db("messages")
-      .leftJoin("user_public_view AS v", "messages.sender_id", "=", "v.id")
-      .select("messages.*", "v.full_name AS sender_full_name", "v.avatar_url AS sender_avatar_url")
-      .where({ conversation_id })
+    const messages = await db("messages AS m")
+      .leftJoin("user_public_view AS v", "v.id", "=", "m.sender_id")
+      .select(
+        "m.id",
+        "m.conversation_id",
+        "m.sender_id",
+        "v.full_name AS sender_full_name",
+        "v.avatar_url AS sender_avatar_url",
+        "m.content",
+        "m.created_at",
+        "m.updated_at"
+      )
+      .where("m.conversation_id", conversation_id)
       .orderBy("messages.created_at", "asc");
 
     return messages;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const isUserMessageSender = async (message_id, user_id) => {
+  try {
+    const [record] = await db("messages").where({ id: message_id, sender_id: user_id }).limit(1);
+
+    return !!record;
   } catch (err) {
     throw new Error(err);
   }
@@ -48,7 +79,8 @@ const updateOneMessageById = async (id, data) => {
   try {
     const [message] = await db("messages")
       .update({
-        ...data,
+        content: data.content,
+        embedding: pgvector.toSql(data.embedding),
         updated_at: db.fn.now()
       })
       .where({ id })
@@ -74,6 +106,7 @@ export default {
   createOneMessage,
   getOneMessageById,
   getManyMessagesByConversationId,
+  isUserMessageSender,
   updateOneMessageById,
   deleteOneMessageById
 };

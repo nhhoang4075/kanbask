@@ -45,7 +45,10 @@ const deleteOneConversation = async (req, res, next) => {
 
 const getParticipantsOfConversation = async (req, res, next) => {
   try {
-    const participants = await conversationService.getParticipantsOfConversation(req.params.id);
+    const participants = await conversationService.getParticipantsOfConversation(
+      req.params.id,
+      req.user.id
+    );
 
     res.status(StatusCodes.OK).json({
       success: true,

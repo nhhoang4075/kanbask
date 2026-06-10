@@ -9,7 +9,7 @@ const notificationRoute = (router) => {
     .route("/notifications")
     .get(
       notificationValidation.validateNotificationsOptionsQuery,
-      notificationController.getManyNotificationsByUserId
+      notificationController.getNotificationsOfUser
     )
     .post(
       notificationValidation.validateNewNotification,

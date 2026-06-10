@@ -30,7 +30,7 @@ const validateUpdateTeam = validate(
   })
 );
 
-const validateDeleteMembers = validate(
+const validateUpdateTeamMembers = validate(
   z.object({
     body: z
       .object({
@@ -110,7 +110,7 @@ const validateTeamIdQuery = validate(
 export default {
   validateCreateTeam,
   validateUpdateTeam,
-  validateDeleteMembers,
+  validateUpdateTeamMembers,
   validateUpdateTeamRole,
   validateTeamIdParam,
   validateTeamJoinRequestIdParam,

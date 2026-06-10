@@ -5,9 +5,13 @@ import ApiError from "../../utils/api-error.js";
 
 const createOneConversation = async (data) => {
   try {
-    const { type, team_id, project_id, user_ids } = data;
+    const { type, team_id = null, project_id = null, user_ids } = data;
 
-    const conversationId = await conversationModel.createOneConversation(type, team_id, project_id);
+    const conversationId = await conversationModel.createOneConversation({
+      type,
+      team_id,
+      project_id
+    });
 
     if (!conversationId) {
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the conversation");
@@ -75,8 +79,20 @@ const deleteOneConversation = async (conversationId) => {
   }
 };
 
-const getParticipantsOfConversation = async (conversationId) => {
+const getParticipantsOfConversation = async (conversationId, actorId) => {
   try {
+    const isConversationParticipant = await conversationModel.isUserInConversation(
+      conversationId,
+      actorId
+    );
+
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
+    }
+
     const participants = await conversationModel.getParticipantsOfConversation(conversationId);
 
     return participants;

@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 
 import UserModel from "../models/user-model.js";
 import ApiError from "../../utils/api-error.js";
+import embeddingProvider from "../../config/embedding-provider.js";
 import { sanitizeUser, sanitizeAllowedFields } from "../../utils/helper.js";
 
 const getOneUserById = async (userId) => {
@@ -55,6 +56,12 @@ const updateUserProfile = async (userId, data) => {
     if (Object.keys(allowedData).length === 0) {
       throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "No allowed field to update");
     }
+    const user = await UserModel.getOneUserById(userId);
+
+    const textToEmbed = `${allowedData.full_name ?? user.full_name} ${user.email}`.trim();
+    const userEmbedding = await embeddingProvider.generateEmbedding(textToEmbed);
+
+    allowedData.embedding = userEmbedding;
 
     await UserModel.updateOneUserById(userId, allowedData);
 

@@ -1,19 +1,19 @@
 import { StatusCodes } from "http-status-codes";
-import taskService from "../services/task-service";
+import taskService from "../services/task-service.js";
 
-const createTask = async (req, res, next) => {
+const createOneTask = async (req, res, next) => {
   try {
     const user_id = req.user.id;
-    const { project_id, title, status, priority, assignees, due_date } = req.body;
+    const { project_id, title, status, priority, due_date, assignees } = req.body;
 
-    const task = await taskService.createTask(
+    const task = await taskService.createOneTask(
       project_id,
       title,
       status,
       priority,
-      assignees,
+      due_date,
       user_id,
-      due_date
+      assignees
     );
 
     res.status(StatusCodes.CREATED).json({
@@ -25,23 +25,53 @@ const createTask = async (req, res, next) => {
   }
 };
 
-const updateTask = async (req, res, next) => {
+const getProjectTasks = async (req, res, next) => {
+  try {
+    const { project_id } = req.body;
+    const tasks = await taskService.getProjectTasks(project_id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: { tasks }
+    });
+  } catch (error) {
+    throw next(error);
+  }
+};
+
+const getOneTaskById = async (req, res, next) => {
+  try {
+    const { task_id } = req.params;
+
+    const task = await taskService.getOneTaskById(task_id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: { task }
+    });
+  } catch (error) {
+    throw next(error);
+  }
+};
+
+const updateOneTaskInfo = async (req, res, next) => {
   try {
     const { task_id } = req.params;
     const user_id = req.user.id;
-    const { title, status, priority, assignees, due_date } = req.body;
+    const { title, status, priority, due_date, assignees } = req.body;
 
-    const task = await taskService.updateTask(
+    const task = await taskService.updateOneTaskInfo(
       task_id,
       title,
       status,
       priority,
-      assignees,
-      due_date
+      due_date,
+      assignees
     );
 
     res.status(StatusCodes.OK).json({
       success: true,
+      message: `Task ${task_id} is updated information successfully`,
       data: { task }
     });
   } catch (error) {
@@ -49,7 +79,41 @@ const updateTask = async (req, res, next) => {
   }
 };
 
+const updateOneTaskPosition = async (req, res, next) => {
+  try {
+    const { task_id, position } = req.params;
+
+    await taskService.updateOneTaskPosition(task_id, position);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Task ${task_id} position updated to ${position} successfully`
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+const deleteOneTaskById = async (req, res, next) => {
+  try {
+    const { task_id } = req.params;
+
+    await taskService.deleteOneTaskById(task_id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Delete task ${task_id} successfully`
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export default {
-  createTask,
-  updateTask
+  createOneTask,
+  getProjectTasks,
+  getOneTaskById,
+  updateOneTaskInfo,
+  updateOneTaskPosition,
+  deleteOneTaskById
 };

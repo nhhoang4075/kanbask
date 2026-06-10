@@ -19,6 +19,10 @@ DROP TABLE IF EXISTS team_join_requests CASCADE;
 DROP TABLE IF EXISTS team_members CASCADE;
 DROP TABLE IF EXISTS teams CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS task_attachments;
+DROP TABLE IF EXISTS message_attachments;
+DROP TABLE IF EXISTS storage_attachments; 
+
 
 -- =============================================
 -- 1.a. Phân mở rộng vector
@@ -270,43 +274,49 @@ LEFT JOIN LATERAL (
 LEFT JOIN users u ON u.id = lm.sender_id;
 
 -- =============================================
--- 16. Bảng lưu trữ thông tin file (từ Supabase)
+-- 16. Bảng lưu trữ thông tin chung của tất cả các file đính kèm
 -- =============================================
 
-CREATE TABLE IF NOT EXISTS files (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
-    supabase_path VARCHAR(1024) UNIQUE NOT NULL, 
+CREATE TABLE IF NOT EXISTS storage_attachments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    supabase_path VARCHAR(1024) UNIQUE NOT NULL,
     original_name VARCHAR(255) NOT NULL,
-    mime_type VARCHAR(100),
-    size_bytes BIGINT,
+    mime_type VARCHAR(100) NOT NULL,
+    size_bytes BIGINT NOT NULL,
     uploaded_by UUID REFERENCES users(id) ON DELETE SET NULL,
+    metadata JSONB, 
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_sa_uploaded_by_v2 ON storage_attachments (uploaded_by);
+CREATE INDEX IF NOT EXISTS idx_sa_mime_type_v2 ON storage_attachments (mime_type);
+
+-- =============================================
+-- 17. Bảng liên kết giữa Task và File đính kèm
+-- =============================================
+
+CREATE TABLE IF NOT EXISTS task_attachments (
     task_id INT REFERENCES tasks(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+    attachment_id UUID REFERENCES storage_attachments(id) ON DELETE CASCADE,
+    attached_by UUID REFERENCES users(id) ON DELETE SET NULL, -- Ai đã đính kèm
+    attached_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (task_id, attachment_id)
 );
+CREATE INDEX IF NOT EXISTS idx_ta_attachment_id ON task_attachments (attachment_id);
 
 -- =============================================
--- 17. Bảng lưu trữ thông tin ảnh/video (từ Cloudinary)
+-- 18. Bảng liên kết giữa Message và File đính kèm
 -- =============================================
 
-CREATE TABLE IF NOT EXISTS media_assets (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(), 
-    cloudinary_public_id VARCHAR(255) UNIQUE NOT NULL,
-    secure_url VARCHAR(1024) NOT NULL, 
-    asset_type VARCHAR(20) NOT NULL CHECK (asset_type IN ('image', 'video')),
-    format VARCHAR(20), 
-    width INT,
-    height INT,
-    bytes BIGINT,
-    duration NUMERIC,
-    uploaded_by UUID REFERENCES users(id) ON DELETE SET NULL,
+CREATE TABLE IF NOT EXISTS message_attachments (
     message_id INT REFERENCES messages(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
+    attachment_id UUID REFERENCES storage_attachments(id) ON DELETE CASCADE,
+    attached_by UUID REFERENCES users(id) ON DELETE SET NULL, -- Ai đã đính kèm
+    attached_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    PRIMARY KEY (message_id, attachment_id)
 );
-
-CREATE INDEX idx_media_assets_uploaded_by ON media_assets (uploaded_by);
-CREATE INDEX idx_media_assets_asset_type ON media_assets (asset_type);
+CREATE INDEX IF NOT EXISTS idx_ma_attachment_id ON message_attachments (attachment_id);
 
 -- =============================================
 -- END init_database.sql

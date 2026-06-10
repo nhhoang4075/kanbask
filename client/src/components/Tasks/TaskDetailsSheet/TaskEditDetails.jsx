@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarIcon, Save, X, Check, ChevronsUpDown } from "lucide-react";
+import { CalendarIcon, Save, X, Check, ChevronsUpDown, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,6 +29,8 @@ import { SheetFooter } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { columnDefinitions, users } from "@/data/tasks";
+import { FileAttachmentList } from "../FileAttachment/FileAttachmentList";
+import { FileUpload } from "../FileAttachment/FileUpload";
 
 export function TaskEditDetails({ task, onSave, onCancel }) {
   const [formData, setFormData] = useState({
@@ -37,7 +39,8 @@ export function TaskEditDetails({ task, onSave, onCancel }) {
     status: task.status || "To Do",
     priority: task.priority || "medium",
     dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
-    assignedTo: task.assignedTo || []
+    assignedTo: task.assignedTo || [],
+    attachments: task.attachments || []
   });
   const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
 
@@ -83,6 +86,20 @@ export function TaskEditDetails({ task, onSave, onCancel }) {
     };
 
     onSave({ id: task.id, ...formattedData });
+  };
+
+  const handleFileUpload = (file) => {
+    setFormData((prev) => ({
+      ...prev,
+      attachments: [...prev.attachments, file]
+    }));
+  };
+
+  const handleDeleteFile = (fileId) => {
+    setFormData((prev) => ({
+      ...prev,
+      attachments: prev.attachments.filter((file) => file.id !== fileId)
+    }));
   };
 
   return (
@@ -153,6 +170,26 @@ export function TaskEditDetails({ task, onSave, onCancel }) {
           />
         </div>
 
+        {/* File Attachments */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="attachments">
+              <div className="flex items-center">
+                <Paperclip className="mr-2 h-4 w-4" />
+                Attachments
+              </div>
+            </Label>
+            <span className="text-xs text-muted-foreground">
+              {formData.attachments.length} {formData.attachments.length === 1 ? "file" : "files"}
+            </span>
+          </div>
+
+          {formData.attachments.length > 0 && (
+            <FileAttachmentList files={formData.attachments} onDelete={handleDeleteFile} />
+          )}
+
+          <FileUpload onFileUpload={handleFileUpload} />
+        </div>
         {/* Assignees */}
         <div className="space-y-2">
           <Label htmlFor="assignees">Assignees</Label>

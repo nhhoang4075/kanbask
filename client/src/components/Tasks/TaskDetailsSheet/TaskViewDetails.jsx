@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, Clock, User, Users, CalendarIcon, AlignLeft } from "lucide-react";
+import { Calendar, Clock, User, Users, CalendarIcon, AlignLeft, Paperclip } from "lucide-react";
 import { format } from "date-fns";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SheetFooter } from "@/components/ui/sheet";
 import { cn, formatDateTime } from "@/lib/utils";
+import { FileAttachmentList } from "../FileAttachment/FileAttachmentList";
 
 export function TaskViewDetails({ task, onEdit, onClose }) {
   const priorityColors = {
@@ -42,6 +43,15 @@ export function TaskViewDetails({ task, onEdit, onClose }) {
             Description
           </div>
           <p className="text-sm">{task.description || "No description provided."}</p>
+        </div>
+
+        {/* File Attachments */}
+        <div className="space-y-2">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Paperclip className="mr-2 h-4 w-4" />
+            Attachments
+          </div>
+          <FileAttachmentList files={task.attachments || []} readOnly={true} />
         </div>
 
         {/* Assignees */}

@@ -29,7 +29,7 @@ const Teams = () => {
   };
 
   return (
-    <div className="w-full grid grid-cols-9 overflow-y-auto border-l-2 border-gray-300 bg-slate-50">
+    <div className="w-full h-full grid grid-cols-9 overflow-y-auto border-l-2 border-gray-300 bg-slate-50">
       <MemberSideBar props={props} />
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full col-span-7">
         <TabsList className="flex flex-row gap-2 w-full h-auto justify-start py-2 px-3 bg-gray-200 rounded-none">

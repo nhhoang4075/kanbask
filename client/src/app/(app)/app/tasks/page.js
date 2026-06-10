@@ -131,7 +131,7 @@ const page = () => {
   };
 
   return (
-    <main className="w-full mx-auto px-4 py-1.5 overflow-hidden">
+    <main className="w-full h-full mx-auto px-4 py-1.5 overflow-hidden bg-white">
       <div className="w-full py-1.5 mb-3 flex flex-row gap-4 justify-between">
         <div className="flex flex-row gap-2 flex-4">
           <h1 className="text-3xl font-bold w-auto mr-3">Project Tasks</h1>

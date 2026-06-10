@@ -110,7 +110,7 @@ const MembersTable = ({ props }) => {
   };
 
   return (
-    <div className="w-full px-3 overflow-y-auto col-span-7 space-y-4 h-[calc(100vh-7rem)]">
+    <div className="w-full px-3 overflow-y-auto col-span-7 space-y-4 h-[calc(100vh-4rem)]">
       {/* Display properties */}
       <Card className="w-full my-2 border-2 py-4 h-fit max-h-80 gap-1 overflow-auto">
         <CardHeader>

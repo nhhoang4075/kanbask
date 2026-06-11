@@ -32,18 +32,19 @@ const startServer = () => {
   const app = express();
   const server = createServer(httpsOptions, app);
 
+  setupSocket(server);
+
   // Middlewares
   app.use(json());
+  app.use(cookieParser());
   app.use(
     cors({
-      origin: process.env.CLIENT_ORIGIN || "https://localhost:3000",
+      origin: [process.env.CLIENT_ORIGIN, "https://localhost:3000"],
       credentials: true
     })
   );
-  app.use(cookieParser());
 
   app.use("/api", apiRouter());
-  setupSocket(server);
   app.use(handleApiError);
 
   app.get("/", async (req, res) => {
@@ -84,8 +85,7 @@ const startServer = () => {
       });
     });
   });
-
-  server.listen(process.env.APP_PORT || 8000, () => {
+  server.listen(process.env.APP_PORT || 8080, () => {
     console.log(`Server is running at https://${process.env.APP_HOST}:${process.env.APP_PORT}`);
   });
 };

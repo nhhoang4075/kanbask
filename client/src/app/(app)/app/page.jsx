@@ -1,16 +1,13 @@
-"use client";
+'use client';
 
-import { useSession } from "@/hooks/use-session";
+import Dashboard from "@/components/dashboard/dashboard";
+import DashboardHeader from "@/components/dashboard/dashboard-header";
 
-export default function AppPage() {
-  const { user, loading } = useSession();
-
+export default function DashboardPage() {
   return (
-    <div className="h-full w-full p-8 bg-background">
-      <h1>User Session:</h1>
-      <pre className="whitespace-pre-wrap text-destructive">
-        {loading ? "loading" : JSON.stringify(user, null, 2)}
-      </pre>
+    <div className="w-full h-[97dvh] overflow-hidden p-6 space-y-6 bg-ghost-white rounded-2xl">
+      <DashboardHeader />
+      <Dashboard />
     </div>
   );
 }

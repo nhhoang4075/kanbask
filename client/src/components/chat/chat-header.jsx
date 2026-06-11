@@ -14,16 +14,20 @@ export default function ChatHeader() {
     const currConv = conversations.find((c) => c.id === selectedConversationId);
     return (
         <div className="flex w-full gap-3 items-center border-b-2 bg-white h-1/9 py-2 px-4">
-            <Avatar className="flex-none h-10 w-10">
-                <AvatarImage src={currConv?.avatar_url || null} alt=""/>
-                <AvatarFallback>
-                    {currConv.type === "direct" ? (
-                        getInitials(currConv.title)
-                    ) : currConv.type === "team" ? (
-                        <Users />
-                    ) : (
-                        <FolderKanban />
-                    )}
+            <Avatar className="h-12 w-12 relative">
+              <AvatarImage
+                src={currConv?.avatar_url}
+                alt={currConv?.title || currConv?.id}
+                className="object-cover"
+              />
+              <AvatarFallback className="bg-mustard">
+                {currConv?.type === "direct" ? (
+                  getInitials(currConv?.title)
+                ) : currConv?.type === "team" ? (
+                  <Users />
+                ) : (
+                  <FolderKanban />
+                )}
               </AvatarFallback>
             </Avatar>
             <div className="flex-none font-roboto text-[25px] 3xl font-bold">
@@ -33,12 +37,12 @@ export default function ChatHeader() {
                              "Team Chat" : "Project Chat"))}
             </div>
             {currConv?.type === "team" && (
-                <Badge className="flex-none text-xs rounded-md bg-red-500">
+                <Badge className="flex-none text-[10px] rounded-md bg-red-500 h-4">
                 Team
                 </Badge>
             )}
             {currConv?.type === "project" && (
-                <Badge className="flex-none text-xs rounded-md bg-blue-500">
+                <Badge className="flex-none text-[10px] rounded-md bg-blue-500 h-4">
                 Project
                 </Badge>
             )}

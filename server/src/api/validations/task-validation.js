@@ -42,7 +42,7 @@ const validateGetTaskById = validate(
   })
 );
 
-const validateUpdateTaskInfo = validate(
+const validateUpdateTask = validate(
   z.object({
     body: z
       .object({
@@ -50,25 +50,13 @@ const validateUpdateTaskInfo = validate(
         status: z.enum(["todo", "in_progress", "done", "review", "canceled"]).optional(),
         priority: z.enum(["low", "medium", "high"]).optional(),
         due_date: z.string().optional(),
+        position: z.coerce.number().int().positive().optional(),
         assignees: z.array(z.string().uuid()).optional()
       })
       .strict(),
     params: z
       .object({
         task_id: z.coerce.number().int().positive()
-      })
-      .strict(),
-    query: z.object({}).optional()
-  })
-);
-
-const validateUpdateTaskPosition = validate(
-  z.object({
-    body: z.object({}).optional(),
-    params: z
-      .object({
-        task_id: z.coerce.number().int().positive(),
-        position: z.coerce.number().int().positive()
       })
       .strict(),
     query: z.object({}).optional()
@@ -91,7 +79,6 @@ export default {
   validateCreateTask,
   validateGetProjectTasks,
   validateGetTaskById,
-  validateUpdateTaskInfo,
-  validateUpdateTaskPosition,
+  validateUpdateTask,
   validateDeleteTask
 };

@@ -6,9 +6,9 @@ const messageRoute = (router) => {
   router.use("/messages", authMiddleware.authenticate);
 
   router
-    .route("/messages/:conversation_id")
+    .route("/messages")
     .get(
-      messageValidation.validateConversationIdParam,
+      messageValidation.validateConversationIdQuery,
       messageController.getManyMessagesByConversationId
     );
 };

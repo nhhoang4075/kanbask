@@ -84,16 +84,6 @@ const linkOneAttachmentToTask = async (task_id, attachment_id, attached_by) => {
   }
 };
 
-const isOneAttachmentLinkedToTask = async (task_id, attachment_id) => {
-  try {
-    const record = await db("task_attachments").where({ task_id, attachment_id }).first();
-
-    return !!record;
-  } catch (err) {
-    throw new Error(err);
-  }
-};
-
 const linkOneAttachmentToMessage = async (message_id, attachment_id, attached_by) => {
   try {
     await db("message_attachments").insert({
@@ -108,16 +98,6 @@ const linkOneAttachmentToMessage = async (message_id, attachment_id, attached_by
   }
 };
 
-const isOneAttachmentLinkedToMessage = async (message_id, attachment_id) => {
-  try {
-    const record = await db("message_attachments").where({ message_id, attachment_id }).first();
-
-    return !!record;
-  } catch (err) {
-    throw new Error(err);
-  }
-};
-
 export default {
   createOneAttachment,
   getOneAttachmentById,
@@ -125,7 +105,5 @@ export default {
   getManyAttachmentsByMessageId,
   deleteOneAttachmentById,
   linkOneAttachmentToTask,
-  isOneAttachmentLinkedToTask,
-  linkOneAttachmentToMessage,
-  isOneAttachmentLinkedToMessage
+  linkOneAttachmentToMessage
 };

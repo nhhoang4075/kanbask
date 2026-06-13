@@ -9,7 +9,6 @@ import messageRoute from "./message-route.js";
 import notificationRoute from "./notification-route.js";
 import searchRoute from "./search-route.js";
 import taskRoute from "./task-route.js";
-import attachmentRoute from "./attachment-route.js";
 
 const router = Router();
 
@@ -22,7 +21,6 @@ function apiRouter() {
   messageRoute(router);
   notificationRoute(router);
   searchRoute(router);
-  attachmentRoute(router);
 
   taskRoute(router);
   return router;

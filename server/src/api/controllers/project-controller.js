@@ -8,10 +8,10 @@ const createOneProject = async (req, res, next) => {
 
     return res.status(StatusCodes.CREATED).json({
       success: true,
-      data: project
+      data: { project }
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -21,12 +21,10 @@ const getProjectsOfUserInTeam = async (req, res, next) => {
 
     return res.status(StatusCodes.OK).json({
       success: true,
-      data: {
-        projects
-      }
+      data: { projects }
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
@@ -43,7 +41,7 @@ const updateOneProjectById = async (req, res, next) => {
       message: `Updated successfully project with id ${projectId}`
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 

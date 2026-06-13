@@ -1,86 +1,232 @@
 import { StatusCodes } from "http-status-codes";
-import ApiError from "../../utils/api-error.js";
+
 import taskModel from "../models/task-model.js";
+import projectModel from "../models/project-model.js";
+import attachmentModel from "../models/attachment-model.js";
+import ApiError from "../../utils/api-error.js";
+import embeddingProvider from "../../config/embedding-provider.js";
+import supabaseProvider from "../../config/supabase-provider.js";
 import { sanitizeAllowedFields } from "../../utils/helper.js";
 
-const createOneTask = async (user_id, data) => {
+const createOneTask = async (data, actorId) => {
   try {
+    const { project_id, title, status, priority, due_date, assignees } = data;
+
+    const isProjectMember = await projectModel.isUserInProject(project_id, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
+    }
+
+    const embedding = await embeddingProvider.generateEmbedding(title);
+    const position = await taskModel.getMaxTaskPositionOfProject(project_id);
+
+    const taskId = await taskModel.createOneTask(
+      {
+        project_id,
+        title,
+        status,
+        priority,
+        due_date,
+        created_by: actorId,
+        embedding,
+        position: position + 1
+      },
+      assignees
+    );
+
+    if (!taskId) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the task");
+    }
+
+    const task = await taskModel.getOneTaskById(taskId);
+    const taskAssignees = await taskModel.getAssigneesOfTask(taskId);
+
+    const formattedTask = { ...task, assignees: taskAssignees };
+
+    return formattedTask;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getManyTasksByProjectId = async (projectId, actorId) => {
+  try {
+    const isProjectMember = await projectModel.isUserInProject(projectId, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
+    }
+
+    const tasks = await taskModel.getManyTasksByProjectId(projectId);
+
+    const formattedTasks = await Promise.all(
+      tasks.map(async (t) => {
+        const [assignees, attachments] = await Promise.all([
+          taskModel.getAssigneesOfTask(t.id),
+          attachmentModel.getManyAttachmentsByTaskId(t.id)
+        ]);
+
+        const formattedAttachments = await Promise.all(
+          attachments.map(async (a) => ({
+            id: a.id,
+            original_name: a.original_name,
+            mime_type: a.mime_type,
+            size_bytes: a.size_bytes,
+            attached_by: a.attached_by,
+            attached_at: a.attached_at
+            // url: await supabaseProvider.generateUrl(a.supabase_path)
+          }))
+        );
+
+        return {
+          ...t,
+          assignees,
+          attachments: formattedAttachments
+        };
+      })
+    );
+
+    return formattedTasks;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const updateOneTaskById = async (id, data, actorId) => {
+  try {
+    const task = await taskModel.getOneTaskById(id);
+
+    const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
+    }
+
     const allowedData = sanitizeAllowedFields(data, [
-      "project_id",
       "title",
       "status",
       "priority",
-      "due_date"
+      "due_date",
+      "completed_at"
     ]);
 
-    const assignees = data.assignees;
-
-    const position = await taskModel.getMaxTaskPosition(allowedData.project_id);
-
-    const task = await taskModel.createOneTask(user_id, allowedData, position + 1, assignees);
-
-    if (!task.id) {
-      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create a task");
+    if (Object.keys(allowedData).length === 0 && !data.assignees && !data.position) {
+      throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "No allowed field to update");
     }
 
-    return task;
+    await taskModel.updateOneTaskById(task.id, allowedData, data.assignees);
+
+    if (data.position != null && task.position != data.position) {
+      await taskModel.moveTask(task.id, task.project_id, task.position, data.position);
+    }
+
+    return task.id;
   } catch (err) {
     throw err;
   }
 };
 
-const getProjectTasks = async (project_id) => {
+const deleteOneTaskById = async (id, actorId) => {
   try {
-    const tasks = await taskModel.getProjectTasks(project_id);
+    const task = await taskModel.getOneTaskById(id);
 
-    if (!tasks) {
-      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to get tasks");
+    const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
     }
 
-    return tasks;
+    await taskModel.deleteOneTaskById(task.id);
+
+    return task.id;
   } catch (err) {
     throw err;
   }
 };
 
-const getOneTaskById = async (task_id) => {
+const uploadAttachmentsToTask = async (taskId, files, actorId) => {
   try {
-    const task = await taskModel.getOneTaskById(task_id);
+    const task = await taskModel.getOneTaskById(taskId);
+
+    const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
+    }
+
+    if (!files || files.length == 0) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Files not found");
+    }
+
+    await Promise.all(
+      files.map(async (file) => {
+        const path = `tasks/${actorId}`;
+        const metadata = await supabaseProvider.uploadToStorage(file, path);
+
+        const attachmentId = await attachmentModel.createOneAttachment({
+          ...metadata,
+          uploaded_by: actorId
+        });
+
+        await attachmentModel.linkOneAttachmentToTask(task.id, attachmentId, actorId);
+      })
+    );
+
+    return task.id;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const deleteAttachmentsFromTask = async (taskId, attachmentIds, actorId) => {
+  try {
+    const task = await taskModel.getOneTaskById(taskId);
+
+    const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
+    }
+
+    if (!attachmentIds || attachmentIds.length == 0) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Attachments not found to delete");
+    }
+
+    await Promise.all(
+      attachmentIds.map(async (id) => {
+        const attachment = await attachmentModel.getOneAttachmentById(id);
+
+        await supabaseProvider.deleteFromStorage(attachment.supabase_path);
+        await attachmentModel.deleteOneAttachmentById(attachment.id);
+      })
+    );
+
+    return task.id;
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getAttachmentUrlOfTask = async (taskId, attachmentId, actorId) => {
+  try {
+    const task = await taskModel.getOneTaskById(taskId);
 
     if (!task) {
-      throw new ApiError(StatusCodes.NOT_FOUND, "Task not found");
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
     }
 
-    return task;
-  } catch (err) {
-    throw err;
-  }
-};
+    const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
 
-const updateOneTaskById = async (task_id, data) => {
-  try {
-    const allowedData = sanitizeAllowedFields(data, ["title", "status", "priority", "due_date"]);
-
-    let task = await taskModel.updateOneTaskById(task_id, allowedData, data.assignees);
-
-    if (!task) {
-      throw new ApiError(StatusCodes.NOT_FOUND, "Task not found");
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
     }
 
-    if (data.position != null && task.position != data.position)
-      task = await taskModel.moveTask(task.id, task.project_id, task.position, data.position);
+    const attachment = await attachmentModel.getOneAttachmentById(attachmentId);
 
-    return task;
-  } catch (err) {
-    throw err;
-  }
-};
+    const url = await supabaseProvider.generateUrl(attachment.supabase_path);
 
-const deleteOneTaskById = async (task_id) => {
-  try {
-    const task = await getOneTaskById(task_id);
-
-    await taskModel.deleteOneTaskById(task_id, task.project_id, task.position);
+    return url;
   } catch (err) {
     throw err;
   }
@@ -88,8 +234,10 @@ const deleteOneTaskById = async (task_id) => {
 
 export default {
   createOneTask,
-  getProjectTasks,
-  getOneTaskById,
+  getManyTasksByProjectId,
   updateOneTaskById,
-  deleteOneTaskById
+  deleteOneTaskById,
+  uploadAttachmentsToTask,
+  deleteAttachmentsFromTask,
+  getAttachmentUrlOfTask
 };

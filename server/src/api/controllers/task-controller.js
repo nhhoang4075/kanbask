@@ -3,83 +3,109 @@ import taskService from "../services/task-service.js";
 
 const createOneTask = async (req, res, next) => {
   try {
-    const user_id = req.user.id;
-
-    const task = await taskService.createOneTask(user_id, req.body);
+    const task = await taskService.createOneTask(req.body, req.user.id);
 
     res.status(StatusCodes.CREATED).json({
       success: true,
       data: { task }
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
-const getProjectTasks = async (req, res, next) => {
+const getTasksOfProject = async (req, res, next) => {
   try {
-    const { project_id } = req.body;
-    const tasks = await taskService.getProjectTasks(project_id);
+    const tasks = await taskService.getManyTasksByProjectId(req.query.project_id, req.user.id);
 
     res.status(StatusCodes.OK).json({
       success: true,
       data: { tasks }
     });
   } catch (error) {
-    throw next(error);
-  }
-};
-
-const getOneTaskById = async (req, res, next) => {
-  try {
-    const { task_id } = req.params;
-
-    const task = await taskService.getOneTaskById(task_id);
-
-    res.status(StatusCodes.OK).json({
-      success: true,
-      data: { task }
-    });
-  } catch (error) {
-    throw next(error);
+    next(error);
   }
 };
 
 const updateOneTaskById = async (req, res, next) => {
   try {
-    const { task_id } = req.params;
-
-    const task = await taskService.updateOneTaskById(task_id, req.body);
+    const taskId = await taskService.updateOneTaskById(req.params.id, req.body, req.user.id);
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Task ${task_id} is updated successfully`,
-      data: { task }
+      message: `Updated successfully task with id ${taskId}`
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
 const deleteOneTaskById = async (req, res, next) => {
   try {
-    const { task_id } = req.params;
-
-    await taskService.deleteOneTaskById(task_id);
+    const taskId = await taskService.deleteOneTaskById(req.params.id, req.user.id);
 
     res.status(StatusCodes.OK).json({
       success: true,
-      message: `Delete task ${task_id} successfully`
+      message: `Delete successfully task with id ${taskId}`
     });
   } catch (error) {
-    return next(error);
+    next(error);
+  }
+};
+
+const uploadAttachmentsToTask = async (req, res, next) => {
+  try {
+    const taskId = await taskService.uploadAttachmentsToTask(req.params.id, req.files, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Upload successfully attachments to task with id ${taskId}`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteAttachmentsFromTask = async (req, res, next) => {
+  try {
+    const taskId = await taskService.deleteAttachmentsFromTask(
+      req.params.id,
+      req.body.attachment_ids,
+      req.user.id
+    );
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: `Delete successfully attachments from task with id ${taskId}`
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getAttachmentUrlOfTask = async (req, res, next) => {
+  try {
+    const url = await taskService.getAttachmentUrlOfTask(
+      req.params.id,
+      req.query.attachment_id,
+      req.user.id
+    );
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: { url }
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
 export default {
   createOneTask,
-  getProjectTasks,
-  getOneTaskById,
+  getTasksOfProject,
   updateOneTaskById,
-  deleteOneTaskById
+  deleteOneTaskById,
+  uploadAttachmentsToTask,
+  deleteAttachmentsFromTask,
+  getAttachmentUrlOfTask
 };

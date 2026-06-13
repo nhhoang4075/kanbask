@@ -1,0 +1,28 @@
+APP_PORT = 8080
+APP_HOST = localhost
+
+# Do not expose your Neon credentials to the browser
+
+DATABASE_URL='postgresql://neondb_owner:npg_n0EUasrDNIq3@ep-shrill-band-a1emdh59-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require'
+SMTP_HOST = smtp.gmail.com
+SMTP_PORT = 587
+SMTP_SECURE = false
+SMTP_AUTH_USER = kanbask.tech@gmail.com
+SMTP_AUTH_PASSWORD = byqf bybu iexh prae
+EMAIL_FROM = "Kanbask <kanbask.tech@gmail.com>"
+
+ACCESS_TOKEN_SECRET = 123456789
+REFRESH_TOKEN_SECRET = 123456789
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME= dq5sal1rx
+CLOUDINARY_API_KEY= 393292466699216
+CLOUDINARY_API_SECRET= h5FUD7wShWaWkCCuX9wbfcW2XnA
+
+# Supabase
+SUPABASE_URL = https://ghdysjjgjkxxetchmnjn.supabase.co
+SUPABASE_ANON_KEY= = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZHlzampnamt4eGV0Y2htbmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5MDc1NTUsImV4cCI6MjA2MTQ4MzU1NX0.dNll-eu1fPVueWNEK4z-zXGSL290s_hiwmwBs-l_sMg
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdoZHlzampnamt4eGV0Y2htbmpuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NTkwNzU1NSwiZXhwIjoyMDYxNDgzNTU1fQ.0N81cZWQScxMc9bWHSEjECkH-5RAYozL9MzjnlYnZpQ
+SUPABASE_BUCKET_FILES=kanbask
+
+CLIENT_ORIGIN = http://localhost:3000

@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import pgvector from "pgvector/knex";
 
 import { db } from "../../config/db.js";
 
@@ -8,7 +9,8 @@ const createOneUser = async (data) => {
     const [user] = await db("users")
       .insert({
         id: userId,
-        ...data
+        ...data,
+        embedding: pgvector.toSql(data.embedding)
       })
       .returning("id");
 
@@ -20,10 +22,7 @@ const createOneUser = async (data) => {
 
 const getOneUserById = async (id) => {
   try {
-    const [user] = await db("users")
-      .select("*", db.raw("first_name || ' ' || last_name as full_name"))
-      .where({ id })
-      .limit(1);
+    const [user] = await db("users").select("*").where({ id }).limit(1);
 
     return user;
   } catch (err) {
@@ -33,10 +32,7 @@ const getOneUserById = async (id) => {
 
 const getOneUserByEmail = async (email) => {
   try {
-    const [user] = await db("users")
-      .select("*", db.raw("first_name || ' ' || last_name as full_name"))
-      .where({ email })
-      .limit(1);
+    const [user] = await db("users").select("*").where({ email }).limit(1);
 
     return user;
   } catch (err) {
@@ -46,10 +42,7 @@ const getOneUserByEmail = async (email) => {
 
 const getOneUserByPasswordResetCode = async (code) => {
   try {
-    const [user] = await db("users")
-      .select("*", db.raw("first_name || ' ' || last_name as full_name"))
-      .where({ password_reset_code: code })
-      .limit(1);
+    const [user] = await db("users").select("*").where({ password_reset_code: code }).limit(1);
 
     return user;
   } catch (err) {
@@ -59,9 +52,7 @@ const getOneUserByPasswordResetCode = async (code) => {
 
 const getAllUsers = async () => {
   try {
-    const users = await db("users")
-      .select("*", db.raw("first_name || ' ' || last_name as full_name"))
-      .orderBy("created_at", "desc");
+    const users = await db("users").select("*").orderBy("created_at", "desc");
 
     return users;
   } catch (err) {
@@ -71,9 +62,20 @@ const getAllUsers = async () => {
 
 const updateOneUserById = async (id, updateData) => {
   try {
+    const finalUpdate = {
+      ...updateData,
+      updated_at: db.fn.now()
+    };
+
+    if ("embedding" in finalUpdate) {
+      finalUpdate.embedding = pgvector.toSql(finalUpdate.embedding);
+    }
+
     const [user] = await db("users")
       .where({ id })
-      .update({ ...updateData, updated_at: new Date().toISOString() })
+      .update({
+        ...finalUpdate
+      })
       .returning("id");
 
     return user.id;

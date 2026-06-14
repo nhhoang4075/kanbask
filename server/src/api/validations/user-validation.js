@@ -6,6 +6,7 @@ const validateUpdateProfile = validate(
   z.object({
     body: z
       .object({
+        full_name: z.string().max(100).optional(),
         first_name: z.string().max(100).optional(),
         last_name: z.string().max(100).optional(),
         avatar_url: z.string().url().optional()

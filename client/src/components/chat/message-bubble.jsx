@@ -23,7 +23,7 @@ export default function MessageBubble({ msgGroup, isMe, curConversation }) {
           className="object-cover"
         />
         <AvatarFallback className="bg-mustard">
-          {msgGroup.sender_full_name.charAt(0).toUpperCase()}
+          {msgGroup.sender_full_name?.charAt(0).toUpperCase()}
         </AvatarFallback>
       </Avatar>
 

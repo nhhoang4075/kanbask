@@ -97,6 +97,10 @@ const updateOneTaskById = async (id, data, actorId) => {
   try {
     const task = await taskModel.getOneTaskById(id);
 
+    if (!task) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
+    }
+
     const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
 
     if (!isProjectMember) {
@@ -131,6 +135,10 @@ const deleteOneTaskById = async (id, actorId) => {
   try {
     const task = await taskModel.getOneTaskById(id);
 
+    if (!task) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
+    }
+
     const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
 
     if (!isProjectMember) {
@@ -148,6 +156,10 @@ const deleteOneTaskById = async (id, actorId) => {
 const uploadAttachmentsToTask = async (taskId, files, actorId) => {
   try {
     const task = await taskModel.getOneTaskById(taskId);
+
+    if (!task) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
+    }
 
     const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
 
@@ -182,6 +194,10 @@ const uploadAttachmentsToTask = async (taskId, files, actorId) => {
 const deleteAttachmentsFromTask = async (taskId, attachmentIds, actorId) => {
   try {
     const task = await taskModel.getOneTaskById(taskId);
+
+    if (!task) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
+    }
 
     const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
 

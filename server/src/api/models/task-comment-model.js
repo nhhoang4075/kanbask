@@ -2,9 +2,7 @@ import { db } from "../../config/db.js";
 
 const createOneTaskComment = async (data) => {
   try {
-    const [comment] = await db("task_comments")
-      .insert({ ...data })
-      .returning("id");
+    const [comment] = await db("task_comments").insert(data).returning("id");
 
     return comment.id;
   } catch (err) {
@@ -24,8 +22,9 @@ const getOneTaskCommentById = async (id) => {
 
 const getManyTaskCommentsByTaskId = async (task_id) => {
   try {
-    const comments = await db("task_comments")
-      .select("*")
+    const comments = await db("task_comments AS tc")
+      .join("user_public_view AS v", "v.id", "=", "tc.user_id")
+      .select("tc.*", "v.full_name", "v.avatar_url")
       .where({ task_id })
       .orderBy("created_at", "asc");
 

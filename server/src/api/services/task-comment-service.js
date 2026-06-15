@@ -2,19 +2,43 @@ import { StatusCodes } from "http-status-codes";
 
 import taskCommentModel from "../models/task-comment-model.js";
 import taskModel from "../models/task-model.js";
+import taskActivityLogModel from "../models/task-activity-log-model.js";
 import projectModel from "../models/project-model.js";
 import ApiError from "../../utils/api-error.js";
 import { sanitizeAllowedFields } from "../../utils/helper.js";
 
-const createOneTaskComment = async (data) => {
+const createOneTaskComment = async (data, actorId) => {
   try {
-    const { task_id, content, created_by } = data;
+    const { task_id, content } = data;
 
-    const commentId = await taskCommentModel.createOneTaskComment({ task_id, content, created_by });
+    const task = await taskModel.getOneTaskById(task_id);
+
+    if (!task) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Task not found");
+    }
+
+    const isProjectMember = await projectModel.isUserInProject(task.project_id, actorId);
+
+    if (!isProjectMember) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
+    }
+
+    const commentId = await taskCommentModel.createOneTaskComment({
+      task_id,
+      content,
+      user_id: actorId
+    });
 
     if (!commentId) {
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the comment");
     }
+
+    await taskActivityLogModel.createOneTaskActivityLog({
+      task_id: task.id,
+      user_id: actorId,
+      action: "comment",
+      details: {}
+    });
 
     const comment = await taskCommentModel.getOneTaskCommentById(commentId);
 
@@ -54,7 +78,7 @@ const updateOneTaskCommentById = async (id, updateData, actorId) => {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Comment not found");
     }
 
-    if (comment.created_by !== actorId) {
+    if (comment.user_id !== actorId) {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only author of comment can access this");
     }
 
@@ -80,7 +104,7 @@ const deleteOneTaskCommentById = async (id, actorId) => {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Comment not found");
     }
 
-    if (comment.created_by !== actorId) {
+    if (comment.user_id !== actorId) {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only author of comment can access this");
     }
 

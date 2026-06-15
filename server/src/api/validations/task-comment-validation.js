@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { validate } from "../../config/validator.js";
 
 const validateCreateTaskComment = validate(
@@ -6,8 +7,7 @@ const validateCreateTaskComment = validate(
     body: z
       .object({
         task_id: z.coerce.number().int().positive(),
-        content: z.string(),
-        created_by: z.string().uuid()
+        content: z.string()
       })
       .strict(),
     params: z.object({}).optional(),

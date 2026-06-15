@@ -1,85 +1,78 @@
 import { StatusCodes } from "http-status-codes";
+
 import taskCommentModel from "../models/task-comment-model.js";
 import ApiError from "../../utils/api-error.js";
+import { sanitizeAllowedFields } from "../../utils/helper.js";
 
-
-const createOneComment = async (data) => {
+const createOneTaskComment = async (data) => {
   try {
     const { task_id, user_id, content } = data;
-    const commentId = await taskCommentModel.createOneComment({ task_id, user_id, content });
 
+    const commentId = await taskCommentModel.createOneTaskComment({ task_id, user_id, content });
 
     if (!commentId) {
-      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create comment");
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the comment");
     }
 
+    const comment = await taskCommentModel.getOneTaskCommentById(commentId);
 
-    const comment = await taskCommentModel.getOneCommentById(commentId);
     return comment;
   } catch (err) {
     throw err;
   }
 };
 
-
-const getCommentsByTaskId = async (taskId) => {
+const getManyTaskCommentsByTaskId = async (taskId) => {
   try {
-    if (!taskId) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, "Task ID is required");
-    }
+    const comments = await taskCommentModel.getManyTaskCommentsByTaskId(taskId);
 
-
-    const comments = await taskCommentModel.getCommentsByTaskId(taskId);
     return comments;
   } catch (err) {
     throw err;
   }
 };
 
-
-
-
-const updateOneComment = async (id,user_id, content) => {
+const updateOneTaskCommentById = async (id, updateData, actorId) => {
   try {
-    const userId = await taskCommentModel.getUserIdByCommentId(id);
+    const comment = await taskCommentModel.getOneTaskCommentById(id);
 
-    if (userId !== user_id) {
-      throw new ApiError(StatusCodes.FORBIDDEN, "You are not allowed to update this comment");
+    if (comment.user_id == actorId) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only author of comment can access this");
     }
 
-    const updatedId = await taskCommentModel.updateOneCommentById(id, content);
+    const allowedData = sanitizeAllowedFields(updateData, ["content"]);
 
-
-    if (!updatedId) {
-      throw new ApiError(StatusCodes.NOT_FOUND, "Comment not found or update failed");
+    if (Object.keys(allowedData).length === 0) {
+      throw new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, "No allowed field to update");
     }
 
+    await taskCommentModel.updateOneTaskCommentById(comment.id, allowedData);
 
-    return await taskCommentModel.getOneCommentById(id);
+    return comment.id;
   } catch (err) {
     throw err;
   }
 };
 
-
-const deleteOneComment = async (id,user_id) => {
+const deleteOneTaskCommentById = async (id, actorId) => {
   try {
-    const userId = await taskCommentModel.getUserIdByCommentId(id);
-    if (userId !== user_id) {
-      throw new ApiError(StatusCodes.FORBIDDEN, "You are not allowed to delete this comment");
+    const comment = await taskCommentModel.getOneTaskCommentById(id);
+
+    if (comment.user_id == actorId) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "Only author of comment can access this");
     }
 
-    await taskCommentModel.deleteOneCommentById(id);
-    return id;
+    await taskCommentModel.deleteOneTaskCommentById(comment.id);
+
+    return comment.id;
   } catch (err) {
     throw err;
   }
 };
-
 
 export default {
-  createOneComment,
-  getCommentsByTaskId,
-  updateOneComment,
-  deleteOneComment
+  createOneTaskComment,
+  getManyTaskCommentsByTaskId,
+  updateOneTaskCommentById,
+  deleteOneTaskCommentById
 };

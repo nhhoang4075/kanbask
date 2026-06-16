@@ -5,9 +5,14 @@ import { Send, Paperclip } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useChat } from "@/hooks/use-chat";
+import { Popover, PopoverTrigger } from "../ui/popover";
+
+import AddAttachments from "./add-attachments";
 
 export default function ChatInput() {
   const [message, setMessage] = useState("");
+  const [attachments, setAttachments] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
   const textareaRef = useRef(null);
   const { sendMessage } = useChat();
 
@@ -54,9 +59,19 @@ export default function ChatInput() {
           style={{ minHeight: "2rem" }}
         />
         <div className="p-2 space-x-2">
-          <Button type="button" variant="outline" className="flex-shrink-0 h-10 w-10 rounded-full">
-            <Paperclip />
-          </Button>
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger asChild>
+              <Button type="button" variant="outline" className="flex-shrink-0 h-10 w-10 rounded-full">
+                <Paperclip />
+              </Button>
+            </PopoverTrigger>
+            <AddAttachments 
+              attachments={attachments}
+              setAttachments={setAttachments}
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+            />
+          </Popover>
           <Button type="submit" className="flex-shrink-0 h-10 w-10 rounded-full">
             <Send />
           </Button>

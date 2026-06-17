@@ -50,14 +50,17 @@ export default function ChatInput() {
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           placeholder="Type your message..."
-          className="flex-1 bg-transparent resize-none overflow-auto max-h-40 p-4 placeholder-gray-400 border-none shadow-none focus-visible:ring-0"
+          className="flex-1 bg-transparent resize-none overflow-auto max-h-40 p-4 placeholder-gray-400 border-none shadow-none focus-visible:ring-0 focus-visible:border-b-2 focus-visible:border-prussian-blue "
           style={{ minHeight: "2rem" }}
         />
         <div className="p-2 space-x-2">
           <Button type="button" variant="outline" className="flex-shrink-0 h-10 w-10 rounded-full">
             <Paperclip />
           </Button>
-          <Button type="submit" className="flex-shrink-0 h-10 w-10 rounded-full">
+          <Button
+            type="submit"
+            className="flex-shrink-0 h-10 w-10 rounded-full bg-prussian-blue text-ghost-white"
+          >
             <Send />
           </Button>
         </div>

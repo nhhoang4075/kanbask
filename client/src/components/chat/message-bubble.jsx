@@ -1,5 +1,8 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useChat } from "@/hooks/use-chat";
 import { formatTimestampHour, formatFullTimestamp, linkifyMessage } from "@/lib/chat-utils";
+import { getInitials, pickAvatarColor } from "@/lib/user-utils";
+import { cn } from "@/lib/utils";
 
 function messageBubbleStyle(curIdx, msgGroupLength, isMe) {
   if (msgGroupLength === 1) {
@@ -14,21 +17,23 @@ function messageBubbleStyle(curIdx, msgGroupLength, isMe) {
 }
 
 export default function MessageBubble({ msgGroup, isMe, curConversation }) {
+  const { highlightId } = useChat();
+
   return (
-    <div className={`flex justify-start gap-x-3 mb-8 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+    <div className={cn("flex justify-start gap-x-3 my-4", isMe ? "flex-row-reverse" : "flex-row")}>
       <Avatar className="h-8 w-8 overflow-hidden border-b">
         <AvatarImage
           src={msgGroup.sender_avatar_url}
           alt={msgGroup.sender_full_name}
           className="object-cover"
         />
-        <AvatarFallback className="bg-mustard">
-          {msgGroup.sender_full_name?.charAt(0).toUpperCase()}
+        <AvatarFallback className="text-sm" style={pickAvatarColor(msgGroup.sender_full_name)}>
+          {getInitials(msgGroup.sender_full_name)}
         </AvatarFallback>
       </Avatar>
 
-      <div className={`flex-1 flex flex-col gap-y-1.5 ${isMe ? "items-end" : "items-start"}`}>
-        <div className={`flex gap-x-2 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+      <div className={cn("flex-1 flex flex-col gap-y-1.5", isMe ? "items-end" : "items-start")}>
+        <div className={cn("flex gap-x-2", isMe ? "flex-row-reverse" : "flex-row")}>
           <span className="peer text-xs text-gray-500">{msgGroup.sender_full_name}</span>
           <span className="text-xs text-gray-500 peer-hover:opacity-100 opacity-0 transition-opacity duration-200 select-none">
             {formatFullTimestamp(msgGroup.group[0].created_at)}
@@ -36,18 +41,28 @@ export default function MessageBubble({ msgGroup, isMe, curConversation }) {
         </div>
 
         {msgGroup.group.map((msg, idx) => (
-          <div key={msg.id} className="w-full">
-            <div className={`flex items-center gap-x-4 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+          <div key={msg.id} id={`msg-${msg.id}`} className="w-full">
+            <div
+              className={cn("flex items-center gap-x-4", isMe ? "flex-row-reverse" : "flex-row")}
+            >
               <div
-                className={`peer max-w-[75%] px-4 py-2 rounded-2xl break-words text-gray-800 ${
-                  isMe ? "bg-sky-blue/50" : "bg-gray-200"
-                } ${messageBubbleStyle(idx, msgGroup.group.length, isMe)}`}
+                className={cn(
+                  "peer max-w-[75%] px-4 py-2 rounded-2xl break-words text-gray-800",
+                  isMe ? "bg-sky-blue/50" : "bg-gray-200",
+                  messageBubbleStyle(idx, msgGroup.group.length, isMe),
+                  msg.id === highlightId && "ring-2 ring-prussian-blue"
+                )}
               >
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">
                   {linkifyMessage(msg.content)}
                 </p>
               </div>
-              <span className="text-xs text-gray-500 peer-hover:opacity-100 opacity-0 transition-opacity duration-200 select-none">
+              <span
+                className={cn(
+                  "text-xs text-gray-500 opacity-0 transition-opacity duration-200 select-none",
+                  msg.id === highlightId ? "opacity-100" : "peer-hover:opacity-100"
+                )}
+              >
                 {formatTimestampHour(msg.created_at)}
               </span>
             </div>

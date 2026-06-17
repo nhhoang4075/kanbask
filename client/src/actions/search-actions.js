@@ -1,6 +1,12 @@
-export async function getUserSearchResults(query, limit = 5, offset = 0) {
+async function searchUsers(params) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/search/users?limit=${limit}&offset=${offset}&q=${query}`, {
+    const queryString = new URLSearchParams({
+      q: params.query || "",
+      limit: params.limit || 10,
+      offset: params.offset || 0
+    }).toString();
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/search/users?${queryString}`, {
       method: "GET",
       credentials: "include"
     });
@@ -14,15 +20,23 @@ export async function getUserSearchResults(query, limit = 5, offset = 0) {
 
       return json.data;
     } else {
-      throw new Error("getUserSearchResults API Error");
+      throw new Error("searchUsers API Error");
     }
   } catch (err) {
     throw err;
   }
 }
-export async function getMessageSearchResults(query, conversationId) {
+
+async function searchTasks(params) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/search/messages?q=${query}&conversation_id=${conversationId}`, {
+    const queryString = new URLSearchParams({
+      q: params.query || "",
+      status: params.status || "all",
+      limit: params.limit || 10,
+      offset: params.offset || 0
+    }).toString();
+
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/search/tasks?${queryString}`, {
       method: "GET",
       credentials: "include"
     });
@@ -36,18 +50,29 @@ export async function getMessageSearchResults(query, conversationId) {
 
       return json.data;
     } else {
-      throw new Error("getMessageSearchResults API Error");
+      throw new Error("searchTasks API Error");
     }
   } catch (err) {
     throw err;
   }
 }
-export async function getTaskSearchResults(query, status = "all", limit = 5, offset = 0) {
+
+async function searchMessages(params) {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/search/tasks?q=${query}&status=${status}&limit=${limit}&offset=${offset}`, {
-      method: "GET",
-      credentials: "include"
-    });
+    const queryString = new URLSearchParams({
+      q: params.query || "",
+      conversation_id: params.conversationId,
+      limit: params.limit || 10,
+      offset: params.offset || 0
+    }).toString();
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/search/messages?${queryString}`,
+      {
+        method: "GET",
+        credentials: "include"
+      }
+    );
 
     if (res.ok) {
       const json = await res.json();
@@ -58,9 +83,11 @@ export async function getTaskSearchResults(query, status = "all", limit = 5, off
 
       return json.data;
     } else {
-      throw new Error("getTaskSearchResults API Error");
+      throw new Error("searchMessages API Error");
     }
   } catch (err) {
     throw err;
   }
 }
+
+export { searchUsers, searchTasks, searchMessages };

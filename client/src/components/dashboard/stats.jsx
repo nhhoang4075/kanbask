@@ -3,7 +3,7 @@ import StatsCard from "@/components/dashboard/stats-card";
 
 export default function Stats({tasks, projects}){
     return (
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
         <StatsCard
           title="Total Projects"
           value={projects.length}
@@ -20,21 +20,21 @@ export default function Stats({tasks, projects}){
         />
         <StatsCard
           title="Tasks Completed"
-          value={tasks.filter(task => task.status === 'Done').length}
+          value={tasks.filter(task => task.status === 'done').length}
           description="Total number of completed tasks"
           color="green"
           itemIcon={<CircleCheckBigIcon className="h-6 w-6 text-green-500" />}
         />
         <StatsCard
           title="Pending Tasks"
-          value={tasks.filter(task => task.status === 'To Do').length}
+          value={tasks.filter(task => task.status === 'todo' || task.status == "in_progress").length}
           description="Total number of pending tasks"
           color="purple"
           itemIcon={<FileText className="h-6 w-6 text-purple-500" />}
         />
         <StatsCard
           title="Overdue Tasks"
-          value={tasks.filter(task => task.dueDate < new Date() && task.status !== 'Done').length}
+          value={tasks.filter(task => task.due_date < new Date() && task.status !== 'done' && task.due_date).length}
           description="Total number of overdue tasks"
           color="red"
           itemIcon={<AlertCircle className="h-6 w-6 text-red-500" />}

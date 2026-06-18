@@ -5,23 +5,13 @@ import authMiddleware from "../../middlewares/auth-middleware.js";
 const conversationRoute = (router) => {
   router.use("/conversations", authMiddleware.authenticate);
 
-  router
-    .route("/conversations")
-    .get(conversationController.getConversationsOfUser)
-    .post(
-      conversationValidation.validateNewConversation,
-      conversationController.createOneConversation
-    );
+  router.route("/conversations").get(conversationController.getConversationsOfUser);
 
   router
     .route("/conversations/:id")
     .get(
       conversationValidation.validateConversationIdParam,
       conversationController.getParticipantsOfConversation
-    )
-    .delete(
-      conversationValidation.validateConversationIdParam,
-      conversationController.deleteOneConversation
     );
 };
 

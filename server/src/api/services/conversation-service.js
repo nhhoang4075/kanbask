@@ -3,38 +3,6 @@ import { StatusCodes } from "http-status-codes";
 import conversationModel from "../models/conversation-model.js";
 import ApiError from "../../utils/api-error.js";
 
-const createOneConversation = async (data) => {
-  try {
-    const { type, team_id = null, project_id = null, user_ids } = data;
-
-    const conversationId = await conversationModel.createOneConversation({
-      type,
-      team_id,
-      project_id
-    });
-
-    if (!conversationId) {
-      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to create the conversation");
-    }
-
-    await conversationModel.addParticipantsToConversation(conversationId, user_ids);
-
-    const conversation = await conversationModel.getOneConversationById(conversationId);
-    const participants = await conversationModel.getParticipantsOfConversation(conversationId);
-
-    const formattedConversation = {
-      ...conversation,
-      participants: participants.map((p) => ({
-        user_id: p.user_id
-      }))
-    };
-
-    return formattedConversation;
-  } catch (err) {
-    throw err;
-  }
-};
-
 const getOneConversationById = async (id, actorId) => {
   try {
     const isConversationParticipant = await conversationModel.isUserInConversation(id, actorId);
@@ -73,28 +41,6 @@ const getManyConversationsByUserId = async (userId) => {
     );
 
     return formattedConversations;
-  } catch (err) {
-    throw err;
-  }
-};
-
-const deleteOneConversation = async (conversationId, actorId) => {
-  try {
-    const isConversationParticipant = await conversationModel.isUserInConversation(
-      conversationId,
-      actorId
-    );
-
-    if (!isConversationParticipant) {
-      throw new ApiError(
-        StatusCodes.FORBIDDEN,
-        "Only participants of conversation can access this"
-      );
-    }
-
-    await conversationModel.deleteOneConversationById(conversationId);
-
-    return conversationId;
   } catch (err) {
     throw err;
   }
@@ -177,10 +123,8 @@ const updateLastReadMessage = async (conversationId, actorId) => {
 };
 
 export default {
-  createOneConversation,
   getOneConversationById,
   getManyConversationsByUserId,
-  deleteOneConversation,
   getParticipantsOfConversation,
   updateConversationPendingStatus,
   updateLastReadMessage

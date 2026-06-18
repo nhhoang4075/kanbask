@@ -30,48 +30,22 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import DragTableRow from "./DragTableRow";
+import { useTask } from "@/hooks/use-tasks";
 
-export function TasksTable({ tasks, setTasks, handleDeleteTask, handleEditTask }) {
-  // Add a ref to track edit mode intent
-  const editModeRef = useRef(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
-
-  const handleDelete = (e, task) => {
-    if (handleDeleteTask) {
-      handleDeleteTask(task.id);
-    }
-  };
+export function TasksTable() {
+  const {
+    tasks,
+    setSelectedTask,
+    getFilterdTasks,
+    updateTask,
+    reorderTasks,
+    setIsTaskDetailsOpen
+  } = useTask();
 
   const handleEdit = (task) => {
     setSelectedTask(() => task);
-    setShowDetails(true);
+    setIsTaskDetailsOpen(true);
     editModeRef.current = true;
-    console.log(selectedTask);
-  };
-
-  const handleViewDetails = (task) => {
-    setSelectedTask(() => task);
-    setShowDetails(() => true);
-    console.log(selectedTask);
-  };
-
-  const handleSaveTask = (updatedTask) => {
-    if (handleEditTask) {
-      handleEditTask(updatedTask);
-    }
-  };
-
-  const handleReorderTasks = (reorderedTasks) => {
-    // Update the tasks state while preserving tasks that aren't in the filtered view
-    const reorderedIds = new Set(reorderedTasks.map((task) => task.id));
-
-    // Keep tasks that aren't in the current filtered view
-    const otherTasks = tasks.filter((task) => !reorderedIds.has(task.id));
-
-    // Combine the reordered tasks with the other tasks
-    setTasks([...reorderedTasks, ...otherTasks]);
-    setTableData([...reorderedTasks, ...otherTasks]);
   };
 
   const [rowSelection, setRowSelection] = useState({});
@@ -82,7 +56,7 @@ export function TasksTable({ tasks, setTasks, handleDeleteTask, handleEditTask }
     setTableData(tasks);
   }, [tasks]);
 
-  const columns = getTaskColumns(handleDelete, handleEdit, handleViewDetails);
+  const columns = getTaskColumns();
 
   const table = useReactTable({
     data: tableData,
@@ -123,9 +97,7 @@ export function TasksTable({ tasks, setTasks, handleDeleteTask, handleEditTask }
       setTableData(newData);
 
       // Call the callback to update parent state => Call API
-      if (handleReorderTasks) {
-        handleReorderTasks(newData);
-      }
+      reorderTasks(newData);
     }
   };
 
@@ -186,14 +158,7 @@ export function TasksTable({ tasks, setTasks, handleDeleteTask, handleEditTask }
               {table.getRowModel().rows?.length ? (
                 table
                   .getRowModel()
-                  .rows.map((row) => (
-                    <DragTableRow
-                      key={row.id}
-                      row={row}
-                      reorderRow={() => {}}
-                      handleViewDetails={handleViewDetails}
-                    />
-                  ))
+                  .rows.map((row) => <DragTableRow key={row.id} row={row} reorderRow={() => {}} />)
               ) : (
                 <TableRow>
                   <TableCell colSpan={columns?.length} className="h-24 text-center">
@@ -224,13 +189,6 @@ export function TasksTable({ tasks, setTasks, handleDeleteTask, handleEditTask }
           Next
         </Button>
       </div>
-      <TaskDetails
-        open={showDetails}
-        task={selectedTask}
-        onOpenChange={setShowDetails}
-        onSave={handleSaveTask}
-        initialEditMode={editModeRef.current}
-      />
     </div>
   );
 }

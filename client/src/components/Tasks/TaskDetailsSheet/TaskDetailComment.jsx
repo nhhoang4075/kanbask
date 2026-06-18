@@ -1,28 +1,58 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
+
 import { format, formatDistanceToNow } from "date-fns";
 import { Send } from "lucide-react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { sampleComments } from "@/data/tasks";
+import { useSocket } from "@/hooks/use-socket";
+import { useTask } from "@/hooks/use-tasks";
 
-const TaskDetailsComments = ({ task, onAddComment, onClose }) => {
+export function TaskDetailsComments({ onAddComment, onClose }) {
+  const { addComment, selectedTask } = useTask();
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [comments, setComments] = useState(sampleComments);
-  const [sortedComments, setSortedComments] = useState([]);
+  const [comments, setComments] = useState(selectedTask.comments || []);
+  const { socket, isConnected } = useSocket();
+  const scrollAreaRef = useRef(null);
 
+  // Join the task room when the component mounts
   useEffect(() => {
-    setSortedComments(() => comments.filter((comment) => comment.taskId === task.id));
-  }, [comments]);
+    if (socket && selectedTask.id) {
+      // Join the task room
+      socket.emit("join-task", task.id);
 
-  const handleSubmitComment = () => {
-    // if (!newComment.trim()) return;
+      // Listen for new comments
+      socket.on("comment-added", (newComment) => {
+        setComments((prevComments) => [...prevComments, newComment]);
+
+        // Scroll to bottom when new comment is received
+        setTimeout(() => {
+          if (scrollAreaRef.current) {
+            const scrollContainer = scrollAreaRef.current.querySelector(
+              "[data-radix-scroll-area-viewport]"
+            );
+            if (scrollContainer) {
+              scrollContainer.scrollTop = scrollContainer.scrollHeight;
+            }
+          }
+        }, 100);
+      });
+
+      // Clean up when the component unmounts
+      return () => {
+        socket.emit("leave-task", selectedTask.id);
+        socket.off("comment-added");
+      };
+    }
+  }, [socket, selectedTask.id]);
+
+  const handleSubmitComment = async () => {
+    if (!newComment.trim()) return;
 
     setIsSubmitting(true);
 
@@ -31,7 +61,6 @@ const TaskDetailsComments = ({ task, onAddComment, onClose }) => {
       const comment = {
         id: `comment-${Date.now()}`,
         text: newComment.trim(),
-        taskId: task.id,
         author: {
           id: "user-1", // Assuming current user is John Doe
           name: "John Doe",
@@ -40,11 +69,39 @@ const TaskDetailsComments = ({ task, onAddComment, onClose }) => {
         createdAt: new Date().toISOString()
       };
 
-      // Call the onAddComment callback
+      // Add the comment locally
       setComments((prevComments) => [...prevComments, comment]);
+
+      // Add the comment using the context
+      addComment(selectedTask.id, comment);
+
+      // Call the onAddComment callback if provided
+      if (onAddComment) {
+        await onAddComment(comment);
+      }
+
+      // Emit the new comment to other clients
+      if (socket) {
+        socket.emit("new-comment", {
+          taskId: selectedTask.id,
+          comment
+        });
+      }
 
       // Clear the input
       setNewComment("");
+
+      // Scroll to bottom
+      setTimeout(() => {
+        if (scrollAreaRef.current) {
+          const scrollContainer = scrollAreaRef.current.querySelector(
+            "[data-radix-scroll-area-viewport]"
+          );
+          if (scrollContainer) {
+            scrollContainer.scrollTop = scrollContainer.scrollHeight;
+          }
+        }
+      }, 100);
     } catch (error) {
       console.error("Failed to add comment:", error);
     } finally {
@@ -64,16 +121,23 @@ const TaskDetailsComments = ({ task, onAddComment, onClose }) => {
     }
   };
 
+  const sortedComments = [...comments].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-[calc(100vh-320px)] pr-1.5">
+        <ScrollArea ref={scrollAreaRef} className="h-[calc(100vh-250px)] pr-4">
           {sortedComments.length > 0 ? (
             <div className="space-y-6 py-4">
               {sortedComments.map((comment) => (
                 <div key={comment.id} className="flex gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={""} alt={comment.author.name} />
+                    <AvatarImage
+                      src={comment.author.avatar || "/placeholder.svg"}
+                      alt={comment.author.name}
+                    />
                     <AvatarFallback>
                       {comment.author.name
                         .split(" ")
@@ -105,12 +169,32 @@ const TaskDetailsComments = ({ task, onAddComment, onClose }) => {
 
       <div className="pt-4">
         <Separator className="my-4" />
-        <div className="space-y-1.5">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              {isConnected ? (
+                <span className="text-green-500 flex items-center">
+                  <span className="h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+                  Connected
+                </span>
+              ) : (
+                <span className="text-yellow-500 flex items-center">
+                  <span className="h-2 w-2 rounded-full bg-yellow-500 mr-2"></span>
+                  Connecting...
+                </span>
+              )}
+            </div>
+          </div>
           <Textarea
             placeholder="Add a comment..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             className="min-h-[80px]"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && e.ctrlKey) {
+                handleSubmitComment();
+              }
+            }}
           />
           <div className="flex justify-between">
             <Button variant="outline" onClick={onClose}>
@@ -125,6 +209,4 @@ const TaskDetailsComments = ({ task, onAddComment, onClose }) => {
       </div>
     </div>
   );
-};
-
-export default TaskDetailsComments;
+}

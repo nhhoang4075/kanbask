@@ -7,32 +7,42 @@ import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import TaskEditDetails from "./TaskEditDetails";
 import TaskViewDetails from "./TaskViewDetails";
-import TaskDetailsComments from "./TaskDetailComment";
 import { FileUpload } from "../FileAttachment/FileUpload";
 import { FileAttachmentList } from "../FileAttachment/FileAttachmentList";
+import { TaskDetailsComments } from "./TaskDetailComment";
+import { useTask } from "@/hooks/use-tasks";
 
-const TaskDetails = ({ task, open, onSave, onOpenChange, initialEditMode }) => {
-  const [isEditing, setIsEditing] = useState(initialEditMode);
+const TaskDetails = () => {
+  const {
+    isTaskDetailsOpen,
+    setIsTaskDetailsOpen,
+    selectedTask,
+    updateTask,
+    editModeRef,
+    addComment,
+    addFileAttachment,
+    deleteFileAttachment
+  } = useTask();
+
+  const [isEditing, setIsEditing] = useState(editModeRef);
   const [activeTab, setActiveTab] = useState("details");
-  const [localTask, setLocalTask] = useState(task);
+  const [localTask, setLocalTask] = useState(selectedTask);
 
   // Update local task when the task prop changes
   useEffect(() => {
-    setLocalTask(task);
-  }, [task]);
+    setLocalTask(selectedTask);
+  }, [selectedTask]);
 
   // Update the useEffect to respect initialEditMode when opening
   useEffect(() => {
     // Reset editing mode when sheet closes, but set to initialEditMode when opening
-    if (!open) {
+    if (!isTaskDetailsOpen) {
       setIsEditing(false);
-    } else if (open && initialEditMode) {
+    } else if (open && editModeRef) {
       setIsEditing(true);
       setActiveTab("details");
     }
-  }, [open, initialEditMode]);
-
-  if (!task) return null;
+  }, [isTaskDetailsOpen, editModeRef]);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -44,63 +54,57 @@ const TaskDetails = ({ task, open, onSave, onOpenChange, initialEditMode }) => {
   };
 
   const handleSave = (updatedTask) => {
-    onSave(updatedTask);
+    updateTask(updatedTask);
+    setLocalTask(updatedTask);
     setIsEditing(false);
-    // Close the sheet after saving
-    onOpenChange(false);
+    setIsTaskDetailsOpen(false);
   };
 
   const handleAddComment = async (comment) => {
-    // Create a new task object with the added comment
-    const updatedTask = {
-      ...task,
-      comments: [...(task.comments || []), comment],
-      updatedAt: new Date().toISOString()
-    };
+    // Add the comment using the context
+    addComment(localTask.id, comment);
 
-    // Call the onSave callback with the updated task
-    onSave(updatedTask);
+    // Update local state
+    setLocalTask((prev) => ({
+      ...prev,
+      comments: [...(prev.comments || []), comment],
+      updatedAt: new Date().toISOString()
+    }));
+
+    return comment;
   };
 
   const handleAddFile = (file) => {
-    // Create a new task object with the added file
-    const updatedTask = {
-      ...localTask,
-      attachments: [...(localTask.attachments || []), file],
-      updatedAt: new Date().toISOString()
-    };
+    // Add the file using the context
+    addFileAttachment(localTask.id, file);
 
     // Update local state
-    setLocalTask(updatedTask);
+    setLocalTask((prev) => ({
+      ...prev,
+      attachments: [...(prev.attachments || []), file],
+      updatedAt: new Date().toISOString()
+    }));
 
-    // Call the onSave callback with the updated task
-    onSave(updatedTask);
-
-    return updatedTask;
+    return file;
   };
 
   const handleDeleteFile = (fileId) => {
-    // Create a new task object with the file removed
-    const updatedTask = {
-      ...localTask,
-      attachments: (localTask.attachments || []).filter((file) => file.id !== fileId),
-      updatedAt: new Date().toISOString()
-    };
+    // Delete the file using the context
+    deleteFileAttachment(localTask.id, fileId);
 
     // Update local state
-    setLocalTask(updatedTask);
-
-    // Call the onSave callback with the updated task
-    onSave(updatedTask);
-
-    return updatedTask;
+    setLocalTask((prev) => ({
+      ...prev,
+      attachments: (prev.attachments || []).filter((file) => file.id !== fileId),
+      updatedAt: new Date().toISOString()
+    }));
   };
 
-  const commentCount = task.comments?.length || 0;
+  const commentCount = selectedTask.comments?.length || 0;
   const fileCount = localTask.attachments?.length || 0;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={isTaskDetailsOpen} onOpenChange={setIsTaskDetailsOpen}>
       <SheetContent
         className="overflow-y-auto"
         onInteractOutside={(e) => {
@@ -114,7 +118,7 @@ const TaskDetails = ({ task, open, onSave, onOpenChange, initialEditMode }) => {
       >
         <SheetHeader>
           <SheetTitle className="text-xl font-semibold">
-            {isEditing && "Editing task:"} {task.title}
+            {isEditing && "Editing task:"} {selectedTask.title}
           </SheetTitle>
         </SheetHeader>
 
@@ -146,13 +150,9 @@ const TaskDetails = ({ task, open, onSave, onOpenChange, initialEditMode }) => {
 
           <TabsContent value="details" className="mt-4">
             {isEditing ? (
-              <TaskEditDetails task={task} onSave={handleSave} onCancel={handleCancel} />
+              <TaskEditDetails onSave={handleSave} onCancel={handleCancel} />
             ) : (
-              <TaskViewDetails
-                task={task}
-                onEdit={handleEdit}
-                onClose={() => onOpenChange(false)}
-              />
+              <TaskViewDetails onEdit={handleEdit} onClose={() => setIsTaskDetailsOpen(false)} />
             )}
           </TabsContent>
           <TabsContent value="files" className="mt-4">
@@ -176,9 +176,8 @@ const TaskDetails = ({ task, open, onSave, onOpenChange, initialEditMode }) => {
           </TabsContent>
           <TabsContent value="comments" className="mt-4">
             <TaskDetailsComments
-              task={task}
               onAddComment={handleAddComment}
-              onClose={() => onOpenChange(false)}
+              onClose={() => setIsTaskDetailsOpen(false)}
             />
           </TabsContent>
         </Tabs>

@@ -11,10 +11,6 @@ const notificationRoute = (router) => {
       notificationValidation.validateNotificationsOptionsQuery,
       notificationController.getNotificationsOfUser
     )
-    .post(
-      notificationValidation.validateNewNotification,
-      notificationController.createOneNotification
-    )
     .put(notificationController.markAllNotificationsAsRead)
     .delete(notificationController.deleteAllNotifications);
 

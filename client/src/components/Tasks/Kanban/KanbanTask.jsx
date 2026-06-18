@@ -4,18 +4,18 @@ import { Calendar, Clock, Paperclip } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { cn, formatDate, priorityColors } from "@/lib/utils";
-import React, { useRef, useState } from "react";
+import React from "react";
 
-import TaskDetails from "../TaskDetailsSheet/TaskDetails";
 import { AvatarGroup } from "@/components/ui/avatar-group";
-import MoreActions from "../MoreActions";
+import MoreActions from "../tasks-ui/MoreActions";
+import { useTask } from "@/hooks/use-tasks";
+import { formatDate, priorityColors } from "@/lib/tasks-utils";
+import { cn } from "@/lib/utils";
 
-const KanbanTask = ({ task, columnId, handleEditTask, handleDeleteTask }) => {
-  const [showDetails, setShowDetails] = useState(false);
+const KanbanTask = ({ task, columnId }) => {
+  const { selectedTask, deleteTask } = useTask();
 
   // Add a ref to track edit mode intent
-  const editModeRef = useRef(false);
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData("taskId", task.id);
@@ -24,25 +24,13 @@ const KanbanTask = ({ task, columnId, handleEditTask, handleDeleteTask }) => {
   };
 
   const handleDelete = (e) => {
-    if (handleDeleteTask) {
-      handleDeleteTask(task.id);
-    }
+    deleteTask(task.id);
   };
 
   const handleEdit = (e) => {
     setShowDetails(true);
     // We'll use a ref to track that we want to open in edit mode
     editModeRef.current = true;
-  };
-
-  const handleViewDetails = (e) => {
-    setShowDetails(true);
-  };
-
-  const handleSaveTask = (updatedTask) => {
-    if (handleEditTask) {
-      handleEditTask(updatedTask);
-    }
   };
 
   const dueDate = formatDate(task.dueDate);
@@ -67,11 +55,7 @@ const KanbanTask = ({ task, columnId, handleEditTask, handleDeleteTask }) => {
             </Badge>
           </div>
           <div className="flex items-center gap-2">
-            <MoreActions
-              handleDelete={handleDelete}
-              handleEdit={handleEdit}
-              handleViewDetails={handleViewDetails}
-            />
+            <MoreActions task={task} />
           </div>
         </CardHeader>
         <CardContent className="px-3 text-xs text-muted-foreground max-h-[175px] overflow-hidden text-ellipsis">
@@ -122,14 +106,6 @@ const KanbanTask = ({ task, columnId, handleEditTask, handleDeleteTask }) => {
           )}
         </CardFooter>
       </Card>
-
-      <TaskDetails
-        task={task}
-        open={showDetails}
-        onOpenChange={setShowDetails}
-        onSave={handleSaveTask}
-        initialEditMode={editModeRef.current}
-      />
     </>
   );
 };

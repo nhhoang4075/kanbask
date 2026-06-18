@@ -33,16 +33,18 @@ import {
   CommandInput,
   CommandItem,
   CommandList
-} from "../ui/command";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+} from "@/components/ui/command";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTask } from "@/hooks/use-tasks";
 
-const NewTasks = ({ open, onOpenChange, handleAddTask, selectedProject }) => {
+const NewTasks = ({ open, onOpenChange, selectedProject }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
   const [date, setDate] = useState(undefined);
   const [assignees, setAssignees] = useState([]);
   const [assigneePopoverOpen, setAssigneePopoverOpen] = useState(false);
+  const { addTask } = useTask();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -57,7 +59,7 @@ const NewTasks = ({ open, onOpenChange, handleAddTask, selectedProject }) => {
       assignedTo: assignees
     };
 
-    handleAddTask(newTask);
+    addTask(newTask);
     resetForm();
   };
 

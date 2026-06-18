@@ -23,14 +23,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import EditMember from "./EditMember";
-import DeleteAlert from "../DeleteAlert";
+import DeleteAlert from "../teams-ui/DeleteAlert";
 import TeamsQueue from "./TeamsQueue";
 import AddMember from "./AddMember";
+import { useTeamContext } from "@/hooks/use-teams";
 
 const MemberDataTable = ({
   columns,
-  data,
-  setFunction,
   showData,
   manage,
   teamShow,
@@ -39,13 +38,14 @@ const MemberDataTable = ({
   handleDecline,
   handleProjectAddMembers
 }) => {
+  const { members } = useTeamContext();
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [addMemberOpen, setAddMemberOpen] = useState(false);
 
   const table = useReactTable({
-    data,
+    data: members,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onRowSelectionChange: setRowSelection,
@@ -63,7 +63,7 @@ const MemberDataTable = ({
 
   useEffect(() => {
     table.resetRowSelection();
-  }, [teamShow, data, table.getRowModel().rows]);
+  }, [teamShow, table.getRowModel().rows]);
 
   return (
     <div>
@@ -71,8 +71,8 @@ const MemberDataTable = ({
         <div className="relative rounded-md bg-white">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
           <Input
-            value={table.getColumn("name")?.getFilterValue() ?? ""}
-            onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
+            value={table.getColumn("full_name")?.getFilterValue() ?? ""}
+            onChange={(event) => table.getColumn("full_name")?.setFilterValue(event.target.value)}
             placeholder="Filter name"
             className="pl-8"
           />
@@ -91,7 +91,12 @@ const MemberDataTable = ({
           )}
           {showData == "project" ? (
             <>
-              <Button onClick={() => setAddMemberOpen(true)}>Add Member</Button>
+              <Button
+                className="text-white bg-blue-500 hover:bg-blue-700"
+                onClick={() => setAddMemberOpen(true)}
+              >
+                Add Member
+              </Button>
               <AddMember
                 project={teamShow}
                 onMembersUpdate={handleProjectAddMembers}
@@ -101,11 +106,7 @@ const MemberDataTable = ({
               />
             </>
           ) : (
-            <TeamsQueue
-              team={teamShow}
-              handleApprove={handleApprove}
-              handleDecline={handleDecline}
-            />
+            <TeamsQueue handleApprove={handleApprove} handleDecline={handleDecline} />
           )}
         </div>
       </div>

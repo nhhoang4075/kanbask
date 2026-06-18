@@ -12,7 +12,7 @@ import {
 import { Button } from "../../ui/button";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "../../ui/checkbox";
-import DeleteAlert from "../DeleteAlert";
+import DeleteAlert from "../teams-ui/DeleteAlert";
 import EditMember from "./EditMember";
 
 export const columns = [
@@ -44,7 +44,7 @@ export const columns = [
     enableHiding: false
   },
   {
-    accessorKey: "name",
+    accessorKey: "full_name",
     header: ({ column }) => {
       return (
         <Button

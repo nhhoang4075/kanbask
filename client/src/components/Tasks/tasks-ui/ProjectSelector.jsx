@@ -4,7 +4,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   CommandList,
   CommandGroup,
@@ -12,9 +12,9 @@ import {
   CommandEmpty,
   CommandInput,
   CommandItem
-} from "../ui/command";
+} from "@/components/ui/command";
 
-const ProjectSelector = ({ projects, selectedProjectId, onProjectChange }) => {
+const ProjectSelector = ({ projects, selectedProjectId, setSelectedProjectId }) => {
   const [open, setOpen] = useState(false);
 
   const selectedProject = projects.filter((project) => project.id === selectedProjectId)[0];
@@ -31,7 +31,7 @@ const ProjectSelector = ({ projects, selectedProjectId, onProjectChange }) => {
           <div className="flex items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis">
             {selectedProject?.name}
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent>
@@ -45,7 +45,7 @@ const ProjectSelector = ({ projects, selectedProjectId, onProjectChange }) => {
                   key={project.id}
                   value={project.name}
                   onSelect={() => {
-                    onProjectChange(project.id);
+                    setSelectedProjectId(() => project.id);
                     setOpen(false);
                   }}
                 >

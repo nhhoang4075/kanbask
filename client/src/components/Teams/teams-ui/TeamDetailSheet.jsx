@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MoreVertical, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -16,47 +16,50 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "../ui/switch";
+import { Switch } from "@/components/ui/switch";
+import { useTeamContext } from "@/hooks/use-teams";
+import { useSession } from "@/hooks/use-session";
+import { formatDate } from "@/lib/teams-utils";
 
-export function TeamDetailSheet({ isOpen, onOpenChange, team, onTeamUpdate, edit }) {
+export function TeamDetailSheet() {
+  const { updateTeamData, isOpenTeamDetails, setIsOpenTeamDetails, selectedTeam, members } =
+    useTeamContext();
+  const { user } = useSession();
+  const editable = members.find((member) => (member.id = user.id))?.role == "owner" ? true : false;
   const [isEditMode, setIsEditMode] = useState(false);
   const [editFormData, setEditFormData] = useState({
-    name: team?.name || "",
-    description: team?.description || ""
+    name: selectedTeam?.name || "",
+    description: selectedTeam?.description || ""
   });
 
   // Update form data when team changes
   useEffect(() => {
-    if (team) {
+    if (selectedTeam) {
       setEditFormData({
-        name: team.name || "",
-        description: team.description || ""
+        name: selectedTeam.name || "",
+        description: selectedTeam.description || ""
       });
       setIsEditMode(false);
     }
-  }, [team]);
+  }, [selectedTeam]);
 
   const handleSaveTeamChanges = () => {
     // Create updated team data
     const updatedTeam = {
-      ...team,
+      ...selectedTeam,
       name: editFormData.name,
       description: editFormData.description,
-      updatedAt: new Date().toISOString().split("T")[0] // Update the date
+      updated_at: new Date().toISOString().split("T")[0] // Update the date
     };
 
-    // Call the update function passed from parent
-    if (onTeamUpdate) {
-      onTeamUpdate(team.id, updatedTeam);
-    }
-
+    updateTeamData(updatedTeam.id, updatedTeam);
     // Switch back to view mode
     setIsEditMode(false);
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-md">
+    <Sheet open={isOpenTeamDetails} onOpenChange={setIsOpenTeamDetails}>
+      <SheetContent className="bg-white">
         <SheetHeader>
           <SheetTitle>{isEditMode ? "Edit Team" : "Team Details"}</SheetTitle>
           <SheetDescription>
@@ -99,43 +102,43 @@ export function TeamDetailSheet({ isOpen, onOpenChange, team, onTeamUpdate, edit
               </div>
             )}
           </div>
-          {team && (
+          {selectedTeam && (
             <div className="grid gap-2 pt-2">
-              <div className="flex justify-between text-sm">
+              {/* <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Created By:</span>
-                <span>{team.createdBy}</span>
-              </div>
+                <span>{selectedTeam.createdBy}</span>
+              </div> */}
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Created At:</span>
-                <span>{team.createdAt}</span>
+                <span>{formatDate(selectedTeam.created_at)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Last Updated:</span>
-                <span>{team.updatedAt}</span>
-              </div>
-              {/* <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Members:</span>
-                <span>{team.members.length}</span>
+                <span>{formatDate(selectedTeam.updated_at)}</span>
               </div>
               <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Members:</span>
+                <span>{members.length}</span>
+              </div>
+              {/* <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Projects:</span>
                 <span>{team.projects.length}</span>
               </div> */}
               {isEditMode ? (
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="manual-join" className="flex-grow">
+                  <Label htmlFor="join_policy" className="flex-grow">
                     Require approval for new members
                     <p className="text-xs text-muted-foreground">
                       When enabled, new members must be approved before joining
                     </p>
                   </Label>
                   <Switch
-                    id="manual-join"
-                    checked={team.manualJoinApproval}
+                    id="join_policy"
+                    checked={selectedTeam.join_policy}
                     onCheckedChange={(checked) =>
                       setEditFormData({
                         ...editFormData,
-                        manualJoinApproval: checked
+                        join_policy: checked
                       })
                     }
                   />
@@ -143,7 +146,7 @@ export function TeamDetailSheet({ isOpen, onOpenChange, team, onTeamUpdate, edit
               ) : (
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Manual Join Approval:</span>
-                  <span>{team.settings?.manualJoinApproval ? "Enabled" : "Disabled"}</span>
+                  <span>{selectedTeam.join_policy ? "Enabled" : "Disabled"}</span>
                 </div>
               )}
             </div>
@@ -165,7 +168,7 @@ export function TeamDetailSheet({ isOpen, onOpenChange, team, onTeamUpdate, edit
               >
                 Close
               </SheetClose>
-              {edit && (
+              {editable && (
                 <Button onClick={() => setIsEditMode(true)}>
                   <Pencil className="mr-2 h-4 w-4" />
                   Edit

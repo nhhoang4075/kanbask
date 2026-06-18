@@ -261,7 +261,7 @@ export const teamsMember = [
   { teamId: "3", userId: "1", role: "admin" }
 ];
 
-export const projectsData = [
+export const projects = [
   {
     id: "1",
     teamId: "1",

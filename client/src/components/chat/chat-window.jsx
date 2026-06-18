@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useMemo, useEffect, useState } from "react";
 import { MoveDown } from "lucide-react";
 
 import ChatInput from "@/components/chat/chat-input";
@@ -16,7 +16,6 @@ const SCROLL_THRESHOLD = 300;
 
 export default function ChatWindow() {
   const [showScrollToBottom, setShowScrollToBottom] = useState(false);
-
   const {
     messages,
     conversations,
@@ -31,7 +30,10 @@ export default function ChatWindow() {
   const bottomRef = useRef(null);
   const scrollAreaRef = useRef(null);
 
-  const curConversation = conversations.find((c) => c.id === selectedConversationId);
+  const currConversation = useMemo(
+    () => conversations.find((c) => c.id === selectedConversationId),
+    [conversations, selectedConversationId]
+  );
 
   const handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
@@ -58,12 +60,12 @@ export default function ChatWindow() {
     }
   }, [loading, scrollTargetId]);
 
-  if (!curConversation) {
+  if (!currConversation) {
     return;
   }
 
   return (
-    <div className="relative flex-1 flex flex-col w-full overflow-hidden bg-white shadow-md">
+    <div className="relative flex-1 flex flex-col w-full overflow-hidden bg-ghost-white shadow-md">
       {loading ? (
         <div className="flex-1 flex w-full">
           <Spinner size="lg" className="-translate-y-16" />
@@ -75,22 +77,18 @@ export default function ChatWindow() {
           className="flex-1 m-0 px-8 pb-36 overflow-y-scroll"
         >
           {groupMessages(messages)?.map((msgGroup, idx) => (
-            <MessageBubble
-              key={idx}
-              msgGroup={msgGroup}
-              isMe={msgGroup.sender_id === user?.id}
-              curConversation={curConversation}
-            />
+            <MessageBubble key={idx} msgGroup={msgGroup} isMe={msgGroup.sender_id === user?.id} />
           ))}
           <div ref={bottomRef} />
         </ScrollArea>
       )}
 
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-full max-w-3xl">
+        <ChatInput />
         {showScrollToBottom && (
           <Button
             variant="outline"
-            className="absolute -top-12 right-5 h-10 w-10 rounded-full"
+            className="absolute -top-12 right-5 h-10 w-10 rounded-full bg-white"
             onClick={() => {
               bottomRef.current?.scrollIntoView({ behavior: "smooth" });
               setShowScrollToBottom(false);
@@ -99,7 +97,6 @@ export default function ChatWindow() {
             <MoveDown />
           </Button>
         )}
-        <ChatInput />
       </div>
     </div>
   );

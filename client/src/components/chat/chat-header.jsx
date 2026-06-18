@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Users, UsersRound, FolderKanban, MoreHorizontal } from "lucide-react";
 
 import ChatOption from "@/components/chat/chat-option";
@@ -12,13 +13,18 @@ import {
   SheetDescription
 } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChat } from "@/hooks/use-chat";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 import { cn, capitalCase } from "@/lib/utils";
 
 export default function ChatHeader() {
   const { conversations, selectedConversationId } = useChat();
-  const currConversation = conversations.find((c) => c.id === selectedConversationId);
+
+  const currConversation = useMemo(
+    () => conversations.find((c) => c.id === selectedConversationId),
+    [conversations, selectedConversationId]
+  );
 
   if (!currConversation) {
     return;
@@ -63,10 +69,19 @@ export default function ChatHeader() {
             </Badge>
           )}
           {currConversation.type !== "direct" && (
-            <div className="flex items-center px-2 py-1 gap-1 text-xs text-gray-500 rounded-sm hover:bg-prussian-blue/10 hover:cursor-pointer transition duration-200 ease-in-out">
-              <UsersRound className="h-3 w-3" />
-              <span>{currConversation.participant_count}</span>
-            </div>
+            <TooltipProvider>
+              <Tooltip delayDuration={500}>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center px-2 py-1 gap-1 text-xs text-gray-500 rounded-sm hover:bg-prussian-blue/10 hover:cursor-pointer transition duration-200 ease-in-out">
+                    <UsersRound className="h-3 w-3" />
+                    <span>{currConversation.participant_count}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="bg-prussian-blue text-white">
+                  <p>{`${currConversation.participant_count} members`}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
         </div>
       </div>

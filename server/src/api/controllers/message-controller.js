@@ -2,7 +2,7 @@ import { StatusCodes } from "http-status-codes";
 
 import messageService from "../services/message-service.js";
 
-const getManyMessagesByConversationId = async (req, res, next) => {
+const getMessagesOfConversation = async (req, res, next) => {
   try {
     const messages = await messageService.getManyMessagesByConversationId(
       req.query.conversation_id,
@@ -19,5 +19,5 @@ const getManyMessagesByConversationId = async (req, res, next) => {
 };
 
 export default {
-  getManyMessagesByConversationId
+  getMessagesOfConversation
 };

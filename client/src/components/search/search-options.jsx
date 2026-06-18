@@ -29,8 +29,11 @@ export default function SearchOptions() {
 
   // filter conversations by search term
   const filteredConvs = useMemo(() => {
-    if (!convSearch) return conversations;
-    return conversations.filter((c) => c.title.toLowerCase().includes(convSearch.toLowerCase()));
+    if (!convSearch) return conversations.filter((c) => !c.is_pending);
+    return conversations.filter((c) => {
+      console.log("c", c.title, c.is_pending);
+      return !c.is_pending && c.title.toLowerCase().includes(convSearch.toLowerCase());
+    });
   }, [convSearch, conversations]);
 
   return (
@@ -122,7 +125,7 @@ export default function SearchOptions() {
                     />
                   </div>
                   {/* scrollable list of options */}
-                  <div className="max-h-80 overflow-y-auto">
+                  <div className="max-h-50 overflow-y-auto">
                     {filteredConvs.length ? (
                       filteredConvs.map((conv) => (
                         <SelectItem key={conv.id} value={conv.id}>

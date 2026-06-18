@@ -10,11 +10,11 @@ export default function ChatPage() {
       direction="horizontal"
       className="max-h-[97dvh]"
     >
-      <ResizablePanel defaultSize={25} minSize={20} maxSize={35} className="rounded-md">
+      <ResizablePanel defaultSize={30} minSize={25} maxSize={35} className="rounded-md">
         <ChatSidebar />
       </ResizablePanel>
       <ResizableHandle className="mx-0.5 w-0.5 rounded bg-transparent hover:bg-mustard active:bg-mustard transition duration-200 ease-in-out" />
-      <ResizablePanel defaultSize={75} className="rounded-md">
+      <ResizablePanel defaultSize={70} className="rounded-md">
         <div className="flex flex-col items-center h-full bg-ghost-white">
           <ChatHeader />
           <ChatWindow />

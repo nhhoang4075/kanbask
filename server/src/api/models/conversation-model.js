@@ -1,12 +1,18 @@
 import { db } from "../../config/db.js";
 
-const createOneConversation = async ({ type, team_id = null, project_id = null }) => {
+const createOneConversation = async ({
+  type,
+  team_id = null,
+  project_id = null,
+  is_pending = false
+}) => {
   try {
     const [conversation] = await db("conversations")
       .insert({
         type,
         team_id,
-        project_id
+        project_id,
+        is_pending
       })
       .returning("id");
 
@@ -130,8 +136,6 @@ const removeParticipantsFromConversation = async (conversation_id, user_ids) => 
 const getDetailOfConversation = async (conversation_id, user_id) => {
   try {
     const [conversation] = await db("conversation_latest_activity_view AS v")
-      .leftJoin("teams AS t", "v.team_id", "t.id")
-      .leftJoin("projects AS p", "v.project_id", "p.id")
       .innerJoin("conversation_participants AS cp", function () {
         this.on("cp.conversation_id", "=", "v.conversation_id").andOn(
           "cp.user_id",
@@ -180,8 +184,16 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
               WHERE cp2.conversation_id = v.conversation_id AND uv.id <> ?
               LIMIT 1
             )
-            WHEN v.type = 'team' THEN t.name
-            WHEN v.type = 'project' THEN p.name
+            WHEN v.type = 'team' THEN (
+              SELECT t.name
+              FROM teams t
+              WHERE t.id = v.team_id
+            )
+            WHEN v.type = 'project' THEN (
+              SELECT p.name
+              FROM projects p
+              WHERE p.id = v.project_id
+            )
           END AS title`,
           [user_id]
         ),
@@ -201,6 +213,12 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
         `,
           [user_id]
         ),
+        db.raw(
+          `(SELECT COUNT(*) 
+            FROM conversation_participants cp3 
+            WHERE cp3.conversation_id = v.conversation_id
+          ) AS participant_count`
+        ),
         db.raw("COALESCE(um.unread_count, 0) AS unread_count")
       ])
       .where("v.conversation_id", conversation_id)
@@ -209,6 +227,19 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
     return conversation;
   } catch (err) {
     throw err;
+  }
+};
+
+const updateConversationPendingStatus = async (conversation_id, is_pending) => {
+  try {
+    const [conversation] = await db("conversations")
+      .where({ id: conversation_id })
+      .update({ is_pending })
+      .returning("id");
+
+    return conversation.id;
+  } catch (err) {
+    throw new Error(err);
   }
 };
 
@@ -237,5 +268,6 @@ export default {
   getParticipantsOfConversation,
   removeParticipantsFromConversation,
   getDetailOfConversation,
+  updateConversationPendingStatus,
   updateLastReadMessage
 };

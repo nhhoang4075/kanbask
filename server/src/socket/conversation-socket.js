@@ -8,20 +8,19 @@ const registerConversationHandlers = (io, socket) => {
 
       if (!oldRoomId) {
         socket.join(`conversation_${conversation_id}`);
-      }
-
-      if (oldRoomId && oldRoomId !== conversation_id) {
+      } else if (oldRoomId !== conversation_id) {
         socket.leave(`conversation_${oldRoomId}`);
         socket.join(`conversation_${conversation_id}`);
-
-        const conversationId = await conversationService.updateLastReadMessage(oldRoomId, user_id);
-        const conversation = await conversationService.getOneConversationById(
-          conversationId,
-          user_id
-        );
-
-        io.to(`user_${user_id}`).emit("update_conversation", conversation);
       }
+
+      await conversationService.updateLastReadMessage(conversation_id, user_id);
+
+      const conversation = await conversationService.getOneConversationById(
+        conversation_id,
+        user_id
+      );
+
+      io.to(`user_${user_id}`).emit("update_conversation", conversation);
 
       socket.data.conversation_id = conversation_id;
     } catch (error) {

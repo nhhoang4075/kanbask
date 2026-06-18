@@ -2,7 +2,7 @@ import pgvector from "pgvector/knex";
 
 import { db } from "../../config/db.js";
 
-const searchUsersByVector = async (team_ids, search_term, query_vector, options = {}) => {
+const searchUsersByVector = async (team_ids, search_term, query_vector, options = {}, actor_id) => {
   try {
     const { limit = 10, offset = 0 } = options;
     const minSimilarity = 0.5;
@@ -20,7 +20,22 @@ const searchUsersByVector = async (team_ids, search_term, query_vector, options 
           qLike,
           qLike
         ]),
-        db.raw("1 - (embedding <=> ?) AS similarity", [queryVectorSql])
+        db.raw("1 - (embedding <=> ?) AS similarity", [queryVectorSql]),
+        db.raw(
+          `
+          (
+            SELECT c.id 
+            FROM conversations c
+            JOIN conversation_participants cp1 ON cp1.conversation_id = c.id
+            JOIN conversation_participants cp2 ON cp2.conversation_id = c.id
+            WHERE c.type = 'direct'
+            AND cp1.user_id = ?
+            AND cp2.user_id = users.id
+            LIMIT 1
+          ) as direct_conversation_id
+        `,
+          [actor_id]
+        )
       )
       .whereIn("id", function () {
         this.select("user_id").from("team_members").whereIn("team_id", team_ids);

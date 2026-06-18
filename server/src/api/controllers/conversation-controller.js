@@ -32,7 +32,10 @@ const getConversationsOfUser = async (req, res, next) => {
 
 const deleteOneConversation = async (req, res, next) => {
   try {
-    const conversation = await conversationService.deleteOneConversation(req.params.id);
+    const conversation = await conversationService.deleteOneConversation(
+      req.params.id,
+      req.user.id
+    );
 
     res.status(StatusCodes.OK).json({
       success: true,

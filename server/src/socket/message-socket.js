@@ -28,7 +28,10 @@ const registerMessageHandlers = (io, socket) => {
         })
       );
 
-      const participants = await conversationService.getParticipantsOfConversation(conversation_id);
+      const participants = await conversationService.getParticipantsOfConversation(
+        conversation_id,
+        sender_id
+      );
 
       await Promise.all(
         participants.map(async (p) => {
@@ -47,12 +50,17 @@ const registerMessageHandlers = (io, socket) => {
 
   socket.on("edit_message", async ({ message_id, content }) => {
     try {
-      const message = await messageService.updateOneMessageById(message_id, { content });
+      const { id: actor_id } = socket.data.user;
+
+      const message = await messageService.updateOneMessageById(message_id, { content }, actor_id);
       const { conversation_id } = message;
 
       io.to(`conversation_${conversation_id}`).emit("message_edited", message);
 
-      const participants = await conversationService.getParticipantsOfConversation(conversation_id);
+      const participants = await conversationService.getParticipantsOfConversation(
+        conversation_id,
+        actor_id
+      );
 
       await Promise.all(
         participants.map(async (p) => {

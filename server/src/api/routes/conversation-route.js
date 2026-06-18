@@ -7,7 +7,7 @@ const conversationRoute = (router) => {
 
   router
     .route("/conversations")
-    .get(conversationController.getManyConversationsByUserId)
+    .get(conversationController.getConversationsOfUser)
     .post(
       conversationValidation.validateNewConversation,
       conversationController.createOneConversation

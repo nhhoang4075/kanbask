@@ -1,20 +1,7 @@
 import { StatusCodes } from "http-status-codes";
 import notificationService from "../services/notification-service.js";
 
-const createOneNotification = async (req, res, next) => {
-  try {
-    const notification = await notificationService.createOneNotification(req.body);
-
-    res.status(StatusCodes.CREATED).json({
-      success: true,
-      data: { notification }
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-const getManyNotificationsByUserId = async (req, res, next) => {
+const getNotificationsOfUser = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const options = req.query;
@@ -98,8 +85,7 @@ const deleteAllNotifications = async (req, res, next) => {
 };
 
 export default {
-  createOneNotification,
-  getManyNotificationsByUserId,
+  getNotificationsOfUser,
   markOneNotificationAsRead,
   markAllNotificationsAsRead,
   deleteOneNotification,

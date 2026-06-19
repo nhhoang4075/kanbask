@@ -24,12 +24,14 @@ import { login } from "@/actions/auth-actions";
 import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
 
 const greetings = [
-  "Nice to see you again!",
-  "Welcome back!",
-  "Hope you're having a great day!",
-  "Let's get started!",
-  "Good to see you!",
-  "Ready to conquer the day?"
+  "Welcome back, we've missed you!",
+  "Great to see you again!",
+  "Ready for another productive day?",
+  "Your journey continues here!",
+  "Back in your digital space!",
+  "Let's make today count!",
+  "Back for more amazing things!",
+  "Your success story continues!"
 ];
 
 const loginSchema = z.object({
@@ -45,7 +47,8 @@ const loginSchema = z.object({
 });
 
 export default function LoginForm() {
-  const [randomGreeting, setRandomGreeting] = useState(" ");
+  const [randomGreeting, setRandomGreeting] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * greetings.length);
@@ -66,40 +69,57 @@ export default function LoginForm() {
   const redirectUrl = searchParams.get("redirect") || DEFAULT_LOGIN_REDIRECT;
 
   const onSubmit = async (formData) => {
+    setIsLoading(true);
     try {
       const data = await login({ ...formData, remember });
 
-      if (!data.user) {
-        toast.error("Login failed! Try 'Forgot password?' ");
-      } else {
-        toast.success("Login successful!");
-        router.push(redirectUrl);
+      if (!data?.user) {
+        toast.error("Invalid credentials. Please try again.");
+        return;
       }
+
+      toast.success("Login successful!");
+      router.push(redirectUrl);
     } catch (error) {
-      toast.error("An error occurred. Please try again.");
+      const errorMessage = error.message || "An error occurred during login. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <p className="font-bold text-black text-2xl whitespace-pre mb-8">{randomGreeting}</p>
+    <div className="w-full max-w-md mx-auto">
+      <div className="mb-8">
+        <h2 className="text-4xl font-bold text-prussian-blue mb-2">Sign in</h2>
+        <p className="text-gray-600">{randomGreeting}</p>
+      </div>
+
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 mb-8" autoComplete="off">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4"
+          autoComplete="off"
+          spellCheck="false"
+        >
           <FormField
             name="email"
             control={form.control}
             render={({ field }) => (
-              <FormItem className="w-full relative pb-5">
-                <FormLabel className="text-gray-800 text-xs">Email</FormLabel>
+              <FormItem className="relative pb-5">
+                <FormLabel className="text-gray-700 text-xs !text-black">Email</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="email"
                     placeholder="Enter your email"
-                    className="w-full h-12 text-foreground rounded-sm bg-gray-200"
+                    className="h-12 bg-prussian-blue/10 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
                   />
                 </FormControl>
-                <FormMessage className="text-xs absolute left-0 bottom-0" />
+                <FormMessage className="absolute left-0 bottom-0 text-xs" />
               </FormItem>
             )}
           />
@@ -107,55 +127,68 @@ export default function LoginForm() {
             name="password"
             control={form.control}
             render={({ field }) => (
-              <FormItem className="w-full relative pb-5">
-                <FormLabel className="text-gray-800 text-xs">Password</FormLabel>
+              <FormItem className="relative pb-5">
+                <FormLabel className="text-gray-700 text-xs !text-black">Password</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="password"
                     placeholder="Enter your password"
-                    className="w-full h-12 text-foreground rounded-sm bg-gray-200"
+                    className="h-12 bg-prussian-blue/10 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
                     autoComplete="new-password"
                   />
                 </FormControl>
-                <FormMessage className="text-xs absolute left-0 bottom-0" />
+                <FormMessage className="absolute left-0 bottom-0 text-xs" />
               </FormItem>
             )}
           />
-          <div className="flex justify-between items-center mb-2">
-            <div className="flex pb-2">
+
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-2">
               <Switch
                 id="remember"
-                name="remember"
                 checked={remember}
-                onCheckedChange={(checked) => setRemember(checked)}
+                onCheckedChange={setRemember}
+                className="data-[state=checked]:bg-blue-green"
               />
-              <Label htmlFor="remember" className="ml-2 block text-sm text-gray-90">
+              <Label htmlFor="remember" className="text-gray-700 text-sm">
                 Remember me
               </Label>
             </div>
             <Link
               href="/auth/forgot-password"
-              className="text-sm font-medium text-blue-green hover:text-prussian-blue"
+              className="text-sm text-blue-green hover:text-prussian-blue transition-colors duration-200"
             >
               Forgot password?
             </Link>
           </div>
+
           <Button
             type="submit"
-            className="w-full h-12 bg-blue-green text-ghost-white text-md hover:bg-prussian-blue"
+            className="w-full h-12 bg-blue-green hover:bg-prussian-blue transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading}
           >
-            Login
+            Sign In
           </Button>
         </form>
       </Form>
-      <div className="border-t border-gray-300 mb-6"></div>
-      <p className=" text-center">
-        Don't have an account?{" "}
-        <Link href="/auth/register" className="ml-2 text-blue-green hover:text-prussian-blue">
-          Sign up now
-        </Link>
-      </p>
-    </>
+
+      <div className="mt-8 text-center">
+        <div className="flex items-center justify-center space-x-2 mb-6">
+          <div className="flex-1 h-px bg-prussian-blue/30"></div>
+          <span className="text-gray-500 text-sm px-2">or</span>
+          <div className="flex-1 h-px bg-prussian-blue/30"></div>
+        </div>
+        <p className="text-gray-600">
+          Don't have an account?{" "}
+          <Link
+            href="/auth/register"
+            className="text-blue-green font-medium hover:text-prussian-blue transition-colors duration-200"
+          >
+            Register
+          </Link>
+        </p>
+      </div>
+    </div>
   );
 }

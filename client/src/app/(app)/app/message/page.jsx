@@ -3,6 +3,11 @@ import ChatSidebar from "@/components/chat/chat-sidebar";
 import ChatWindow from "@/components/chat/chat-window";
 import ChatHeader from "@/components/chat/chat-header";
 
+export const metadata = {
+  title: "Messages",
+  description: "Your Kanbask messages and conversations"
+};
+
 export default function ChatPage() {
   return (
     <ResizablePanelGroup

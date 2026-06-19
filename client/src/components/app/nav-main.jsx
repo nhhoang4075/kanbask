@@ -58,7 +58,15 @@ export default function NavMain() {
           const isActive = item.url === pathname;
           return (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton isActive={isActive} tooltip={item.title} asChild>
+              <SidebarMenuButton
+                isActive={isActive}
+                tooltip={item.title}
+                asChild
+                className={cn(
+                  "hover:bg-mustard active:bg-mustard hover:text-prussian-blue active:text-prussian-blue transition-all duration-200 ease-in-out rounded-sm",
+                  "data-[active=true]:bg-mustard data-[active=true]:text-prussian-blue"
+                )}
+              >
                 <Link href={item.url}>
                   {item.icon && <item.icon className={cn(isActive && "text-blue-green")} />}
                   <span>{item.title}</span>

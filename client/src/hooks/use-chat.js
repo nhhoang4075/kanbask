@@ -82,6 +82,7 @@ export function ChatProvider({ initialConversations = [], children }) {
     socket.on("new_message", handleNewMsg);
 
     setLoading(true);
+
     getMessagesOfConversation(selectedConversationId)
       .then((data) => {
         setMessages(data.messages);

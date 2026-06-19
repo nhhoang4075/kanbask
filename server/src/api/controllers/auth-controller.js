@@ -36,11 +36,11 @@ const login = async (req, res, next) => {
     const accessToken = jwtProvider.generateToken(
       userPayload,
       process.env.ACCESS_TOKEN_SECRET,
-      "1h"
+      "30s"
     );
 
     res.cookie("access_token", accessToken, {
-      maxAge: ms("1h"),
+      maxAge: ms("30s"),
       httpOnly: true,
       secure: true,
       sameSite: "none"
@@ -76,7 +76,9 @@ const getSession = async (req, res, next) => {
   try {
     const user = await authService.getSession(req.user.id);
 
-    res.status(StatusCodes.OK).json({ success: true, data: { user } });
+    res
+      .status(StatusCodes.OK)
+      .json({ success: true, data: { user, expires_at: req.user.exp * 1000 } });
   } catch (error) {
     next(error);
   }
@@ -106,10 +108,10 @@ const refreshSession = async (req, res, next) => {
       email_verified: decodedRefreshToken.email_verified
     };
 
-    const accessToken = jwtProvider.generateToken(payload, process.env.ACCESS_TOKEN_SECRET, "1h");
+    const accessToken = jwtProvider.generateToken(payload, process.env.ACCESS_TOKEN_SECRET, "30s");
 
     res.cookie("access_token", accessToken, {
-      maxAge: ms("1h"),
+      maxAge: ms("30s"),
       httpOnly: true,
       secure: true,
       sameSite: "none"

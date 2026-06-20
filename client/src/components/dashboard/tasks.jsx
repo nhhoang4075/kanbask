@@ -14,6 +14,7 @@ export default function Tasks({ tasks, projects }) {
     if (dateA - dateB !== 0) return dateA - dateB; // Sort by due date
     return priorityOrder[a.priority] - priorityOrder[b.priority]; // Sort by priority
   });
+  console.log("Sorted Tasks:", sortedTasks);
   return (
     <Card className="w-full h-full flex flex-col overflow-hidden">
       <CardHeader className="flex-shrink-0 flex flex-row items-center justify-between space-y-0 pb-2">
@@ -37,11 +38,12 @@ export default function Tasks({ tasks, projects }) {
                   <Badge className={`text-xs mr-2 ${task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-yellow-500' : task.status === 'low' ? 'bg-green-500' : 'bg-black'}`}>
                     {task.priority?.charAt(0).toUpperCase() + task.priority?.slice(1) || 'No Priority'}
                   </Badge>
-                  <Badge className={`text-xs ${task.status === 'done' ? 'bg-green-500' : task.status === 'todo' || task.status === "in_progress" ? 'bg-yellow-500' : 'bg-red-500'}`}>
+                  <Badge className={`text-xs ${task.status === 'done' ? 'bg-green-500' : task.status === 'todo' || task.status === "in_progress" || task.status === "review" ? 'bg-yellow-500' : 'bg-red-500'}`}>
                     {task.status === 'done' ? 'Completed' : 
                       task.status === 'todo' ? 'To do' : 
                         task.status === 'in_progress' ? 'In Progress' : 
-                          task.status === 'overdue' ? 'Overdue' : 'Cancelled'
+                          task.status === 'overdue' ? 'Overdue' : 
+                            task.status === 'review' ? 'Review' : 'Cancelled'
                     }
                   </Badge>
                 </div>

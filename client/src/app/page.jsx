@@ -1,83 +1,327 @@
+"use client";
 import Image from "next/image";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { BentoGrid, BentoCard } from "@/components/magicui/bento-grid";
+import { BoxReveal } from "@/components/magicui/box-reveal";
+import { FlickeringGrid } from "@/components/magicui/flickering-grid";
+import { InteractiveHoverButton } from "@/components/magicui/interactive-hover-button";
+import { Marquee } from "@/components/magicui/marquee";
+import { NumberTicker } from "@/components/magicui/number-ticker";
+import { TextAnimate } from "@/components/magicui/text-animate";
+import { AuroraText } from "@/components/magicui/aurora-text";
+import { WordRotate } from "@/components/magicui/word-rotate";
+import { PulsatingButton } from "@/components/magicui/pulsating-button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Check, Star } from "lucide-react";
+import { 
+  featureCards,
+  stats,
+  testimonials,
+  quotes,
+  subQuotes,
+  pricingPlans 
+} from "@/data/landing-page-data";
 
-export default function Home() {
+export default function LandingPage() {
+  
+  // Add state for selected quotes
+  const [selectedQuote, setSelectedQuote] = useState("");
+  const [selectedSubQuote, setSelectedSubQuote] = useState("");
+  
+  // Select quotes on client-side only
+  useEffect(() => {
+    // Select random quotes
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    const randomSubQuote = subQuotes[Math.floor(Math.random() * subQuotes.length)];
+    
+    // Update state
+    setSelectedQuote(randomQuote);
+    setSelectedSubQuote(randomSubQuote);
+  }, []);
+  
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <>
+      {/* Fixed background */}
+      <FlickeringGrid 
+        className="fixed top-0 left-0 h-full w-full overflow-hidden bg-gradient-to-b from-gray-50 to-gray-100" 
+        color="#219ebc"
+      />
+      
+      {/* Fixed header */}
+      <header className="fixed top-0 left-0 right-0 z-20">
+        <Card className="w-[101%] p-4 rounded-none shadow-lg backdrop-blur-md bg-prussian-blue text-white -m-0.5">
+          <CardContent className="w-full flex items-center justify-between p-0">
+            <h1 className="text-3xl md:text-4xl font-bold ml-2">Kanbask</h1>
+            <div className="flex items-center gap-2">
+              <Button size="lg" className="rounded-full text-black bg-mustard hover:bg-mustard/70">
+                <a href="/auth/register">Sign Up</a>
+              </Button>
+              <Button size="lg" className="rounded-full ml-2 text-black bg-mustard hover:bg-mustard/70">
+                <a href="/auth/login">Login</a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </header>
+      
+      <div className="relative z-10 pt-24 w-full min-h-full overflow-y-auto">
+        {/* Hero section */}
+        <div className="flex flex-col items-center justify-center min-h-[90vh] px-4 md:px-8">
+          <div className="w-4xl text-center space-y-6 md:space-y-8">
+            <Badge className="px-4 py-2 text-sm mb-4">
+              Task Management Reimagined
+            </Badge>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight h-[120px]">
+              <WordRotate words={quotes} duration={4000}>
+                <TextAnimate className="">{selectedQuote}</TextAnimate>
+              </WordRotate>
+            </h1>
+            <WordRotate words={subQuotes} duration={4000}>
+              <TextAnimate className="text-lg md:text-2xl text-gray-600 max-w-3xl mx-auto">
+                {selectedSubQuote || subQuotes[0]}
+              </TextAnimate>
+            </WordRotate>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+              <Link href="/auth/login">
+                <InteractiveHoverButton className="rounded-full text-lg bg-mustard">
+                  Get Started
+                </InteractiveHoverButton>
+              </Link>
+            </div>
+            
+            <div className="pt-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+              {stats.map((stat, index) => (
+                <div key={index} className="flex flex-col items-center">
+                  <NumberTicker className="text-3xl font-bold" value={stat.value} />
+                  <span className="text-gray-600">{stat.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/file.svg" alt="File icon" width={16} height={16} />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/window.svg" alt="Window icon" width={16} height={16} />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image aria-hidden src="/globe.svg" alt="Globe icon" width={16} height={16} />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+        {/* Spotlight Feature Section with BoxReveal animation */}
+        <section className="py-24 px-4 md:px-8 bg-gradient-to-b from-white to-ghost-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              {/* Left side: Image with shadow effect */}
+              <div className="flex-1 w-full relative">
+                <div className="absolute -inset-4 bg-sky-blue/30 rounded-2xl blur-xl"></div>
+                <div className="relative">
+                  <Image
+                    src="/images/feature-image.jpg"
+                    alt="Kanbask Performance Dashboard"
+                    width={800}
+                    height={700}
+                    className="rounded-xl shadow-2xl object-cover w-full h-auto"
+                    priority
+                  />
+                </div>
+              </div>
+              
+              {/* Right side: Content with BoxReveal animations */}
+              <div className="flex-1 space-y-6">
+                <BoxReveal boxColor="#023047">
+                  <Badge className="px-4 py-2 text-sm mb-4">
+                    Lightning Fast
+                  </Badge>
+                </BoxReveal>
+                
+                <BoxReveal boxColor="#023047" delay={0.1}>
+                  <h2 className="text-4xl md:text-5xl font-bold pb-2">
+                    Performance Without&nbsp;
+                    <AuroraText>
+                    Compromise
+                    </AuroraText>
+                  </h2>
+                </BoxReveal>
+                
+                <BoxReveal boxColor="#023047" delay={0.2}>
+                  <p className="text-lg text-gray-600 mt-4">
+                    Kanbask is engineered for speed at every level. From initial load to complex operations, 
+                    our optimized architecture ensures your team stays productive without waiting.
+                  </p>
+                </BoxReveal>
+                
+                <BoxReveal boxColor="#023047" delay={0.3}>
+                  <ul className="space-y-3 mt-6">
+                    {["Instant updates with React Server Components", 
+                      "Optimized database queries for large projects", 
+                      "Edge-optimized global infrastructure"].map((item, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <Check className="h-5 w-5 text-blue-600" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </BoxReveal>
+                
+                <BoxReveal boxColor="#023047" delay={0.4}>
+                  <Link href="/auth/login">
+                    <InteractiveHoverButton 
+                      className="mt-8 rounded-full text-lg px-6 py-3 bg-mustard hover:bg-mustard/80"
+                    >
+                      Explore Performance Features
+                    </InteractiveHoverButton>
+                  </Link>
+                </BoxReveal>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* AI Search Spotlight Section */}
+        <section className="py-24 px-4 md:px-8 bg-gradient-to-b mt-8 from-ghost-white to-white">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row-reverse items-center gap-12">
+              {/* Right side: Image with shadow effect */}
+              <div className="flex-1 w-full relative">
+                <div className="absolute -inset-4 bg-sky-blue/30 rounded-2xl blur-xl"></div>
+                <div className="relative">
+                  <Image
+                    src="/images/search-image.jpg"
+                    alt="Kanbask AI-Powered Search"
+                    width={800}
+                    height={700}
+                    className="rounded-xl shadow-2xl object-cover w-full h-auto"
+                    priority
+                  />
+                </div>
+              </div>
+              
+              {/* Left side: Content with BoxReveal animations */}
+              <div className="flex-1 space-y-6">
+                <BoxReveal boxColor="#023047">
+                  <Badge className="px-4 py-2 text-sm mb-4">
+                    AI-Powered
+                  </Badge>
+                </BoxReveal>
+                
+                <BoxReveal boxColor="#023047" delay={0.1}>
+                  <h2 className="text-4xl md:text-5xl font-bold pb-2">
+                    Find Anything in&nbsp;
+                    <AuroraText>
+                    Seconds
+                    </AuroraText>
+                  </h2>
+                </BoxReveal>
+                
+                <BoxReveal boxColor="#023047" delay={0.2}>
+                  <p className="text-lg text-gray-600 mt-4">
+                    Our intelligent search understands what you need before you finish typing. 
+                    Natural language processing helps you locate tasks, comments, and files across your entire workspace.
+                  </p>
+                </BoxReveal>
+                
+                <BoxReveal boxColor="#023047" delay={0.3}>
+                  <ul className="space-y-3 mt-6">
+                    {["Natural language understanding for contextual results", 
+                      "Find content across all projects with a single query", 
+                      "Personalized results based on your work patterns"].map((item, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <Check className="h-5 w-5 text-blue-600" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </BoxReveal>
+                
+                <BoxReveal boxColor="#023047" delay={0.4}>
+                  <Link href="/auth/login">
+                    <InteractiveHoverButton 
+                      className="mt-8 rounded-full text-lg px-6 py-3 bg-mustard hover:bg-mustard/80"
+                    >
+                      Try Smart Search
+                    </InteractiveHoverButton>
+                  </Link>
+                </BoxReveal>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <div className="flex flex-col items-center justify-center py-16 mt-12 px-4 md:px-8 bg-gradient-to-r from-sky-blue/50 to-sky-blue/80">
+          <Badge className="px-4 py-2 text-sm mb-4 relative z-10">
+            Powerful Features
+          </Badge>
+          <TextAnimate className="text-4xl font-bold mb-4 text-center relative z-10">Everything You Need</TextAnimate>
+          <TextAnimate className="text-lg text-gray-700 max-w-2xl text-center mb-10 relative z-10">
+            Streamline your workflow with our intuitive tools designed for maximum productivity
+          </TextAnimate>
+          
+          <BentoGrid className="max-w-6xl grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 relative z-10">
+            {featureCards.map((feature, index) => (
+              <BentoCard
+                key={index}
+                {...feature}
+              />
+            ))}
+          </BentoGrid>
+          <Link href="/auth/login">
+            <InteractiveHoverButton variant="outline" className="mt-12 rounded-full bg-mustard hover:bg-mustard/80 relative z-10 shadow-lg">
+              Explore All Features
+            </InteractiveHoverButton>
+          </Link>
+        </div>
+        {/* Testimonials section */}
+        <div className="flex flex-col items-center justify-center py-16 mt-12 px-4 md:px-8 bg-ghost-white">
+          <Badge className="px-4 py-2 text-sm mb-4">
+            Testimonials
+          </Badge>
+          <TextAnimate className="text-4xl font-bold mb-4 text-center">What Our Users Say</TextAnimate>
+          <TextAnimate className="text-lg text-gray-600 max-w-2xl text-center mb-10">
+            Join thousands of teams who have transformed their workflow with Kanbask
+          </TextAnimate>
+          
+          <Marquee className="py-4 max-w-7xl" pauseOnHover={true} speed={40}>
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="mx-4 p-6 w-[350px] bg-white shadow-lg rounded-xl border border-gray-100">
+                <CardContent className="pt-6">
+                  <div className="flex mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />
+                    ))}
+                  </div>
+                  <p className="text-gray-700 italic mb-6">{`"${testimonial.quote}"`}</p>
+                </CardContent>
+                <CardFooter className="flex items-center pt-2 border-t border-gray-100">
+                  <Avatar className="h-10 w-10 mr-3">
+                    <AvatarImage src={testimonial.avatar} alt={testimonial.author} />
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {testimonial.author.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="font-semibold">{testimonial.author}</h4>
+                    <p className="text-sm text-gray-500">{testimonial.title}</p>
+                  </div>
+                </CardFooter>
+              </Card>
+            ))}
+          </Marquee>
+          <Link href="/auth/login">
+            <InteractiveHoverButton size="lg" className="mt-10 rounded-full bg-mustard  hover:bg-mustard/80">
+              Read More Reviews
+            </InteractiveHoverButton>
+          </Link>
+        </div>
+        {/* footer */}
+        <footer className="flex flex-col items-center justify-center py-8 mt-8 px-4 md:px-8 bg-gray-50">
+          <div className="flex space-x-4">
+            <a href="/privacy-policy" className="text-gray-600 hover:text-gray-800">Privacy Policy</a>
+            <a href="/terms-of-service" className="text-gray-600 hover:text-gray-800">Terms of Service</a>
+            <a href="/about-us" className="text-gray-600 hover:text-gray-800">About Us</a>
+          </div>
+          <div className="mt-4 text-gray-600">
+            <p>&copy; {new Date().getFullYear()} Kanbask. All rights reserved.</p>
+          </div>
+        </footer>
+      </div>
+    </>
   );
 }

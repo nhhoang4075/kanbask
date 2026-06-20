@@ -27,7 +27,7 @@ export default function Stats({tasks, projects}){
         />
         <StatsCard
           title="Pending Tasks"
-          value={tasks.filter(task => task.status === 'todo' || task.status == "in_progress").length}
+          value={tasks.filter(task => task.status === 'todo' || task.status == "in_progress" || task.status == "review").length}
           description="Total number of pending tasks"
           color="purple"
           itemIcon={<FileText className="h-6 w-6 text-purple-500" />}

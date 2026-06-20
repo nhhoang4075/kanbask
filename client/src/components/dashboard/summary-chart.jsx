@@ -39,14 +39,16 @@ export default function SummaryChart({ chosenProjectId, tasks }) {
         weekday: 'short', 
         day: 'numeric' 
       });
-      
       // Count completed tasks for this project on this date
       const completedCount = tasks.filter(task => {
         if (task.project_id !== chosenProjectId) return false;
         if (!task.complete_at) return false;
-        
-        const completeDate = new Date(task.complete_at);
-        return completeDate === date;
+        if (!task.complete_at && task.status == "done") {
+          const newCompleteDate = new Date(task.created_at).toLocaleDateString();
+          return newCompleteDate == date.toLocaleDateString();
+        }; 
+        const completeDate = new Date(task.complete_at).toLocaleDateString();
+        return completeDate == date.toLocaleDateString();
       }).length;
 
       // Count to do tasks for this project on this date
@@ -75,7 +77,7 @@ export default function SummaryChart({ chosenProjectId, tasks }) {
         if (task.status === "done") return false;
         const createDate = new Date(task.created_at);
         const dueDate = task.due_date ? new Date(task.due_date) : new Date(9999, 11, 31);
-        return createDate <= date && date < dueDate && dueDate < new Date();
+        return date > dueDate && createDate <= date;
       }).length;
 
       // Count all tasks for this project on this date
@@ -96,6 +98,7 @@ export default function SummaryChart({ chosenProjectId, tasks }) {
       };
     });
   }, [chosenProjectId, tasks, lastWeekDates]);
+  console.log("Chart Data:", chartData);
   return (
     <ChartContainer config={chartConfig} className="h-full">
       <LineChart

@@ -1,5 +1,3 @@
-"use server";
-
 import { get, put } from "@/actions/fetch-client";
 
 export async function getNotifications() {

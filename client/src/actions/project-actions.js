@@ -1,8 +1,6 @@
-import { fetchWithAuth } from "./fetch-with-auth";
-
 async function createOneProject(data) {
   try {
-    const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/projects`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -25,9 +23,9 @@ async function createOneProject(data) {
   }
 }
 
-async function getProjectsOfUserInTeam() {
+async function getProjectsOfUserInTeam(teamId) {
   try {
-    const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/projects`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects?team_id=${teamId}`, {
       method: "GET",
       credentials: "include"
     });
@@ -50,7 +48,7 @@ async function getProjectsOfUserInTeam() {
 
 async function updateOneProjectById(id, data) {
   try {
-    const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}`, {
       method: "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -75,7 +73,7 @@ async function updateOneProjectById(id, data) {
 
 async function deleteOneProjectById(id) {
   try {
-    const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}`, {
       method: "DELETE",
       credentials: "include"
     });
@@ -87,7 +85,7 @@ async function deleteOneProjectById(id) {
         throw new Error(json.message);
       }
 
-      return json.message;
+      return json.msg;
     } else {
       throw new Error("deleteOneProjectById API Error");
     }
@@ -98,13 +96,10 @@ async function deleteOneProjectById(id) {
 
 async function getMembersOfProject(id) {
   try {
-    const res = await fetchWithAuth(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}/members`,
-      {
-        method: "GET",
-        credentials: "include"
-      }
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}/members`, {
+      method: "GET",
+      credentials: "include"
+    });
 
     if (res.ok) {
       const json = await res.json();
@@ -113,7 +108,7 @@ async function getMembersOfProject(id) {
         throw new Error(json.message);
       }
 
-      return json.message;
+      return json.data;
     } else {
       throw new Error("getMembersOfProject API Error");
     }
@@ -124,15 +119,12 @@ async function getMembersOfProject(id) {
 
 async function addMembersToProject(id, user_ids) {
   try {
-    const res = await fetchWithAuth(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}/members`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_ids })
-      }
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}/members`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_ids })
+    });
 
     if (res.ok) {
       const json = await res.json();
@@ -152,15 +144,12 @@ async function addMembersToProject(id, user_ids) {
 
 async function removeMembersFromProject(id, user_ids) {
   try {
-    const res = await fetchWithAuth(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}/members`,
-      {
-        method: "DELETE",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_ids })
-      }
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}/members`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_ids })
+    });
 
     if (res.ok) {
       const json = await res.json();
@@ -180,15 +169,12 @@ async function removeMembersFromProject(id, user_ids) {
 
 async function updateProjectRoleOfMember(id, user_id, role) {
   try {
-    const res = await fetchWithAuth(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}/members`,
-      {
-        method: "PUT",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id, role })
-      }
-    );
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${id}/members`, {
+      method: "PUT",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id, role })
+    });
 
     if (res.ok) {
       const json = await res.json();

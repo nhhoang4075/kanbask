@@ -263,7 +263,7 @@ const leaveOneTeamById = async (teamId, actorId) => {
     await teamModel.removeMembersFromTeam(teamId, [actorId]);
 
     const user = await userModel.getOneUserById(actorId);
-    await notifyMembersOfTeam(team.id, `<@${user.full_name}> has left the team.`);
+    await notifyMembersOfTeam(teamId, `<@${user.full_name}> has left the team.`);
 
     return teamId;
   } catch (err) {

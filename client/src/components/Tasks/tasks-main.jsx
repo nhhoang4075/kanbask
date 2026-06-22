@@ -1,16 +1,16 @@
 import { projects, teams } from "@/data/teams";
 import React, { useEffect, useState } from "react";
-import { TeamSelector } from "./tasks-ui/TeamSelector";
-import ProjectSelector from "./tasks-ui/ProjectSelector";
-import ToggleView from "./tasks-ui/ToggleView";
+import { TeamSelector } from "./tasks-ui/team-selector";
+import ProjectSelector from "./tasks-ui/project-selector";
+import ToggleView from "./tasks-ui/toggle-view";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
-import NewTasks from "./tasks-ui/NewTasks";
+import NewTasks from "./tasks-ui/new-task";
 import { Separator } from "../ui/separator";
-import KanbanBoard from "./Kanban/KanbanBoard";
-import { ListView } from "./List/ListView";
-import TaskDetails from "./TaskDetailsSheet/TaskDetails";
+import KanbanBoard from "./kanban/kanban-board";
+import { ListView } from "./List/list-view";
+import TaskDetails from "./task-detail-sheet/task-detail";
 import { useTask } from "@/hooks/use-tasks";
 
 const TaskMain = () => {

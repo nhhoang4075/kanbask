@@ -1,14 +1,32 @@
-import { Button } from "../ui/button";
-import { PlusCircle } from "lucide-react";
+"use client";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { useDashboard } from "@/hooks/use-dashboard";
 
 export default function DashboardHeader() {
+  const { teams, selectedTeamId, setSelectedTeamId } = useDashboard();
+
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex items-center space-x-4 mb-4 px-2">
       <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-      <Button>
-        <PlusCircle className="mr-2 h-4 w-4" />
-        New Project
-      </Button>
+      <Select onValueChange={setSelectedTeamId} value={selectedTeamId}>
+        <SelectTrigger className="w-[200px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {teams.map((team) => (
+            <SelectItem key={team.id} value={team.id}>
+              {team.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }

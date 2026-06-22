@@ -78,6 +78,7 @@ export function TaskProvider({ children }) {
   useEffect(() => {
     fetchTasks();
   }, [fetchTasks]);
+  ``;
 
   const contextValue = {
     tasks,

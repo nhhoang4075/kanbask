@@ -1,100 +1,38 @@
-// import { fetchWithAuth } from "@/actions/fetch-with-auth";
+import { post, get } from "@/actions/fetch-client";
 
-async function login({ email, password, remember }) {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      credentials: "include",
-      body: JSON.stringify({ email, password, remember })
-    });
-
-    if (res.ok) {
-      const json = await res.json();
-
-      if (!json.success) {
-        throw new Error(json.message);
-      }
-
-      return json.data;
-    } else {
-      throw new Error("login API Error");
-    }
-  } catch (err) {
-    throw err;
-  }
+export async function register(data) {
+  return post("/auth/register", data);
 }
 
-async function getSession() {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
-      method: "GET",
-      credentials: "include"
-    });
-
-    if (res.ok) {
-      const json = await res.json();
-
-      if (!json.success) {
-        throw new Error(json.message);
-      }
-
-      return json.data;
-    } else if (res.status === 401) {
-      const refreshRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`, {
-        method: "POST",
-        credentials: "include"
-      });
-
-      if (refreshRes.ok) {
-        const retry = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/me`, {
-          method: "GET",
-          credentials: "include"
-        });
-
-        if (retry.ok) {
-          const retryJson = await retry.json();
-
-          if (!json.success) {
-            throw new Error(json.message);
-          }
-
-          return retryJson.data;
-        }
-      } else {
-        throw new Error("getSession API Error");
-      }
-    } else {
-      throw new Error("getSession API Error");
-    }
-  } catch (err) {
-    throw err;
-  }
+export async function login(data) {
+  return post("/auth/login", data);
 }
 
-async function logout() {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
-      method: "POST",
-      credentials: "include"
-    });
-
-    if (res.ok) {
-      const json = await res.json();
-
-      if (!json.success) {
-        throw new Error(json.message);
-      }
-
-      return json.message;
-    } else {
-      throw new Error("logout API Error");
-    }
-  } catch (err) {
-    throw err;
-  }
+export async function getSession() {
+  return get("/auth/me");
 }
 
-export { login, getSession, logout };
+export async function refreshSession() {
+  await post("/auth/refresh");
+  return getSession();
+}
+
+export async function logout() {
+  return post("/auth/logout");
+}
+
+export async function sendVerificationCode() {
+  return post("/mail/verify-email");
+}
+
+export async function verifyEmail(code) {
+  return post(`/auth/verify-email?code=${code}`);
+}
+
+export async function forgotPassword(email) {
+  return post(`/mail/reset-password?email=${email}`);
+}
+
+export async function resetPassword(data) {
+  return post("/auth/reset-password", data);
+}

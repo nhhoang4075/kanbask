@@ -1,39 +1,9 @@
 import Link from "next/link";
-import { format, isSameDay, isSameYear, parseISO, differenceInMinutes } from "date-fns";
-
-function formatTimestampHour(isoString) {
-  return format(isoString, "HH:mm");
-}
-
-function formatFullTimestamp(isoString) {
-  const date = parseISO(isoString);
-  const now = new Date();
-
-  if (isSameDay(date, now)) {
-    return format(date, "HH:mm");
-  } else if (isSameYear(date, now)) {
-    return format(date, "MMM d, HH:mm");
-  } else {
-    return format(date, "MMM d yyyy, HH:mm");
-  }
-}
-
-function formatShortTimestamp(isoString) {
-  const date = parseISO(isoString);
-  const now = new Date();
-
-  if (isSameDay(date, now)) {
-    return format(date, "HH:mm");
-  } else if (isSameYear(date, now)) {
-    return format(date, "MMM d");
-  } else {
-    return format(date, "MMM d, yyyy");
-  }
-}
+import { parseISO, differenceInMinutes } from "date-fns";
 
 const GROUP_THRESHOLD_MINUTES = 5;
 
-function groupMessages(messages) {
+export function groupMessages(messages) {
   const groupedMessages = [];
 
   messages.forEach((msg) => {
@@ -62,7 +32,7 @@ function groupMessages(messages) {
   return groupedMessages;
 }
 
-function linkifyMessage(message) {
+export function linkifyMessage(message) {
   const urlRegex = /(https?:\/\/[\w.-]+(?:\/[\w\-._~:\/?#[\]@!$&'()*+,;=]*)?)/g;
   return message.split(urlRegex).map((part, idx) => {
     if (urlRegex.test(part)) {
@@ -82,10 +52,4 @@ function linkifyMessage(message) {
   });
 }
 
-export {
-  formatTimestampHour,
-  formatFullTimestamp,
-  formatShortTimestamp,
-  groupMessages,
-  linkifyMessage
-};
+export { groupMessages, linkifyMessage };

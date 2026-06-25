@@ -27,6 +27,7 @@ function apiRouter() {
   taskActivityLogRoute(router);
   searchRoute(router);
 
+  taskRoute(router);
   return router;
 }
 

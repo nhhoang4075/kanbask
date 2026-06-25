@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function Input({ className, type, ...props }) {
@@ -25,11 +25,7 @@ function Input({ className, type, ...props }) {
           onClick={() => setShowPassword(!showPassword)}
           className="absolute right-3 top-1/2 transform -translate-y-1/2"
         >
-          {showPassword ? (
-            <FiEyeOff className="text-gray-900" />
-          ) : (
-            <FiEye className="text-gray-900" />
-          )}
+          {showPassword ? <EyeOff className="text-gray-900" /> : <Eye className="text-gray-900" />}
         </button>
       )}
     </div>

@@ -2,13 +2,18 @@ import Image from "next/image";
 
 import LoginForm from "@/components/auth/login-form";
 
-export default function Login() {
+export const metadata = {
+  title: "Login",
+  description: "Login to your Kanbask account"
+};
+
+export default function LoginPage() {
   return (
     <div className="min-h-screen min-w-screen flex">
       <div className="relative flex-1">
         <Image
-          src="https://images.unsplash.com/photo-1520962880247-cfaf541c8724?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cGVhY2V8ZW58MHx8MHx8fDA%3D"
-          alt="Login image"
+          src="https://images.unsplash.com/photo-1743309425925-72a2e4dbb8a4?q=80&w=3475&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          alt="login thumbnail"
           fill
           quality={100}
           priority={true}

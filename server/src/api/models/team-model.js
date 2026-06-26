@@ -39,6 +39,7 @@ const getManyTeamsByUserId = async (user_id) => {
       .select(
         "t.*",
         "tm.role",
+        "tm.joined_at",
         db.raw(`
           (
             SELECT COUNT(*)
@@ -47,7 +48,8 @@ const getManyTeamsByUserId = async (user_id) => {
           )::int AS member_count
         `)
       )
-      .where("tm.user_id", user_id);
+      .where("tm.user_id", user_id)
+      .orderBy("tm.joined_at", "asc");
 
     return teams;
   } catch (err) {
@@ -109,7 +111,7 @@ const getMembersOfTeam = async (team_id) => {
   try {
     const members = await db("team_members AS tm")
       .join("user_public_view AS v", "v.id", "=", "tm.user_id")
-      .select("v.*", "tm.role")
+      .select("v.*", "tm.role", "tm.joined_at")
       .where({ team_id });
 
     return members;

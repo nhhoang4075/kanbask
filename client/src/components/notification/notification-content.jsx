@@ -55,7 +55,7 @@ export default function NotificationContent() {
 
   return (
     <Tabs defaultValue="all">
-      <TabsList className="justify-start w-full px-4 gap-x-4 rounded-none border-b bg-white">
+      <TabsList className="justify-start w-full px-4 gap-x-6 rounded-none border-b bg-white">
         <TabsTrigger
           value="all"
           className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
@@ -76,7 +76,7 @@ export default function NotificationContent() {
           ))}
         </ScrollArea>
       </TabsContent>
-      <TabsContent value="unread">
+      <TabsContent value="unread" className="m-0">
         <ScrollArea className="flex flex-col m-0 py-2 h-[50vh] bg-ghost-white rounded-md">
           {groupNotificationsByDate(unreadNotifications).map((group) => (
             <NotificationList key={group.date} group={group} />

@@ -20,20 +20,16 @@ export async function getMembersOfTeam(teamId) {
   return get(`/teams/${teamId}/members`);
 }
 
-export async function addMembersToTeam(teamId, data) {
-  return post(`/teams/${teamId}/members`, data);
-}
-
 export async function removeMembersFromTeam(teamId, data) {
   return del(`/teams/${teamId}/members`, data);
 }
 
-export async function updateTeamMemberRole(teamId, memberId, data) {
-  return put(`/teams/${teamId}/members/${memberId}`, data);
+export async function updateTeamRoleOfMember(teamId, data) {
+  return put(`/teams/${teamId}/members`, data);
 }
 
 export async function leaveTeam(teamId) {
-  return post(`/teams/${teamId}/leave`);
+  return post(`/teams/${teamId}`);
 }
 
 export async function joinTeam(code) {

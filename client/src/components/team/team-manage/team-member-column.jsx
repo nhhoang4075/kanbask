@@ -1,23 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 
-import DeleteAlert from "../teams-ui/delete-alert";
-import EditMember from "./edit-member";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
+import TeamMemberActions from "@/components/team/actions/team-member-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
-import { capitalCase } from "@/lib/utils";
+import { cn, formatDate, capitalCase } from "@/lib/utils";
 
 export function getColumns(editable) {
   let columns = [];
@@ -77,14 +69,14 @@ export function getColumns(editable) {
       cell: ({ row }) => {
         const user = row.original;
         return (
-          <div className="flex flex-row items-center gap-2 px-4">
+          <div className="flex flex-row items-center gap-2 mx-4">
             <Avatar className="h-8 w-8">
               <AvatarImage className="object-cover" src={user.avatar_url} alt="Avatar" />
               <AvatarFallback style={pickAvatarColor(user.full_name)}>
                 {getInitials(user.full_name)}
               </AvatarFallback>
             </Avatar>
-            <p className="font-medium truncate">{user.full_name}</p>
+            <p className="font-semibold truncate">{user.full_name}</p>
           </div>
         );
       }
@@ -110,7 +102,7 @@ export function getColumns(editable) {
         const user = row.original;
 
         return (
-          <div className="text-left px-4 truncate">
+          <div className="text-left mx-4 truncate">
             <Link
               href={`mailto:${user.email}`}
               target="_blank"
@@ -159,26 +151,35 @@ export function getColumns(editable) {
       }
     },
     {
+      accessorKey: "joined_at",
+      header: ({ column }) => {
+        return (
+          <div className="space-x-1">
+            <span>Joined At</span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="hover:bg-prussian-blue/5"
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+              <ArrowUpDown className="h-4 w-4" />
+            </Button>
+          </div>
+        );
+      },
+      cell: ({ row }) => {
+        const user = row.original;
+
+        return <p>{formatDate(user.joined_at)}</p>;
+      }
+    },
+    {
       header: "Actions",
       id: "actions",
       cell: ({ row }) => {
         const user = row.original;
 
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Team member actions</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {editable && <EditMember user={row} />}
-              <DropdownMenuSeparator />
-              {editable && <DeleteAlert manage={"member"} row={[user]} />}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
+        return <TeamMemberActions member={user} />;
       }
     }
   ];

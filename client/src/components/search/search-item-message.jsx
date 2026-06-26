@@ -6,6 +6,7 @@ import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 import { useSearch } from "@/hooks/use-search";
 import { useChat } from "@/hooks/use-chat";
 import { formatShortTimestamp } from "@/lib/utils";
+
 export default function SearchItemMessage({ message }) {
   const { setOpen } = useSearch();
   const { setScrollTargetId } = useChat();

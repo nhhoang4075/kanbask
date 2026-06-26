@@ -8,7 +8,7 @@ const validateCreateProject = validate(
       .object({
         team_id: z.coerce.number().int().positive(),
         name: z.string().min(1).max(100),
-        description: z.string().optional()
+        description: z.string().max(1000).optional()
       })
       .strict(),
     params: z.object({}).optional(),
@@ -21,7 +21,7 @@ const validateUpdateProject = validate(
     body: z
       .object({
         name: z.string().min(1).max(100).optional(),
-        description: z.string().optional()
+        description: z.string().max(1000).optional()
       })
       .strict(),
     params: z

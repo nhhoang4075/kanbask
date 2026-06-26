@@ -6,8 +6,8 @@ const validateCreateTeam = validate(
   z.object({
     body: z
       .object({
-        name: z.string().max(100),
-        description: z.string().max(255).optional(),
+        name: z.string().min(1).max(100),
+        description: z.string().max(1000).optional(),
         join_policy: z.enum(["auto", "manual"])
       })
       .strict(),
@@ -21,7 +21,7 @@ const validateUpdateTeam = validate(
     body: z
       .object({
         name: z.string().max(100).optional(),
-        description: z.string().max(255).optional(),
+        description: z.string().max(1000).optional(),
         join_policy: z.enum(["auto", "manual"]).optional()
       })
       .strict(),

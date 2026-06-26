@@ -110,7 +110,7 @@ export default function RegisterForm() {
 
       {/* Progress Bar */}
       <div className="relative mb-8">
-        <div className="w-full h-2 bg-prussian-blue/10 rounded-full">
+        <div className="w-full h-2 bg-prussian-blue/5 rounded-full">
           <div
             className="h-full bg-blue-green rounded-full transition-all duration-300 ease-in-out"
             style={{ width: `${(step / totalSteps) * 100}%` }}
@@ -127,26 +127,21 @@ export default function RegisterForm() {
       </div>
 
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4"
-          autoComplete="off"
-          spellCheck="false"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} autoComplete="off" spellCheck="false">
           {step === 1 && (
-            <div className="space-y-4 animate-fadeIn">
+            <div className="space-y-2">
               <FormField
                 name="full_name"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="relative pb-5">
-                    <FormLabel className="text-gray-700 text-xs !text-black">Full Name</FormLabel>
+                    <FormLabel className="text-xs !text-black">Full Name</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="text"
                         placeholder="Enter your name"
-                        className="h-12 bg-prussian-blue/10 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
+                        className="h-12 bg-prussian-blue/5 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
                         autoComplete="off"
                         autoCorrect="off"
                         autoCapitalize="off"
@@ -161,13 +156,13 @@ export default function RegisterForm() {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="relative pb-5">
-                    <FormLabel className="text-gray-700 text-xs !text-black">Email</FormLabel>
+                    <FormLabel className="text-xs !text-black">Email</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="email"
                         placeholder="Enter your email"
-                        className="h-12 bg-prussian-blue/10 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
+                        className="h-12 bg-prussian-blue/5 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
                         autoComplete="off"
                         autoCorrect="off"
                         autoCapitalize="off"
@@ -188,19 +183,19 @@ export default function RegisterForm() {
           )}
 
           {step === 2 && (
-            <div className="space-y-4 animate-fadeIn">
+            <div className="space-y-2">
               <FormField
                 name="password"
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="relative pb-5">
-                    <FormLabel className="text-gray-700 text-xs !text-black">Password</FormLabel>
+                    <FormLabel className="text-xs !text-black">Password</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="password"
                         placeholder="Create a password"
-                        className="h-12 bg-prussian-blue/10 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
+                        className="h-12 bg-prussian-blue/5 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
                         autoComplete="new-password"
                       />
                     </FormControl>
@@ -213,15 +208,13 @@ export default function RegisterForm() {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem className="relative pb-5">
-                    <FormLabel className="text-gray-700 text-xs !text-black">
-                      Confirm Password
-                    </FormLabel>
+                    <FormLabel className="text-xs !text-black">Confirm Password</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
                         type="password"
                         placeholder="Confirm your password"
-                        className="h-12 bg-prussian-blue/10 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
+                        className="h-12 bg-prussian-blue/5 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
                         autoComplete="new-password"
                       />
                     </FormControl>
@@ -233,7 +226,7 @@ export default function RegisterForm() {
                 <Button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="w-1/2 h-12 bg-prussian-blue/10 text-gray-700 hover:bg-prussian-blue/20 transition-colors duration-200"
+                  className="w-1/2 h-12 bg-prussian-blue/5 text-gray-700 hover:bg-prussian-blue/20 transition-colors duration-200"
                 >
                   Back
                 </Button>

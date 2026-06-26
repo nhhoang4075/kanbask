@@ -98,7 +98,7 @@ export default function LoginForm() {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4"
+          className="space-y-2"
           autoComplete="off"
           spellCheck="false"
         >
@@ -107,13 +107,13 @@ export default function LoginForm() {
             control={form.control}
             render={({ field }) => (
               <FormItem className="relative pb-5">
-                <FormLabel className="text-gray-700 text-xs !text-black">Email</FormLabel>
+                <FormLabel className="text-xs !text-black">Email</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="email"
                     placeholder="Enter your email"
-                    className="h-12 bg-prussian-blue/10 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
+                    className="h-12 bg-prussian-blue/5 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
                     autoComplete="off"
                     autoCorrect="off"
                     autoCapitalize="off"
@@ -128,13 +128,13 @@ export default function LoginForm() {
             control={form.control}
             render={({ field }) => (
               <FormItem className="relative pb-5">
-                <FormLabel className="text-gray-700 text-xs !text-black">Password</FormLabel>
+                <FormLabel className="text-xs !text-black">Password</FormLabel>
                 <FormControl>
                   <Input
                     {...field}
                     type="password"
                     placeholder="Enter your password"
-                    className="h-12 bg-prussian-blue/10 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
+                    className="h-12 bg-prussian-blue/5 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
                     autoComplete="new-password"
                   />
                 </FormControl>

@@ -181,7 +181,7 @@ export default function ForgotPasswordForm() {
           <Form {...emailForm}>
             <form
               onSubmit={emailForm.handleSubmit(onEmailSubmit)}
-              className="space-y-4"
+              className="space-y-2"
               autoComplete="off"
               spellCheck="false"
             >
@@ -196,7 +196,7 @@ export default function ForgotPasswordForm() {
                         {...field}
                         type="email"
                         placeholder="Enter your email"
-                        className="h-12 bg-prussian-blue/10 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
+                        className="h-12 bg-prussian-blue/5 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
                         autoComplete="off"
                         autoCorrect="off"
                         autoCapitalize="off"
@@ -220,7 +220,7 @@ export default function ForgotPasswordForm() {
         <Form {...passwordForm}>
           <form
             onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
-            className="space-y-4"
+            className="space-y-2"
             autoComplete="off"
             spellCheck="false"
           >
@@ -235,7 +235,7 @@ export default function ForgotPasswordForm() {
                       {...field}
                       type="password"
                       placeholder="Enter new password"
-                      className="h-12 bg-prussian-blue/10 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
+                      className="h-12 bg-prussian-blue/5 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
                       autoComplete="new-password"
                     />
                   </FormControl>
@@ -254,7 +254,7 @@ export default function ForgotPasswordForm() {
                       {...field}
                       type="password"
                       placeholder="Confirm new password"
-                      className="h-12 bg-prussian-blue/10 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
+                      className="h-12 bg-prussian-blue/5 border-1 border-prussian-blue/30 focus-visible:border-blue-green focus-visible:ring-0 transition-colors duration-200"
                       autoComplete="new-password"
                     />
                   </FormControl>

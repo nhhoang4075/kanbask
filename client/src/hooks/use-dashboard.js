@@ -17,61 +17,85 @@ export function DashboardProvider({ children }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedTeamId, setSelectedTeamId] = useState(null);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
 
-  // Fetch all data consecutively
-  const fetchAllData = useCallback(
-    async (teamId) => {
+  // Fetch data
+  const fetchData = useCallback(async () => {
+    try {
       setLoading(true);
-      try {
-        const projectsData = await getProjectsInTeamOfUser(selectedTeamId || teamId);
-        setProjects(projectsData.projects);
+      const projectsData = await getProjectsInTeamOfUser(selectedTeamId);
+      setProjects(projectsData.projects);
 
-        if (projectsData.projects.length > 0) {
-          // Fetch tasks from all projects
-          const tasksPromises = projectsData.projects.map((project) =>
-            getTasksOfProject(project.id)
-          );
-          const tasksData = await Promise.all(tasksPromises);
-          const allTasks = tasksData.reduce((acc, projectTasks) => {
-            return acc.concat(projectTasks.tasks);
-          }, []);
-          setTasks(allTasks);
-        } else {
-          setTasks([]);
-        }
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
+      if (projectsData.projects.length > 0) {
+        setSelectedProjectId(projectsData.projects[0].id);
+
+        // Fetch tasks from all projects
+        const tasksPromises = projectsData.projects.map((project) => getTasksOfProject(project.id));
+        const tasksData = await Promise.all(tasksPromises);
+        const allTasks = tasksData.reduce((acc, projectTasks) => {
+          return acc.concat(projectTasks.tasks);
+        }, []);
+        setTasks(allTasks);
+      } else {
+        setSelectedProjectId(null);
+        setTasks([]);
       }
-    },
-    [selectedTeamId]
-  );
+    } catch (error) {
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedTeamId]);
 
-  // Fetch teams data on initial render, set selectedTeamId to the first team and fetch all other data
+  const fetchTeams = async () => {
+    try {
+      setLoading(true);
+      const teamsData = await getTeamsOfUser();
+      setTeams(teamsData.teams);
+      setSelectedTeamId(teamsData.teams[0].id);
+    } catch (error) {
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      const projectsData = await getProjectsInTeamOfUser(selectedTeamId);
+      setProjects(projectsData.projects);
+      setSelectedProjectId(projectsData.projects[0]?.id || null);
+    } catch (error) {
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTasks = async () => {
+    try {
+      setLoading(true);
+      const tasksData = await getTasksOfProject(selectedProjectId);
+      setTasks(tasksData.tasks);
+    } catch (error) {
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch teams data on initial render, set selectedTeamId to the first team and fetch data
   useEffect(() => {
-    const fetchTeamsAndData = async () => {
-      setLoading(true);
-      try {
-        const teamsData = await getTeamsOfUser();
-        setTeams(teamsData.teams);
-        fetchAllData(teamsData.teams[0].id); // Fetch data for the first team
-        setSelectedTeamId(teamsData.teams[0].id); // Set the first team as the chosen team
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTeamsAndData();
+    fetchTeams();
   }, []);
+
   // Fetch data when selectedTeamId changes
   useEffect(() => {
     if (selectedTeamId) {
-      fetchAllData();
+      fetchData();
     }
-  }, [selectedTeamId, fetchAllData]);
+  }, [selectedTeamId, fetchData]);
 
   // Context value
   const contextValue = {
@@ -81,7 +105,9 @@ export function DashboardProvider({ children }) {
     loading,
     error,
     selectedTeamId,
-    setSelectedTeamId
+    setSelectedTeamId,
+    selectedProjectId,
+    setSelectedProjectId
   };
   return <DashboardContext.Provider value={contextValue}>{children}</DashboardContext.Provider>;
 }

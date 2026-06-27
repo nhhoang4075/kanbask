@@ -1,11 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 import { searchUsers, searchTasks, searchMessages } from "@/actions/search-actions";
 
 const SEARCH_LIMIT = 5;
+
 const SearchContext = createContext();
 
 export function useSearch() {
@@ -117,11 +118,11 @@ export function SearchProvider({ children }) {
   }, [query, type, options]);
 
   // Load more when needed
-  const searchMore = () => {
+  const searchMore = useCallback(async () => {
     if (type && hasMore[type]) {
-      fetchResults({ limit: SEARCH_LIMIT, offset: offsets[type], append: true });
+      await fetchResults({ limit: SEARCH_LIMIT, offset: offsets[type], append: true });
     }
-  };
+  }, [type, hasMore, offsets]);
 
   const contextValue = {
     open,

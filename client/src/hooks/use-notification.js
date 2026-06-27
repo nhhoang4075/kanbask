@@ -9,6 +9,8 @@ import {
 } from "@/actions/notification-actions";
 import { useSocket } from "@/hooks/use-socket";
 
+const NOTIFICATION_LIMIT = 20;
+
 const NotificationContext = createContext();
 
 export function useNotification() {
@@ -19,8 +21,11 @@ export function NotificationProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [filter, setFilter] = useState("all");
-  const [loading, setLoading] = useState(true);
+  const [loadingInitial, setLoadingInitial] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
+  const [offset, setOffset] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
   const { socket, connected: socketConnected } = useSocket();
 
@@ -31,24 +36,29 @@ export function NotificationProvider({ children }) {
     { value: "task", label: "Task Notifications" }
   ];
 
-  const setUnreadNotifications = useCallback(() => {
-    setUnreadCount(notifications.filter((n) => !n.is_read).length);
-  }, [notifications]);
-
   // Fetch notifications
-  const fetchNotifications = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getNotifications();
-      setNotifications(data.notifications || []);
-      setUnreadCount(data.notifications?.filter((n) => !n.is_read).length || 0);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchNotifications = useCallback(
+    async ({ limit = NOTIFICATION_LIMIT, offset = 0, append = false }) => {
+      try {
+        append ? setLoadingMore(true) : setLoadingInitial(true);
+        setError(null);
+
+        const data = await getNotifications({ limit, offset });
+        setNotifications((prev) => [...prev, ...data.notifications]);
+        setHasMore(data.notifications.length === NOTIFICATION_LIMIT);
+        setOffset(offset + data.notifications.length);
+      } catch (err) {
+        setError(err);
+      } finally {
+        append ? setLoadingMore(false) : setLoadingInitial(false);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    setUnreadCount(notifications.filter((n) => !n.is_read).length || 0);
+  }, [notifications]);
 
   // Mark a single notification as read
   const markAsRead = useCallback(
@@ -83,10 +93,16 @@ export function NotificationProvider({ children }) {
     }
   }, []);
 
+  const loadMore = useCallback(async () => {
+    await fetchNotifications({ offset, append: true });
+  }, [fetchNotifications, offset]);
+
   // Initial fetch
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    if (hasMore) {
+      fetchNotifications({ limit: NOTIFICATION_LIMIT, offset: 0, append: false });
+    }
+  }, [fetchNotifications, hasMore]);
 
   useEffect(() => {
     if (!socket || !socketConnected) return;
@@ -109,10 +125,13 @@ export function NotificationProvider({ children }) {
     filterOptions,
     filter,
     setFilter,
-    loading,
+    loadingInitial,
+    loadingMore,
     error,
     markAsRead,
-    markAllAsRead
+    markAllAsRead,
+    hasMore,
+    loadMore
   };
 
   return (

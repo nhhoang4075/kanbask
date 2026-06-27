@@ -73,7 +73,7 @@ export default function ProjectMemberTable() {
 
   return (
     <div className="flex flex-col gap-2 py-4 bg-ghost-white border-1 rounded-md">
-      <div className="flex flex-row justify-between items-center px-4">
+      <div className="flex flex-row justify-between items-center flex-wrap gap-4 px-4">
         <div className="flex gap-4">
           <div className="relative rounded-md bg-white">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
@@ -152,7 +152,7 @@ export default function ProjectMemberTable() {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-30 text-center text-gray-500">
+              <TableCell colSpan={columns.length} className="p-6 text-center text-gray-500">
                 No results.
               </TableCell>
             </TableRow>

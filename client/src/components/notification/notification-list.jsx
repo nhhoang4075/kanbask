@@ -1,8 +1,7 @@
 import { Users, FolderKanban, SquareCheckBig } from "lucide-react";
 
 import { useNotification } from "@/hooks/use-notification";
-import { formatTimestampHour } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { cn, formatTimestampHour } from "@/lib/utils";
 
 function highlightUser(content) {
   return content.replace(
@@ -15,12 +14,12 @@ export default function NotificationList({ group }) {
   const { markAsRead } = useNotification();
 
   return (
-    <div key={group.date} className="space-y-2 mb-4">
+    <div key={group.date} className="space-y-2 mb-2">
       <div className="flex items-center gap-2 px-4">
         <h3 className="text-sm font-medium text-prussian-blue">{group.date}</h3>
         <div className="flex-1 h-px bg-prussian-blue" />
       </div>
-      <div>
+      <div className="flex flex-col gap-2">
         {group.notifications.map((notification) => (
           <div
             key={notification.id}

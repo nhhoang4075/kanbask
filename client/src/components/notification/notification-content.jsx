@@ -1,8 +1,13 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 import { format, isToday, isYesterday, isSameYear } from "date-fns";
 
 import NotificationList from "@/components/notification/notification-list";
 import NotificationItemSkeleton from "@/components/notification/notification-item-skeleton";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNotification } from "@/hooks/use-notification";
 
@@ -36,9 +41,16 @@ function groupNotificationsByDate(notifications) {
 }
 
 export default function NotificationContent() {
-  const { notifications, unreadCount, filter, loading } = useNotification();
+  const { notifications, unreadCount, filter, loadingInitial, hasMore, loadMore } =
+    useNotification();
 
-  if (loading) {
+  const filteredNotifications = notifications.filter(
+    (notification) => notification.reference_type === filter || filter === "all"
+  );
+
+  const unreadNotifications = filteredNotifications.filter((notification) => !notification.is_read);
+
+  if (loadingInitial) {
     return (
       <div className="flex flex-col h-[50vh]">
         {Array.from({ length: 6 }).map((_, index) => (
@@ -47,11 +59,6 @@ export default function NotificationContent() {
       </div>
     );
   }
-
-  const filteredNotifications = notifications.filter(
-    (notification) => notification.reference_type === filter || filter === "all"
-  );
-  const unreadNotifications = filteredNotifications.filter((notification) => !notification.is_read);
 
   return (
     <Tabs defaultValue="all">
@@ -74,6 +81,24 @@ export default function NotificationContent() {
           {groupNotificationsByDate(filteredNotifications).map((group) => (
             <NotificationList key={group.date} group={group} />
           ))}
+          {hasMore ? (
+            <div className="flex justify-center px-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadMore}
+                className="w-full text-xs rounded-sm"
+              >
+                Load more
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-4">
+              <div className="flex-1 h-px bg-border" />
+              <p className="text-xs text-muted-foreground">No more notifications</p>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+          )}
         </ScrollArea>
       </TabsContent>
       <TabsContent value="unread" className="m-0">
@@ -81,6 +106,24 @@ export default function NotificationContent() {
           {groupNotificationsByDate(unreadNotifications).map((group) => (
             <NotificationList key={group.date} group={group} />
           ))}
+          {hasMore ? (
+            <div className="flex justify-center px-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadMore}
+                className="w-full text-xs rounded-sm"
+              >
+                Load more
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-4">
+              <div className="flex-1 h-px bg-border" />
+              <p className="text-xs text-muted-foreground">No more notifications</p>
+              <div className="flex-1 h-px bg-border" />
+            </div>
+          )}
         </ScrollArea>
       </TabsContent>
     </Tabs>

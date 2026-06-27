@@ -20,21 +20,21 @@ export default function Stats({ tasks, projects }) {
         itemIcon={<ListTodo className="h-6 w-6 text-amber-500" />}
       />
       <StatsCard
-        title="Tasks Completed"
+        title="Completed Tasks"
         value={tasks.filter((task) => task.status === "done").length}
         description="Total number of completed tasks"
         color="green"
         itemIcon={<CircleCheckBigIcon className="h-6 w-6 text-green-500" />}
       />
       <StatsCard
-        title="Pending Tasks"
+        title="Todo Tasks"
         value={
           tasks.filter(
             (task) =>
               task.status === "todo" || task.status == "in_progress" || task.status == "review"
           ).length
         }
-        description="Total number of pending tasks"
+        description="Total number of todo tasks"
         color="purple"
         itemIcon={<FileText className="h-6 w-6 text-purple-500" />}
       />

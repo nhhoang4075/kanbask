@@ -51,19 +51,19 @@ export default function TeamManageWindow() {
             </TabsList>
             <ScrollArea className="w-full h-[calc(98vh-100px)]">
               <TabsContent value="members" className="m-0">
-                <div className="w-full p-6 overflow-y-auto space-y-4">
+                <div className="w-full p-6 space-y-4">
                   <TeamInformationCard />
                   <TeamMemberTable />
                 </div>
               </TabsContent>
               <TabsContent value="projects" className="m-0">
-                <div className="w-full p-6 overflow-y-auto space-y-4">
+                <div className="w-full p-6 space-y-4">
                   <TeamInformationCard />
                   <TeamProjectTable />
                 </div>
               </TabsContent>
               <TabsContent value="invitations" className="m-0">
-                <div className="w-full p-6 overflow-y-auto space-y-4">
+                <div className="w-full p-6 space-y-4">
                   <TeamInvitationCard />
                   <TeamRequestTable />
                 </div>

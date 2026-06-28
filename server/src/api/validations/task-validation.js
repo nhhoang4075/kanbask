@@ -8,9 +8,11 @@ const validateCreateTask = validate(
       .object({
         project_id: z.coerce.number().int().positive(),
         title: z.string().max(255),
-        status: z.enum(["todo", "in_progress", "done", "review", "canceled"]).optional(),
-        priority: z.enum(["low", "medium", "high"]).optional(),
-        due_date: z.date().optional(),
+        description: z.string().max(1000).optional(),
+        status: z.enum(["todo", "in_progress", "done", "review", "canceled"]).nullable().optional(),
+        priority: z.enum(["low", "medium", "high"]).nullable().optional(),
+        due_date: z.coerce.date().optional(),
+        completed_at: z.coerce.date().optional(),
         assignees: z.array(z.string().uuid()).optional()
       })
       .strict(),
@@ -24,10 +26,11 @@ const validateUpdateTask = validate(
     body: z
       .object({
         title: z.string().max(255).optional(),
-        status: z.enum(["todo", "in_progress", "done", "review", "canceled"]).optional(),
-        priority: z.enum(["low", "medium", "high"]).optional(),
-        due_date: z.date().optional(),
-        completed_at: z.date().optional(),
+        description: z.string().max(1000).optional(),
+        status: z.enum(["todo", "in_progress", "done", "review", "canceled"]).nullable().optional(),
+        priority: z.enum(["low", "medium", "high"]).nullable().optional(),
+        due_date: z.coerce.date().optional(),
+        completed_at: z.coerce.date().optional(),
         position: z.coerce.number().int().positive().optional(),
         assignees: z.array(z.string().uuid()).optional()
       })

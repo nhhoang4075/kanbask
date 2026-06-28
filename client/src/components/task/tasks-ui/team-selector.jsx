@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,12 +15,33 @@ import {
   CommandList
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useTeam } from "@/hooks/use-team";
 import { cn } from "@/lib/utils";
 
-export function TeamSelector({ teams, selectedTeamId, setSelectedTeamId }) {
+export default function TeamSelector({ teamId }) {
+  const { teams, selectedTeam, setSelectedTeam } = useTeam();
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const selectedTeam = teams.find((team) => team.id === selectedTeamId);
+  useEffect(() => {
+    if (!teams.length || teamId === selectedTeam?.id) return;
+
+    if (teamId) {
+      const existingTeam = teams.find((team) => team.id === teamId);
+
+      if (existingTeam) {
+        setSelectedTeam(existingTeam);
+      } else {
+        const params = new URLSearchParams(searchParams);
+        params.delete("team");
+        params.delete("project");
+
+        router.push(`${pathname}?${params.toString()}`);
+      }
+    }
+  }, [teamId, teams]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -27,38 +50,44 @@ export function TeamSelector({ teams, selectedTeamId, setSelectedTeamId }) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="min-w-[200px] justify-between"
+          className="w-50 justify-between bg-white"
         >
-          <div className="flex items-center gap-2 max-w-[300px] overflow-hidden text-ellipsis">
-            {selectedTeam.name}
-          </div>
+          {selectedTeam ? (
+            <p className="truncate font-normal">{selectedTeam.name}</p>
+          ) : (
+            <p className="truncate text-gray-500">Select Team</p>
+          )}
           <ChevronsUpDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0">
+      <PopoverContent className="w-50 p-0">
         <Command>
           <CommandInput placeholder="Search team..." />
           <CommandList>
             <CommandEmpty>No team found.</CommandEmpty>
             <CommandGroup>
-              {teams.map((team) => (
-                <CommandItem
-                  key={team.id}
-                  value={team.id}
-                  onSelect={() => {
-                    setSelectedTeamId(() => team.id);
-                    setOpen(false);
-                  }}
-                >
-                  <div className="flex items-center gap-2">{team.name}</div>
-                  <Check
-                    className={cn(
-                      "ml-auto h-4 w-4",
-                      selectedTeamId === team.id ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                </CommandItem>
-              ))}
+              {teams.map((team) => {
+                const params = new URLSearchParams(searchParams);
+                params.set("team", team.id);
+                params.delete("project");
+
+                return (
+                  <CommandItem key={team.id} value={team.id} onSelect={() => setOpen(false)}>
+                    <Link
+                      href={`${pathname}?${params.toString()}`}
+                      className="w-full flex items-center justify-between"
+                    >
+                      <div className="truncate">{team.name}</div>
+                      <Check
+                        className={cn(
+                          "ml-auto h-4 w-4",
+                          selectedTeam?.id === team.id ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    </Link>
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

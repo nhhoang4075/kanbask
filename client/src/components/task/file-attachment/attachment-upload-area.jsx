@@ -2,9 +2,13 @@
 
 import { useState, useRef } from "react";
 import { Upload, AlertCircle } from "lucide-react";
+
+import { useTask } from "@/hooks/use-task";
 import { cn } from "@/lib/utils";
 
-export function FileUpload({ onFileUpload, disabled = false }) {
+export default function AttachmentUploadArea({ task }) {
+  const { handleUploadTaskAttachments } = useTask();
+
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState("");
   const fileInputRef = useRef(null);
@@ -30,8 +34,6 @@ export function FileUpload({ onFileUpload, disabled = false }) {
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-
-    if (disabled) return;
 
     const files = e.dataTransfer.files;
     handleFiles(files);
@@ -60,34 +62,27 @@ export function FileUpload({ onFileUpload, disabled = false }) {
       return;
     }
 
-    // Create a file object with necessary information
-    const fileObj = {
-      id: `file-${Date.now()}`,
-      name: file.name,
-      type: getFileType(file.type),
-      size: file.size,
-      url: URL.createObjectURL(file), // Create a temporary URL
-      uploadedAt: new Date().toISOString(),
-      uploadedBy: {
-        id: "user-1", // Assuming current user is John Doe
-        name: "John Doe",
-        avatar: "/placeholder.svg?height=40&width=40"
-      }
-    };
+    // // Create a file object with necessary information
+    // const fileObj = {
+    //   id: `file-${Date.now()}`,
+    //   name: file.name,
+    //   type: getFileType(file.type),
+    //   size: file.size,
+    //   url: URL.createObjectURL(file), // Create a temporary URL
+    //   uploadedAt: new Date().toISOString(),
+    //   uploadedBy: {
+    //     id: "user-1", // Assuming current user is John Doe
+    //     name: "John Doe",
+    //     avatar: "/placeholder.svg?height=40&width=40"
+    //   }
+    // };
 
-    onFileUpload(fileObj);
+    handleUploadTaskAttachments(task.id, file);
 
     // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
-  };
-
-  const getFileType = (mimeType) => {
-    if (mimeType.includes("pdf")) return "pdf";
-    if (mimeType.includes("image")) return "image";
-    if (mimeType.includes("word")) return "word";
-    return "other";
   };
 
   const handleButtonClick = () => {
@@ -102,12 +97,12 @@ export function FileUpload({ onFileUpload, disabled = false }) {
         className={cn(
           "border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors",
           isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/20",
-          disabled ? "opacity-50 cursor-not-allowed" : "hover:border-primary/50 hover:bg-primary/5"
+          false ? "opacity-50 cursor-not-allowed" : "hover:border-primary/50 hover:bg-primary/5"
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={disabled ? undefined : handleButtonClick}
+        onClick={handleButtonClick}
       >
         <input
           type="file"
@@ -115,7 +110,6 @@ export function FileUpload({ onFileUpload, disabled = false }) {
           className="hidden"
           onChange={handleFileInputChange}
           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif"
-          disabled={disabled}
         />
         <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
         <p className="text-sm font-medium">Drag and drop a file here, or click to select a file</p>

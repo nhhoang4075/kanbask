@@ -1,4 +1,4 @@
-import { API_URL, handleResponse } from "@/lib/api-util";
+import { API_URL, ApiError, handleResponse } from "@/lib/api-util";
 
 async function api(endpoint, options = {}) {
   const headers = new Headers({

@@ -9,8 +9,8 @@ import React from "react";
 import { AvatarGroup } from "@/components/ui/avatar-group";
 import MoreActions from "../tasks-ui/more-action";
 import { useTask } from "@/hooks/use-tasks";
-import { formatDate, priorityColors } from "@/lib/tasks-utils";
-import { cn } from "@/lib/utils";
+import { pickPriorityColor } from "@/lib/task-utils";
+import { cn, formatDate, capitalCase } from "@/lib/utils";
 
 const KanbanTask = ({ task, columnId }) => {
   const { selectedTask, deleteTask } = useTask();
@@ -49,9 +49,9 @@ const KanbanTask = ({ task, columnId }) => {
             <h4 className="text-md font-semibold text-primary">{task.title}</h4>
             <Badge
               variant="outline"
-              className={cn("text-xs font-normal", priorityColors[task.priority])}
+              className={cn("text-xs font-normal", pickPriorityColor(task.priority))}
             >
-              {task.priority}
+              {capitalCase(task.priority)}
             </Badge>
           </div>
           <div className="flex items-center gap-2">

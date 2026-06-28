@@ -1,10 +1,10 @@
-import { TableCell, TableRow } from "@/components/ui/table";
+import { flexRender } from "@tanstack/react-table";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { flexRender } from "@tanstack/react-table";
-import React from "react";
 
-const DragableRow = ({ row, reorderRow }) => {
+import { TableCell, TableRow } from "@/components/ui/table";
+
+export default function DragableRow({ row, reorderRow }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: row.original.id
   });
@@ -33,6 +33,4 @@ const DragableRow = ({ row, reorderRow }) => {
       ))}
     </TableRow>
   );
-};
-
-export default DragableRow;
+}

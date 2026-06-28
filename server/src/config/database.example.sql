@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   id SERIAL PRIMARY KEY,
   project_id INT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   title VARCHAR(200) NOT NULL,
-  status VARCHAR(30) NOT NULL DEFAULT 'todo' CHECK (status IN ('todo','in_progress','review','done','canceled')),
+  status VARCHAR(30) DEFAULT 'todo' CHECK (status IN ('todo','in_progress','review','done','canceled')),
   priority VARCHAR(30),
   description TEXT,
   position INT NOT NULL DEFAULT 0,

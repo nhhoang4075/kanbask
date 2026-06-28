@@ -1,3 +1,4 @@
+// import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ListTodo } from "lucide-react";
 
@@ -13,6 +14,8 @@ export default function SearchItemTask({ task }) {
       className="flex items-center justify-between gap-4 mx-6 my-2 py-2 px-4 text-left text-md rounded-md bg-white hover:bg-prussian-blue/5 cursor-pointer transition-colors duration-200 ease-in-out"
       onClick={() => {
         setOpen(false);
+        console.log("task", task);
+        router.push(`/app/task?team=${task.team_id}&project=${task.project_id}`);
       }}
     >
       <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-prussian-blue/20">

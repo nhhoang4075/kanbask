@@ -36,10 +36,14 @@ export default function AttachmentUploadArea({ task }) {
     setIsUploading(true);
     setError(null);
 
-    if (files.length === 0) return;
+    if (files.length === 0) {
+      setIsUploading(false);
+      return;
+    }
 
     if (files.length > 5) {
       setError("You can only upload up to 5 files at a time");
+      setIsUploading(false);
       return;
     }
 
@@ -47,6 +51,7 @@ export default function AttachmentUploadArea({ task }) {
 
     if (fileArray.some((file) => !allowedFileTypes.includes(file.type))) {
       setError("Include invalid file types");
+      setIsUploading(false);
       return;
     }
 
@@ -59,7 +64,10 @@ export default function AttachmentUploadArea({ task }) {
       return true;
     });
 
-    if (validFiles.length === 0) return;
+    if (validFiles.length === 0) {
+      setIsUploading(false);
+      return;
+    }
 
     await handleUploadAttachments(task.id, validFiles);
 
@@ -106,7 +114,7 @@ export default function AttachmentUploadArea({ task }) {
       </div>
 
       {error && (
-        <div className="absolute bottom-0 left-0 right-0 flex items-center gap-2 text-destructive text-sm">
+        <div className="absolute bottom-0 left-6 right-0 flex items-center gap-2 text-destructive text-sm">
           <AlertCircle className="h-4 w-4" />
           <span>{error}</span>
         </div>

@@ -63,7 +63,7 @@ export default function TasksCard() {
                   >
                     <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-4">
                       <div>
-                        <p className="text-lg font-medium truncate">{task.title}</p>
+                        <p className="text-md font-medium truncate">{task.title}</p>
                         <p className="text-xs text-gray-500 truncate">
                           {projects[selectedTeam?.id]?.find(
                             (project) => project.id === task.project_id

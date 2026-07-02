@@ -161,7 +161,8 @@ export function TaskProvider({ children }) {
     handleCreateTask,
     handleUpdateTask,
     handleDeleteTask,
-    handleReorderTask
+    handleReorderTask,
+    fetchMyAssignedTasks
   };
 
   return <TaskContext.Provider value={contextValue}>{children}</TaskContext.Provider>;

@@ -30,9 +30,13 @@ const scrollToToday = () => {
 
 export default function CalendarWindow() {
   const calendarRef = useRef(null);
-  const { myAssignedTasks, loading } = useTask();
+  const { myAssignedTasks, fetchMyAssignedTasks, loading } = useTask();
   const { open: sidebarOpen } = useSidebar();
   const router = useRouter();
+
+  useEffect(() => {
+    fetchMyAssignedTasks();
+  }, []);
 
   useEffect(() => {
     if (calendarRef.current?.getApi) {

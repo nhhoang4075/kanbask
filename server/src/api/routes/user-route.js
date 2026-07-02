@@ -14,23 +14,6 @@ const userRoute = (router) => {
   router
     .route("/me/password")
     .put(userValidation.validateChangePassword, userController.changeMyPassword);
-
-  router
-    .route("/users")
-    .get(userValidation.validateUserEmailQuery, userController.getOneUserByEmail);
-
-  router
-    .route("/users/:user_id")
-    .get(userValidation.validateUserIdParam, userController.getOneUserById);
-
-  router.use("/admin", authMiddleware.authenticate, authMiddleware.authorizeAdmin);
-
-  router.route("/admin/users").get(userController.getAllUsers);
-
-  router
-    .route("/admin/users/:user_id")
-    .put(userValidation.validateUpdateUserForAdmin, userController.updateOneUserForAdmin)
-    .delete(userValidation.validateUserIdParam, userController.deleteOneUserForAdmin);
 };
 
 export default userRoute;

@@ -20,7 +20,7 @@ export default function TaskActions({ task }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const handleOpenDetails = () => {
+  const handleOpenDetails = (e) => {
     const params = new URLSearchParams(searchParams);
     params.set("task", String(task.id));
     router.push(`?${params.toString()}`);
@@ -28,13 +28,18 @@ export default function TaskActions({ task }) {
 
   return (
     <div>
-      <DropdownMenu>
+      <DropdownMenu className="dropdown-menu-selector">
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm">
             <MoreVertical className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent side="bottom" align="end">
+        <DropdownMenuContent
+          side="bottom"
+          align="end"
+          className="dropdown-menu-selector"
+          onCloseAutoFocus={(e) => e.preventDefault()}
+        >
           <DropdownMenuItem onSelect={handleOpenDetails}>
             <Info className="h-4 w-4" />
             <span>Details</span>

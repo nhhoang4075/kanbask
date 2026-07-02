@@ -30,51 +30,7 @@ const validateChangePassword = validate(
   })
 );
 
-const validateUserIdParam = validate(
-  z.object({
-    params: z
-      .object({
-        user_id: z.string().uuid()
-      })
-      .strict(),
-    body: z.object({}).optional(),
-    query: z.object({}).optional()
-  })
-);
-
-const validateUserEmailQuery = validate(
-  z.object({
-    query: z
-      .object({
-        email: z.string().email()
-      })
-      .strict(),
-    body: z.object({}).optional(),
-    params: z.object({}).optional()
-  })
-);
-
-const validateUpdateUserForAdmin = validate(
-  z.object({
-    body: z
-      .object({
-        role: z.enum(["user", "admin"]).optional(),
-        is_enabled: z.boolean().optional()
-      })
-      .strict(),
-    params: z
-      .object({
-        user_id: z.string().uuid()
-      })
-      .strict(),
-    query: z.object({}).optional()
-  })
-);
-
 export default {
   validateUpdateProfile,
   validateChangePassword,
-  validateUserIdParam,
-  validateUserEmailQuery,
-  validateUpdateUserForAdmin
 };

@@ -12,7 +12,10 @@ export default function SearchDialog() {
   const { type, query, setQuery } = useSearch();
 
   return (
-    <DialogContent className="flex flex-col gap-y-0 p-0 min-w-1/2 max-w-1/2 min-h-5/6 max-h-5/6 border-none bg-muted overflow-y-scroll">
+    <DialogContent
+      onCloseAutoFocus={(e) => e.preventDefault()}
+      className="flex flex-col gap-y-0 p-0 min-w-1/2 max-w-1/2 min-h-5/6 max-h-5/6 border-none bg-muted overflow-y-scroll"
+    >
       <DialogDescription />
       <DialogHeader className="py-4 space-y-2 bg-ghost-white shadow-md">
         <div className="flex items-center mx-6 px-4 border-1 border-ring rounded-3xl">

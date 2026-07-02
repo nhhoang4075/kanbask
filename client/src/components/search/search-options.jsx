@@ -9,11 +9,13 @@ import {
   SelectItem
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useSearch } from "@/hooks/use-search";
 import { useChat } from "@/hooks/use-chat";
-import { capitalCase } from "@/lib/utils";
+import { capitalCase, cn } from "@/lib/utils";
+import { pickStatusColor } from "@/lib/task-utils";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 
 export default function SearchOptions() {
@@ -86,7 +88,9 @@ export default function SearchOptions() {
                 <SelectContent>
                   {["todo", "in_progress", "review", "done", "canceled"].map((stt) => (
                     <SelectItem key={stt} value={stt}>
-                      {capitalCase(stt)}
+                      <Badge className={cn("text-xs font-normal rounded-sm", pickStatusColor(stt))}>
+                        {capitalCase(stt)}
+                      </Badge>
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 import { Button } from "@/components/ui/button";
 import { getColumns } from "@/components/task/list/task-list-column";
 import { useTask } from "@/hooks/use-task";
@@ -98,7 +98,7 @@ export default function TaskList() {
   return (
     <div className="flex flex-col gap-2 py-4 bg-ghost-white border-1 rounded-md">
       <div className="flex flex-row justify-between items-center flex-wrap gap-4 px-4">
-        <div className="flex gap-4">
+        <div className="flex items-center gap-4">
           <div className="relative rounded-md bg-white">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
             <Input
@@ -118,6 +118,7 @@ export default function TaskList() {
             <ArrowDownAZ className="w-4 h-4" />
             Reset
           </Button>
+          <div className="text-sm text-gray-500">{taskTableData.length} tasks total</div>
         </div>
         <div className="flex flex-row justify-end gap-4">
           <Button

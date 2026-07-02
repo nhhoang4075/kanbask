@@ -43,18 +43,18 @@ async function apiServer(endpoint, options = {}) {
   }
 }
 
-export async function getServer(endpoint) {
-  return apiServer(endpoint, { method: "GET" });
+export async function getServer(endpoint, options = {}) {
+  return apiServer(endpoint, { method: "GET", ...options });
 }
 
-export async function postServer(endpoint, data) {
-  return apiServer(endpoint, { method: "POST", body: data });
+export async function postServer(endpoint, data, options = {}) {
+  return apiServer(endpoint, { method: "POST", body: data, ...options });
 }
 
-export async function putServer(endpoint, data) {
-  return apiServer(endpoint, { method: "PUT", body: data });
+export async function putServer(endpoint, data, options = {}) {
+  return apiServer(endpoint, { method: "PUT", body: data, ...options });
 }
 
-export async function delServer(endpoint, data) {
-  return apiServer(endpoint, { method: "DELETE", body: data });
+export async function delServer(endpoint, data, options = {}) {
+  return apiServer(endpoint, { method: "DELETE", body: data, ...options });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import TaskDetailsForm from "@/components/task/task-details-form";
+import TaskDetailsForm from "@/components/task/details/task-details-form";
 import {
   Sheet,
   SheetContent,
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useTask } from "@/hooks/use-task";
 import { useProject } from "@/hooks/use-project";
 
-export default function CreateTaskSheet({ isOpen, onOpenChange }) {
+export default function CreateTaskSheet({ isOpen, onOpenChange, initialValues }) {
   const { selectedProject } = useProject();
   const { handleCreateTask } = useTask();
 
@@ -30,7 +30,7 @@ export default function CreateTaskSheet({ isOpen, onOpenChange }) {
         </SheetHeader>
         <SheetDescription className="px-6">Create a new task</SheetDescription>
         <ScrollArea className="h-[calc(100vh-150px)] p-6">
-          <TaskDetailsForm onSubmit={handleSubmit} />
+          <TaskDetailsForm onSubmit={handleSubmit} initialValues={initialValues} />
         </ScrollArea>
         <div className="absolute bottom-6 right-6 flex justify-end gap-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>

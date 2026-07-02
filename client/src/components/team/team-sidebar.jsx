@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 import { Button } from "@/components/ui/button";
 import { useTeam } from "@/hooks/use-team";
 import { useProject } from "@/hooks/use-project";

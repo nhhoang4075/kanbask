@@ -20,6 +20,33 @@ const getOneAttachmentById = async (id) => {
   }
 };
 
+const getOneTaskAttachmentById = async (task_id, id) => {
+  try {
+    const [attachment] = await db("task_attachments AS ta")
+      .join("storage_attachments AS sa", "sa.id", "=", "ta.attachment_id")
+      .join("user_public_view AS v", "v.id", "=", "ta.attached_by")
+      .where("ta.task_id", task_id)
+      .andWhere("sa.id", id)
+      .select(
+        "sa.id",
+        "ta.task_id",
+        "sa.supabase_path",
+        "sa.original_name",
+        "sa.mime_type",
+        "sa.size_bytes",
+        "ta.attached_by AS attacher_id",
+        "v.full_name AS attacher_full_name",
+        "v.avatar_url AS attacher_avatar_url",
+        "ta.attached_at"
+      )
+      .limit(1);
+
+    return attachment;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const getManyAttachmentsByTaskId = async (task_id) => {
   try {
     const attachments = await db("task_attachments AS ta")
@@ -28,6 +55,7 @@ const getManyAttachmentsByTaskId = async (task_id) => {
       .where("ta.task_id", task_id)
       .select(
         "sa.id",
+        "ta.task_id",
         "sa.supabase_path",
         "sa.original_name",
         "sa.mime_type",
@@ -53,6 +81,7 @@ const getManyAttachmentsByMessageId = async (message_id) => {
       .where("ma.message_id", message_id)
       .select(
         "sa.id",
+        "ma.message_id",
         "sa.supabase_path",
         "sa.original_name",
         "sa.mime_type",
@@ -107,6 +136,7 @@ const linkOneAttachmentToMessage = async (message_id, attachment_id, attached_by
 export default {
   createOneAttachment,
   getOneAttachmentById,
+  getOneTaskAttachmentById,
   getManyAttachmentsByTaskId,
   getManyAttachmentsByMessageId,
   deleteOneAttachmentById,

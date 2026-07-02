@@ -26,7 +26,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 import { useTeam } from "@/hooks/use-team";
 import { useProject } from "@/hooks/use-project";
 

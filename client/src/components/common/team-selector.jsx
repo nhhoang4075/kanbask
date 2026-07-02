@@ -37,6 +37,7 @@ export default function TeamSelector({ teamId }) {
         const params = new URLSearchParams(searchParams);
         params.delete("team");
         params.delete("project");
+        params.delete("detail");
 
         router.push(`${pathname}?${params.toString()}`);
       }
@@ -70,6 +71,7 @@ export default function TeamSelector({ teamId }) {
                 const params = new URLSearchParams(searchParams);
                 params.set("team", team.id);
                 params.delete("project");
+                params.delete("detail");
 
                 return (
                   <CommandItem key={team.id} value={team.id} onSelect={() => setOpen(false)}>

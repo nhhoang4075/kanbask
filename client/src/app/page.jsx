@@ -51,18 +51,22 @@ export default function LandingPage() {
           <CardContent className="w-full flex items-center justify-between p-0">
             <Image src={KanbaskWhite} alt="Kanbask Logo" width={160} priority />
             <div className="flex items-center gap-2 px-4">
-              <Button
-                size="lg"
-                className="rounded-full font-semibold text-black bg-mustard hover:bg-mustard/70"
-              >
-                <Link href="/auth/register">Sign Up</Link>
-              </Button>
-              <Button
-                size="lg"
-                className="rounded-full ml-2 font-semibold text-black bg-mustard hover:bg-mustard/70"
-              >
-                <Link href="/auth/login">Login</Link>
-              </Button>
+              <Link href="/auth/register">
+                <Button
+                  size="lg"
+                  className="rounded-full font-semibold text-black bg-mustard hover:bg-mustard/70"
+                >
+                  Sign Up
+                </Button>
+              </Link>
+              <Link href="/auth/login">
+                <Button
+                  size="lg"
+                  className="rounded-full ml-2 font-semibold text-black bg-mustard hover:bg-mustard/70"
+                >
+                  Login
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

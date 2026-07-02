@@ -11,7 +11,7 @@ import { TaskProvider } from "@/hooks/use-task";
 import { ChatProvider } from "@/hooks/use-chat";
 import { NotificationProvider } from "@/hooks/use-notification";
 
-export default async function Layout({ children }) {
+export default async function RootLayout({ children }) {
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 

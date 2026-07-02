@@ -12,7 +12,7 @@ import {
   FormControl,
   FormMessage
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/custom-input";
 import { Textarea } from "@/components/ui/textarea";
 import { useTeam } from "@/hooks/use-team";
 import { useProject } from "@/hooks/use-project";

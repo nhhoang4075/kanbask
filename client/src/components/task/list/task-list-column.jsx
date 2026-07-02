@@ -1,12 +1,14 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { ArrowUpDown, Clock, GripVertical } from "lucide-react";
+import { ArrowUpDown, Clock, GripVertical, PanelRight } from "lucide-react";
 
 import TaskActions from "@/components/task/task-actions";
-import { Badge } from "@/components/ui/badge";
 import { AvatarGroup } from "@/components/ui/avatar-group";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { pickPriorityColor, pickStatusColor, comparePriority } from "@/lib/task-utils";
@@ -21,7 +23,8 @@ export const getColumns = () => {
       size: 50,
       header: () => null,
       cell: ({ table }) => {
-        const isDragDisabled = table.getState().sorting.length > 0;
+        const isDragDisabled =
+          table.getState().sorting.length > 0 || table.getState().columnFilters.length > 0;
 
         return isDragDisabled ? (
           <div className="w-4 h-4" />
@@ -91,10 +94,41 @@ export const getColumns = () => {
       cell: ({ row }) => {
         const task = row.original;
 
+        const router = useRouter();
+        const searchParams = useSearchParams();
+        const isOpen = searchParams.get("task") === String(task.id);
+
+        const handleOpenDetails = () => {
+          if (!isOpen) {
+            const params = new URLSearchParams(searchParams);
+            params.set("task", String(task.id));
+            router.push(`?${params.toString()}`);
+          }
+        };
+
         return (
-          <div>
-            <div className="font-medium text-primary truncate">{task.title}</div>
-            <div className="text-sm text-muted-foreground truncate">{task.description}</div>
+          <div className="group grid grid-cols-[minmax(0,1fr)_auto] gap-1 items-center">
+            <div>
+              <p className="font-medium text-primary truncate">{task.title}</p>
+              <p className="text-sm text-muted-foreground truncate">{task.description}</p>
+            </div>
+            <TooltipProvider>
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="cursor-pointer opacity-0 group-hover:opacity-100 transition duration-200 ease-in-out"
+                    onClick={handleOpenDetails}
+                  >
+                    <PanelRight className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Open details panel</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         );
       }
@@ -171,7 +205,7 @@ export const getColumns = () => {
         return task.assignees.length > 0 ? (
           <AvatarGroup className="flex items-center justify-center -space-x-2.5">
             {task.assignees.slice(0, 3).map((assignee) => (
-              <Avatar key={assignee.user_id} className="h-8 w-8">
+              <Avatar key={assignee.user_id} className="h-8 w-8 text-xs">
                 <AvatarImage className="object-cover" src={assignee.avatar_url} />
                 <AvatarFallback style={pickAvatarColor(assignee.full_name)}>
                   {getInitials(assignee.full_name)}
@@ -180,7 +214,7 @@ export const getColumns = () => {
             ))}
             {task.assignees.length > 3 && (
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs font-medium bg-white border-1 border-prussian-blue text-prussian-blue">
+                <AvatarFallback className="text-xs font-medium bg-blue-100 text-prussian-blue">
                   +{task.assignees.length - 3}
                 </AvatarFallback>
               </Avatar>

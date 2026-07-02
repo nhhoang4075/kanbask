@@ -2,8 +2,8 @@
 
 import { useSearchParams } from "next/navigation";
 
-import TeamSelector from "@/components/task/tasks-ui/team-selector";
-import ProjectSelector from "@/components/task/tasks-ui/project-selector";
+import TeamSelector from "@/components/common/team-selector";
+import ProjectSelector from "@/components/common/project-selector";
 
 export default function TaskHeader() {
   const searchParams = useSearchParams();

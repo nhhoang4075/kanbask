@@ -11,6 +11,8 @@ const taskRoute = (router) => {
     .post(taskValidation.validateCreateTask, taskController.createOneTask)
     .get(taskValidation.validateProjectIdQuery, taskController.getTasksOfProject);
 
+  router.route("/tasks/me").get(taskController.getMyAssignedTasks);
+
   router
     .route("/tasks/:id")
     .put(taskValidation.validateUpdateTask, taskController.updateOneTaskById)
@@ -23,7 +25,7 @@ const taskRoute = (router) => {
       uploadMiddleware.uploadAttachment.array("files"),
       taskController.uploadAttachmentsToTask
     )
-    .get(taskValidation.validateGetTaskAttachmentUrl, taskController.getAttachmentUrlOfTask)
+    .get(taskValidation.validateTaskIdParam, taskController.getAttachmentsOfTask)
     .delete(taskValidation.validateDeleteTaskAttachments, taskController.deleteAttachmentsFromTask);
 };
 

@@ -1,44 +1,48 @@
 "use client";
 
-import { FileText, Paperclip, MessageSquare } from "lucide-react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useCallback } from "react";
+import { FileText, Paperclip, MessageSquare, History } from "lucide-react";
 
-import TaskDetailsForm from "@/components/task/task-details-form";
-import TaskAttachmentTab from "@/components/task/task-attachment-tab";
+import DetailsTab from "@/components/task/details/details-tab";
+import AttachmentsTab from "@/components/task/attachments/attachments-tab";
+import CommentsTab from "@/components/task/comments/comments-tab";
+import HistoryTab from "@/components/task/history/history-tab";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { useTask } from "@/hooks/use-task";
 
-export default function TaskDetailsSheet({ isOpen, onOpenChange, task }) {
-  const { handleUpdateTask } = useTask();
+export default function TaskDetailsSheet({ task }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
-  const attachmentCount = task.attachments?.length || 0;
-  const commentCount = task.comments?.length || 0;
+  const taskIdQuery = searchParams.get("task");
+  const isOpen = taskIdQuery === String(task.id);
 
-  const handleUpdateTaskDetailsSubmit = async (formData) => {
-    await handleUpdateTask(task.id, {
-      ...formData,
-      status: formData.status || null,
-      priority: formData.priority || null,
-      due_date: formData.due_date || null,
-      completed_at: formData.completed_at || null
-    });
+  const onOpenChange = useCallback(
+    (open) => {
+      const params = new URLSearchParams(searchParams);
 
-    onOpenChange(false);
-  };
+      if (!open) {
+        params.delete("task");
+      } else {
+        params.set("task", String(task.id));
+      }
+
+      const queryString = params.toString();
+      const newUrl = queryString ? `?${queryString}` : pathname;
+
+      router.replace(newUrl);
+    },
+    [router, searchParams, task.id]
+  );
+
+  const attachmentCount = task.attachment_count || 0;
+  const commentCount = task.comment_count || 0;
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent
-        className="min-w-[100vw] md:min-w-[70vw] lg:min-w-[600px] p-0"
-        onInteractOutside={(e) => {
-          // Prevent the event from propagating to avoid focus issues
-          // Don't close on outside click
-          e.stopPropagation();
-          e.preventDefault();
-        }}
-      >
+    <Sheet open={isOpen} onOpenChange={onOpenChange} modal={false}>
+      <SheetContent className="min-w-[100vw] md:min-w-[70vw] lg:min-w-[600px] p-0">
         <SheetHeader className="p-6 pb-0">
           <SheetTitle className="text-3xl font-bold truncate">{task.title}</SheetTitle>
         </SheetHeader>
@@ -66,36 +70,28 @@ export default function TaskDetailsSheet({ isOpen, onOpenChange, task }) {
               <MessageSquare className="h-4 w-4" />
               {`Comments ${commentCount > 0 ? `(${commentCount})` : ""}`}
             </TabsTrigger>
+            <TabsTrigger
+              value="history"
+              className="flex items-center gap-2 rounded-none border-b-3 border-transparent data-[state=active]:border-prussian-blue data-[state=active]:shadow-none data-[state=active]:ring-0"
+            >
+              <History className="h-4 w-4" />
+              History
+            </TabsTrigger>
           </TabsList>
 
-          <ScrollArea className="h-[calc(100vh-200px)]">
-            <TabsContent value="details" className="px-6">
-              <TaskDetailsForm onSubmit={handleUpdateTaskDetailsSubmit} task={task} />
-            </TabsContent>
-            <TabsContent value="attachments" className="px-6">
-              <TaskAttachmentTab task={task} />
-            </TabsContent>
-            <TabsContent value="comments" className="px-6">
-              {/* <TaskDetailsComments
-              onAddComment={handleAddComment}
-              onClose={() => onOpenChange(false)}
-            /> */}
-              <div className="space-y-4">Comments</div>
-            </TabsContent>
-          </ScrollArea>
+          <TabsContent value="details">
+            <DetailsTab task={task} onOpenChange={onOpenChange} />
+          </TabsContent>
+          <TabsContent value="attachments">
+            <AttachmentsTab task={task} />
+          </TabsContent>
+          <TabsContent value="comments" className="">
+            <CommentsTab task={task} />
+          </TabsContent>
+          <TabsContent value="history">
+            <HistoryTab task={task} />
+          </TabsContent>
         </Tabs>
-        <div className="absolute bottom-6 right-6 flex justify-end gap-4">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-          <Button
-            type="submit"
-            form="task-details-form"
-            className="bg-prussian-blue hover:bg-prussian-blue/90"
-          >
-            Save Changes
-          </Button>
-        </div>
       </SheetContent>
     </Sheet>
   );

@@ -123,6 +123,7 @@ export default function EditMemberDialog({ isOpen, onOpenChange, member, type })
           <Button
             type="submit"
             form="edit-member-form"
+            disabled={form.formState.isSubmitting}
             className="bg-prussian-blue hover:bg-prussian-blue/90"
           >
             Save Changes

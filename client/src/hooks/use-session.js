@@ -82,7 +82,7 @@ export function SessionProvider({ children }) {
         isRefreshingRef.current = false;
       }
     },
-    [router, clearSession]
+    [clearSession]
   );
 
   const logoutHandler = useCallback(async () => {

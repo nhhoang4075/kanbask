@@ -10,6 +10,7 @@ import {
   deleteMyAccount
 } from "@/actions/user-actions";
 import { useSession } from "@/hooks/use-session";
+import { toast } from "sonner";
 
 // Context to hold session state and actions
 const AccountContext = createContext();
@@ -58,8 +59,10 @@ export function AccountProvider({ children }) {
   const handleChangePassword = useCallback(async (data) => {
     try {
       await changeMyPassword(data);
+      toast.success("Change password successfully");
     } catch (err) {
       setError(err);
+      toast.error("Current password does not match");
     }
   }, []);
 

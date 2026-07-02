@@ -1,220 +1,195 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useRef, useEffect, useMemo } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
 import Spinner from "@/components/app/spinner";
-import CalendarTooltip from "@/components/calendar/calendar-tooltip";
-import CalendarPopup from "@/components/calendar/calendar-popup";
-import { Badge } from "@/components/ui/badge";
+import CalendarItem from "@/components/calendar/calendar-item";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useTask } from "@/hooks/use-task";
-import { getStatusClass, handleEventClick, getPriorityClass } from "@/lib/calendar-utils";
-import { cn, capitalCase } from "@/lib/utils";
-import { pickStatusColor } from "@/lib/task-utils";
 
-import CTooltip from "@/components/calendar/c-tooltip";
+const PRIORITY_CLASSES = {
+  low: "!bg-green-300 !border-green-700",
+  medium: "!bg-amber-300 !border-amber-700",
+  high: "!bg-red-300 !border-red-700",
+  default: "!bg-slate-300 !border-slate-700"
+};
+
+const scrollToToday = () => {
+  const todayEl = document.querySelector(".fc-day-today");
+  if (todayEl) {
+    todayEl.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  }
+};
 
 export default function CalendarWindow() {
   const calendarRef = useRef(null);
-  const { open } = useSidebar();
-  const { myAssignedTasks, loading, projects } = useTask();
-
-  // Function to scroll to today's cell
-  const scrollToToday = () => {
-    if (calendarRef.current?.getApi) {
-      // Find today's cell and scroll to it
-      setTimeout(() => {
-        const todayEl = document.querySelector(".fc-day-today");
-        if (todayEl) {
-          todayEl.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-          });
-        }
-      }, 100);
-    }
-  };
-  // Function to handle date clicks
-  const handleDateClick = (info) => {
-    // Redirect to the task creation page with the selected date
-    // const selectedDate = info.dateStr;
-    // const url = `/tasks/create?date=${encodeURIComponent(selectedDate)}`;
-    // router.push(url);
-  };
+  const { myAssignedTasks, loading } = useTask();
+  const { open: sidebarOpen } = useSidebar();
+  const router = useRouter();
 
   useEffect(() => {
     if (calendarRef.current?.getApi) {
       setTimeout(() => {
         calendarRef.current.getApi().updateSize();
-        // Initial scroll to today when loaded
         scrollToToday();
-      }, 200);
+      }, 300);
     }
-  }, [open, loading]);
+  }, [sidebarOpen, loading]);
 
-  const events = myAssignedTasks.map((task) => {
-    const priorityColors = {
-      high: "#ff2c37",
-      medium: "#fe9800",
-      low: "#00c950",
-      default: "#90a2b9"
-    };
+  const handleEventClick = (info) => {
+    const {
+      id: taskId,
+      extendedProps: { teamId, projectId }
+    } = info.event;
 
-    const backgroundColor = priorityColors[task.priority] || priorityColors.default;
+    router.push(`/app/task?team=${teamId}&project=${projectId}&task=${taskId}`);
+  };
 
-    return {
-      id: task.id,
-      title: task.title,
-      start: task.created_at,
-      end:
+  const events = useMemo(() => {
+    return myAssignedTasks.map((task) => {
+      const start = task.created_at;
+      const end =
         task.due_date ||
-        new Date(new Date(task.created_at).getTime() + 24 * 60 * 60 * 1000).toISOString(),
-      backgroundColor,
-      borderColor: backgroundColor,
-      textColor: "#000",
-      extendedProps: {
-        description: task.description,
-        status: task.status,
-        priority: task.priority,
-        project: task.project_id // TODO: get project name
-      }
+        new Date(new Date(task.created_at).getTime() + 24 * 60 * 60 * 1000).toISOString();
+
+      return {
+        id: task.id,
+        title: task.title,
+        start,
+        end,
+        textColor: "#000",
+        extendedProps: {
+          description: task.description,
+          status: task.status,
+          priority: task.priority,
+          projectId: task.project_id,
+          teamId: task.team_id
+        }
+      };
+    });
+  }, [myAssignedTasks]);
+
+  const calendarOptions = useMemo(() => {
+    return {
+      plugins: [dayGridPlugin, interactionPlugin],
+      initialView: "dayGridMonth",
+      initialDate: new Date(),
+      height: "100%",
+      events,
+      headerToolbar: {
+        left: "prev,next today",
+        center: "title",
+        right: "dayGridMonth,dayGridWeek"
+      },
+      buttonText: {
+        today: "Today",
+        month: "Month",
+        week: "Week"
+      },
+      datesSet: (dateInfo) => {
+        const today = new Date();
+        if (today >= dateInfo.start && today <= dateInfo.end) {
+          scrollToToday();
+        }
+      },
+      customButtons: {
+        today: {
+          text: "Today",
+          click: () => {
+            const api = calendarRef.current?.getApi();
+            api?.today();
+            scrollToToday();
+          }
+        }
+      },
+      views: {
+        dayGridMonth: {
+          titleFormat: { year: "numeric", month: "long" },
+          dayHeaderFormat: { weekday: "long" },
+          dayMaxEvents: 3
+        },
+        dayGridWeek: {
+          titleFormat: { year: "numeric", month: "long", day: "2-digit" },
+          dayHeaderFormat: { weekday: "short", day: "numeric", month: "numeric" },
+          dayMaxEvents: 8
+        }
+      },
+      eventClick: handleEventClick,
+      eventTimeFormat: {
+        hour: "2-digit",
+        minute: "2-digit",
+        meridiem: false,
+        hour12: false
+      },
+      themeSystem: "standard",
+      fixedWeekCount: false,
+      nowIndicator: true,
+      slotEventOverlap: true,
+      firstDay: 1,
+      eventContent: (info) => <CalendarItem info={info} />,
+      eventClassNames: (eventInfo) => [
+        PRIORITY_CLASSES[eventInfo.event.extendedProps.priority || "default"]
+      ],
+      moreLinkContent: (arg) => (
+        <div className=" rounded-md p-1 m-0 text-xs font-bold bg-prussian-blue text-white hover:bg-blue-green">
+          +{arg.num}
+        </div>
+      )
     };
-  });
+  }, [events]);
 
   if (loading) {
     return (
-      <div className="h-full w-full bg-white rounded-md flex items-center">
-        <Spinner size="lg" className="-translate-y-6" />;
+      <div className="h-full w-full bg-white rounded-md flex items-center justify-center">
+        <Spinner size="lg" />
       </div>
     );
   }
-
-  const calendarOptions = {
-    plugins: [dayGridPlugin, interactionPlugin],
-    events,
-    height: "100%",
-    initialView: "dayGridWeek",
-    initialDate: new Date(), // Ensure we start on today's date
-    headerToolbar: {
-      left: "prev,next today",
-      center: "title",
-      right: "dayGridMonth,dayGridWeek"
-    },
-    dateClick: handleDateClick,
-    // Handle dates rendered - scroll to today
-    datesSet: (dateInfo) => {
-      // Only scroll if today is visible in the current view
-      const today = new Date();
-      if (today >= dateInfo.start && today <= dateInfo.end) {
-        scrollToToday();
-      }
-    },
-    // Custom buttons
-    customButtons: {
-      today: {
-        text: "Today",
-        click: function () {
-          const calendarApi = calendarRef.current.getApi();
-          calendarApi.today();
-          scrollToToday();
-        }
-      }
-    },
-    // View options
-    views: {
-      dayGridMonth: {
-        titleFormat: { year: "numeric", month: "long" },
-        dayHeaderFormat: { weekday: "long" },
-        dayMaxEvents: 3
-      },
-      dayGridWeek: {
-        titleFormat: { year: "numeric", month: "short", day: "2-digit" },
-        dayHeaderFormat: { weekday: "long", day: "numeric", month: "numeric" },
-        dayMaxEvents: 8
-      }
-    },
-    // Event click handler
-    eventClick: handleEventClick,
-    eventTimeFormat: {
-      hour: "2-digit",
-      minute: "2-digit",
-      meridiem: false,
-      hour12: false
-    },
-    themeSystem: "standard",
-    fixedWeekCount: false,
-    nowIndicator: true,
-    slotEventOverlap: true,
-    firstDay: 1,
-    buttonText: {
-      today: "Today",
-      month: "Month",
-      week: "Week"
-    },
-    // Custom rendering for event content
-    eventContent: (info) => {
-      const { title, extendedProps } = info.event;
-
-      return (
-        // <div className={cn("fc-event-custom-content flex justify-between items-center")}>
-        //   <div className="font-medium truncate">{title}</div>
-        //   <Badge className={cn("rounded-sm", pickStatusColor(extendedProps.status))}>
-        //     {capitalCase(extendedProps.status)}
-        //   </Badge>
-        // </div>
-        <CTooltip info={info} />
-      );
-    },
-    // Custom class names for events based on priority
-    eventClassNames: (eventInfo) => [getPriorityClass(eventInfo.event.extendedProps.priority)],
-    moreLinkContent: (arg) => (
-      <div className="text-[13px] font-bold font-roboto bg-prussian-blue text-white p-1 !m-0 rounded-md hover:bg-blue-green">
-        +{arg.num}
-      </div>
-    ),
-    // Handle more link clicks
-    moreLinkClick: (info) => {
-      CalendarPopup(info, calendarRef);
-      return "background";
-    },
-    eventDidMount: CalendarTooltip
-  };
 
   return (
     <div className="h-full w-full bg-white rounded-md p-6">
       <FullCalendar ref={calendarRef} {...calendarOptions} />
 
+      {/* Global styles override cho FullCalendar */}
       <style jsx global>{`
         .fc .fc-toolbar-title {
-          font-size: 1.5rem;
-          color: #1f2937;
+          font-size: 1.8rem;
+          color: #000;
           font-weight: 600;
         }
 
         .fc .fc-button-primary {
-          background-color: var(--color-blue-green);
-          border-color: var(--color-blue-green);
-          padding: 8px 8px 9px !important;
-          border-radius: 20px;
+          background-color: var(--color-mustard);
+          border-color: var(--color-mustard);
+          color: var(--color-prussian-blue);
+          font-size: 14px;
+          padding: 4px 8px 4px !important;
+          border-radius: 6px;
         }
 
         .fc .fc-button-primary:not(:disabled):hover {
-          background-color: var(--color-blue-green);
-          border-color: var(--color-blue-green);
-          opacity: 0.8;
+          background-color: var(--color-prussian-blue/90);
+          transition: color 0.2s ease-in-out;
+        }
+
+        .fc .fc-button:focus {
+          box-shadow: none;
         }
 
         .fc-button-group > .fc-button:not(:first-child) {
-          border-top-right-radius: 20px;
-          border-bottom-right-radius: 20px;
+          border-top-right-radius: 6px;
+          border-bottom-right-radius: 6px;
         }
-
         .fc-button-group > .fc-button:not(:last-child) {
-          border-top-left-radius: 20px;
-          border-bottom-left-radius: 20px;
+          border-top-left-radius: 6px;
+          border-bottom-left-radius: 6px;
         }
 
         .fc .fc-button-primary:not(:disabled):active,
@@ -232,10 +207,6 @@ export default function CalendarWindow() {
           cursor: pointer;
         }
 
-        .fc-event-custom-content {
-          padding: 6px 4px 6px 12px;
-        }
-
         .fc .fc-scrollgrid,
         .fc .fc-scrollgrid-section > * {
           border-color: #000;
@@ -244,7 +215,8 @@ export default function CalendarWindow() {
         .fc .fc-col-header-cell {
           background-color: var(--color-prussian-blue);
           color: var(--color-ghost-white);
-          font-weight: 600;
+          font-weight: 200;
+          font-size: 16px;
           padding: 8px;
         }
 
@@ -258,7 +230,7 @@ export default function CalendarWindow() {
         }
 
         .fc .fc-daygrid-day.fc-day-today {
-          background-color: var(--color-sky-blue);
+          background-color: var(--color-mustard/50);
           font-weight: 600;
         }
 
@@ -267,6 +239,7 @@ export default function CalendarWindow() {
           background-color: var(--color-prussian-blue);
           border-radius: 25%;
         }
+
         .fc .fc-daygrid-day {
           border-color: #000;
           transition: background-color 0.2s ease-in-out;
@@ -276,15 +249,16 @@ export default function CalendarWindow() {
           min-height: 190px !important;
           height: 190px !important;
         }
+
         .fc .fc-daygrid-day:hover {
           background-color: var(--color-blue-100);
         }
 
         .fc-day-other .fc-daygrid-more-link {
           display: none !important;
-        }
+        }import { Router } from 'express';
 
-        /* Add scroll behavior for smoother scrolling */
+
         .fc-scroller {
           scroll-behavior: smooth;
         }

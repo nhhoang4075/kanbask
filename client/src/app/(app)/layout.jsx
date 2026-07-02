@@ -10,6 +10,7 @@ import { ProjectProvider } from "@/hooks/use-project";
 import { TaskProvider } from "@/hooks/use-task";
 import { ChatProvider } from "@/hooks/use-chat";
 import { NotificationProvider } from "@/hooks/use-notification";
+import { Toaster } from "sonner";
 
 export default async function RootLayout({ children }) {
   const cookieStore = await cookies();
@@ -29,6 +30,7 @@ export default async function RootLayout({ children }) {
                       <SidebarInset>
                         <main className="flex-1 min-h-[95dvh] bg-prussian-blue">{children}</main>
                       </SidebarInset>
+                      <Toaster position="top-right" />
                     </SearchProvider>
                   </SidebarProvider>
                 </ChatProvider>

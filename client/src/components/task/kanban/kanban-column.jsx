@@ -5,20 +5,17 @@ import { Plus } from "lucide-react";
 
 import KanbanItem from "@/components/task/kanban/kanban-item";
 import CreateTaskSheet from "@/components/task/create-task-sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { useProject } from "@/hooks/use-project";
 import { pickStatusColor } from "@/lib/task-utils";
 import { cn } from "@/lib/utils";
 
 export default function KanbanColumn({ column, handleMoveTask }) {
   const [isOver, setIsOver] = useState(false);
   const [isCreateTaskSheetOpen, setIsCreateTaskSheetOpen] = useState(false);
+
+  const { selectedProject } = useProject();
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -69,6 +66,7 @@ export default function KanbanColumn({ column, handleMoveTask }) {
               variant="ghost"
               className="w-6 h-6 text-white rounded-full"
               onClick={() => setIsCreateTaskSheetOpen(true)}
+              disabled={!selectedProject}
             >
               <Plus className="w-4 h-4" />
             </Button>

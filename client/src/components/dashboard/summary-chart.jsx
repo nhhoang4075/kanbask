@@ -57,8 +57,6 @@ export default function SummaryChart() {
         day: "numeric"
       });
 
-      console.log(tasks);
-
       // Count all tasks for this project on this date
       const allTasks = tasks.filter((task) => {
         // Set createDate to 0h00 of that day

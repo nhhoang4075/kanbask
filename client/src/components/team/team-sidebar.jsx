@@ -173,7 +173,7 @@ export default function TeamSideBar() {
                         >
                           <p
                             key={project.id}
-                            className="pl-12 pr-6 py-2 w-full rounded-md text-left truncate"
+                            className="pl-12 pr-6 py-2 w-full rounded-md text-left text-sm truncate"
                           >
                             {project.name}
                           </p>

@@ -61,6 +61,8 @@ export default function AddMemberDialog({ isOpen, onOpenChange }) {
     await handleAddProjectMembers(selectedProject.id, {
       user_ids: formData.members
     });
+
+    form.reset();
     onOpenChange(false);
   };
 

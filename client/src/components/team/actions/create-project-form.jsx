@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/custom-input";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { useTeam } from "@/hooks/use-team";
 import { useProject } from "@/hooks/use-project";
 
@@ -105,6 +106,18 @@ export default function CreateProjectForm({ onOpenChange }) {
             </FormItem>
           )}
         />
+        <div className="absolute bottom-6 right-6 flex justify-end gap-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+            className="bg-prussian-blue hover:bg-prussian-blue/90"
+          >
+            Confirm
+          </Button>
+        </div>
       </form>
     </Form>
   );

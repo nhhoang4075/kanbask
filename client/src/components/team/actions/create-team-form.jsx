@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/custom-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { useTeam } from "@/hooks/use-team";
 
 const createTeamSchema = z.object({
@@ -118,6 +119,18 @@ export default function CreateTeamForm({ onOpenChange }) {
             </FormItem>
           )}
         />
+        <div className="absolute bottom-6 right-6 flex justify-end gap-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+            className="bg-prussian-blue hover:bg-prussian-blue/90"
+          >
+            Confirm
+          </Button>
+        </div>
       </form>
     </Form>
   );

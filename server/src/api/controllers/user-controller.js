@@ -1,7 +1,6 @@
 import { StatusCodes } from "http-status-codes";
 
 import userService from "../services/user-service.js";
-import ApiError from "../../utils/api-error.js";
 
 const getMyAccount = async (req, res, next) => {
   try {
@@ -29,9 +28,17 @@ const changeMyPassword = async (req, res, next) => {
 
     await userService.changeUserPassword(req.user.id, old_password, new_password);
 
-    return res
-      .status(StatusCodes.OK)
-      .json({ success: true, message: "Changed password successfully" });
+    res.status(StatusCodes.OK).json({ success: true, message: "Changed password successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const uploadMyAvatar = async (req, res, next) => {
+  try {
+    const avatar_url = await userService.uploadUserAvatar(req.user.id, req.file);
+
+    res.status(StatusCodes.OK).json({ success: true, data: { avatar_url } });
   } catch (error) {
     next(error);
   }
@@ -41,9 +48,7 @@ const deleteMyAccount = async (req, res, next) => {
   try {
     await userService.deleteUserAccount(req.user.id);
 
-    return res
-      .status(StatusCodes.OK)
-      .json({ success: true, message: "Deleted account successfully" });
+    res.status(StatusCodes.OK).json({ success: true, message: "Deleted account successfully" });
   } catch (error) {
     next(error);
   }
@@ -53,5 +58,6 @@ export default {
   getMyAccount,
   updateMyProfile,
   changeMyPassword,
-  deleteMyAccount,
+  uploadMyAvatar,
+  deleteMyAccount
 };

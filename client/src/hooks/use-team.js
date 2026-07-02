@@ -111,7 +111,6 @@ export function TeamProvider({ children }) {
         return newTeam;
       } catch (err) {
         setError(err);
-        throw err;
       } finally {
         setLoading(false);
       }
@@ -127,7 +126,6 @@ export function TeamProvider({ children }) {
         await fetchTeams();
       } catch (err) {
         setError(err);
-        throw err;
       } finally {
         setLoading(false);
       }
@@ -143,7 +141,6 @@ export function TeamProvider({ children }) {
         await fetchTeams();
       } catch (err) {
         setError(err);
-        throw err;
       } finally {
         setLoading(false);
       }
@@ -159,7 +156,6 @@ export function TeamProvider({ children }) {
         await fetchTeams();
       } catch (err) {
         setError(err);
-        throw err;
       } finally {
         setLoading(false);
       }
@@ -175,7 +171,6 @@ export function TeamProvider({ children }) {
         await fetchTeams();
       } catch (err) {
         setError(err);
-        throw err;
       } finally {
         setLoading(false);
       }
@@ -191,7 +186,6 @@ export function TeamProvider({ children }) {
         await fetchTeamMembers(teamId);
       } catch (err) {
         setError(err);
-        throw err;
       } finally {
         setLoading(false);
       }
@@ -207,7 +201,6 @@ export function TeamProvider({ children }) {
         await fetchTeamMembers(teamId);
       } catch (err) {
         setError(err);
-        throw err;
       } finally {
         setLoading(false);
       }
@@ -223,7 +216,6 @@ export function TeamProvider({ children }) {
         await fetchTeamJoinRequests(selectedTeam.id);
       } catch (err) {
         setError(err);
-        throw err;
       } finally {
         setLoading(false);
       }
@@ -239,7 +231,6 @@ export function TeamProvider({ children }) {
         await fetchTeamJoinRequests(selectedTeam.id);
       } catch (err) {
         setError(err);
-        throw err;
       } finally {
         setLoading(false);
       }

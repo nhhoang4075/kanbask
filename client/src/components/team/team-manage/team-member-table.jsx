@@ -109,7 +109,7 @@ export default function TeamMemberTable() {
             disabled={table.getSelectedRowModel().rows.length === 0}
           >
             <Trash className="w-4 h-4" />
-            Batch Delete
+            Delete
           </Button>
           <Link href={`/app/team/${selectedTeam.id}?tab=invitations`}>
             <Button

@@ -72,7 +72,7 @@ export default function HistoryList({ task }) {
                     </Tooltip>
                   </TooltipProvider>
                   <Avatar className="h-8 w-8 flex-shrink-0 text-sm">
-                    <AvatarImage src={log.avatar_url} />
+                    <AvatarImage src={log.avatar_url} alt={log.full_name} className="object-cover"/>
                     <AvatarFallback style={pickAvatarColor(log.full_name)}>
                       {getInitials(log.full_name)}
                     </AvatarFallback>

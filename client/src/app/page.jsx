@@ -289,7 +289,7 @@ export default function LandingPage() {
                 </CardContent>
                 <CardFooter className="flex items-center pt-2 border-t border-gray-100">
                   <Avatar className="h-10 w-10 mr-3">
-                    <AvatarImage src={testimonial.avatar} alt={testimonial.author} />
+                    <AvatarImage src={testimonial.avatar} alt={testimonial.author} className="object-cover"/>
                     <AvatarFallback className="bg-primary/10 text-primary">
                       {testimonial.author.charAt(0)}
                     </AvatarFallback>

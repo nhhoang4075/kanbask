@@ -18,8 +18,10 @@ export function SessionProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const refreshTimerRef = useRef(null);
   const isRefreshingRef = useRef(false);
+
   const router = useRouter();
 
   const clearSession = useCallback(() => {
@@ -87,10 +89,11 @@ export function SessionProvider({ children }) {
     try {
       await logout();
       clearSession();
-      router.push("/auth/login");
     } catch (err) {
       setError(err);
       clearSession();
+    } finally {
+      router.push("/auth/login");
     }
   }, [router, clearSession]);
 
@@ -104,10 +107,20 @@ export function SessionProvider({ children }) {
     };
   }, [handleSession]);
 
+  const refreshSessionHandler = useCallback(async () => {
+    if (isRefreshingRef.current) return;
+    try {
+      await handleSession(true);
+    } catch (err) {
+      setError(err);
+    }
+  }, [handleSession]);
+
   const contextValue = {
     user,
     loading,
     error,
+    refreshSession: refreshSessionHandler,
     logout: logoutHandler
   };
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Settings, LogOutIcon, MoreVerticalIcon, UserCircleIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -75,6 +76,7 @@ export default function NavUser() {
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={10}
+            onCloseAutoFocus={(e) => e.preventDefault()}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
@@ -96,10 +98,12 @@ export default function NavUser() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="group focus:bg-prussian-blue focus:text-background transition-colors duration-200 ease-in-out">
-                <UserCircleIcon className="text-muted-foreground group-focus:text-background transition-colors duration-200 ease-in-out" />
-                Account
-              </DropdownMenuItem>
+              <Link href="/app/account">
+                <DropdownMenuItem className="group focus:bg-prussian-blue focus:text-background transition-colors duration-200 ease-in-out">
+                    <UserCircleIcon className="text-muted-foreground group-focus:text-background transition-colors duration-200 ease-in-out" />
+                    Account
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuItem className="group focus:bg-prussian-blue focus:text-background transition-colors duration-200 ease-in-out">
                 <Settings className="text-muted-foreground group-focus:text-background transition-colors duration-200 ease-in-out" />
                 Settings

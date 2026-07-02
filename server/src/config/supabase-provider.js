@@ -1,7 +1,10 @@
+// src/providers/supabase-provider.js
+
 import { createClient } from "@supabase/supabase-js";
 import { StatusCodes } from "http-status-codes";
 import slugify from "slugify";
 import path from "path";
+import ApiError from "../utils/api-error.js";
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -17,8 +20,8 @@ const uploadToStorage = async (file, folderPath) => {
 
     if (!buffer) throw new ApiError(StatusCodes.BAD_REQUEST, "No file buffer provided");
 
-    const ext = path.extname(file.originalname);
-    const name = path.basename(file.originalname, ext);
+    const ext = path.extname(originalname);
+    const name = path.basename(originalname, ext);
     const safeName = slugify(name, {
       lower: true,
       strict: true
@@ -34,8 +37,9 @@ const uploadToStorage = async (file, folderPath) => {
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Supabase error: ${error.message}`);
     }
 
-    if (!data?.path)
+    if (!data?.path) {
       throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Supabase error: No path returned.");
+    }
 
     const metadata = {
       supabase_path: data.path,
@@ -62,7 +66,7 @@ const deleteFromStorage = async (path) => {
   }
 };
 
-const generateUrl = async (path) => {
+const generateSignedUrl = async (path) => {
   try {
     const { data, error } = await supabase.storage
       .from(supabaseBucket)
@@ -82,4 +86,27 @@ const generateUrl = async (path) => {
   }
 };
 
-export default { uploadToStorage, deleteFromStorage, generateUrl };
+const generatePublicUrl = (path) => {
+  try {
+    const { data, error } = supabase.storage.from(supabaseBucket).getPublicUrl(path);
+
+    if (error) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, `Supabase error: ${error.message}`);
+    }
+
+    if (!data || !data.publicUrl) {
+      throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, "Failed to generate public URL");
+    }
+
+    return data.publicUrl;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export default {
+  uploadToStorage,
+  deleteFromStorage,
+  generateSignedUrl,
+  generatePublicUrl
+};

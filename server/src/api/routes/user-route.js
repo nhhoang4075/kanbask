@@ -1,6 +1,7 @@
 import userValidation from "../validations/user-validation.js";
 import userController from "../controllers/user-controller.js";
 import authMiddleware from "../../middlewares/auth-middleware.js";
+import uploadMiddleware from "../../middlewares/upload-middleware.js";
 
 const userRoute = (router) => {
   router.use("/me", authMiddleware.authenticate);
@@ -14,6 +15,10 @@ const userRoute = (router) => {
   router
     .route("/me/password")
     .put(userValidation.validateChangePassword, userController.changeMyPassword);
+
+  router
+    .route("/me/avatar")
+    .put(uploadMiddleware.uploadImage.single("file"), userController.uploadMyAvatar);
 };
 
 export default userRoute;

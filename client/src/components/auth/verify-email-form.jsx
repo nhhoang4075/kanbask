@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -37,7 +36,6 @@ export default function VerifyEmailForm() {
   const [randomGreeting, setRandomGreeting] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
-  const router = useRouter();
   const { user, loading, logout } = useSession();
 
   useEffect(() => {

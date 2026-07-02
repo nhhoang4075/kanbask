@@ -164,6 +164,14 @@ const updateOneTaskById = async (id, data, actorId) => {
       });
     }
 
+    if (allowedData.assignees && allowedData.assignees.length > 0) {
+      await notifyAssigneesOfTask(
+        task.id,
+        "Task Assigned",
+        `You have been assigned to a task: ${task.title}`
+      );
+    }
+
     return task.id;
   } catch (err) {
     throw err;

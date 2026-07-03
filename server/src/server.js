@@ -1,75 +1,84 @@
 import "dotenv/config";
-import express, { json } from "express";
-import { createServer } from "http";
 import cors from "cors";
 import { StatusCodes } from "http-status-codes";
-// const socketIo = require("socket.io");
+import cookieParser from "cookie-parser";
+import express, { json } from "express";
+import { createServer } from "http";
+// import fs from "fs";
+// import path from "path";
+// import { fileURLToPath } from "url";
 
-import { connectDb, sql } from "./config/db.js";
 import apiRouter from "./api/routes/index.js";
+import setupSocket from "./socket/index.js";
+import embeddingProvider from "./config/embedding-provider.js";
+import { handleApiError } from "./middlewares/error-middleware.js";
+
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+
+// const certPath = path.join(__dirname, "../certificates", "localhost.pem");
+// const keyPath = path.join(__dirname, "../certificates", "localhost-key.pem");
 
 /**
- * Starts the server with Express, HTTP, and Socket.IO.
+ * Starts the server with Express and HTTP.
  *
  * @function startServer
- * @description Initializes an Express application, sets up an HTTP server, and integrates Socket.IO for real-time communication.
- *              Configures routes and handles WebSocket events for chat functionality.
+ * @description Initializes an Express application, sets up an HTTP server, and configures routes.
  */
 const startServer = () => {
+  // const httpsOptions = {
+  //   key: fs.readFileSync(keyPath),
+  //   cert: fs.readFileSync(certPath)
+  // };
   const app = express();
   const server = createServer(app);
-  // const io = socketIo(server, {
-  //   cors: {
-  //     origin: "*",
-  //     methods: ["GET", "POST"],
-  //   },
-  // });
+  // const server = createServer(httpsOptions, app);
 
+  setupSocket(server);
+
+  // Middlewares
   app.use(json());
-  app.use(cors());
-
-  // io.on("connection", (socket) => {
-  //   console.log("A user connected: " + socket.id);
-
-  //   // Lắng nghe sự kiện 'chat message' từ client
-  //   socket.on("chat message", (msg) => {
-  //     console.log("Message received: ", msg);
-  //     // Phát lại tin nhắn đến tất cả client
-  //     io.emit("chat message", msg);
-  //   });
-
-  //   // Xử lý khi client ngắt kết nối
-  //   socket.on("disconnect", () => {
-  //     console.log("User disconnected: " + socket.id);
-  //   });
-  // });
+  app.use(cookieParser());
+  app.use(
+    cors({
+      origin: [process.env.CLIENT_ORIGIN, "http://localhost:3000"],
+      credentials: true
+    })
+  );
 
   app.use("/api", apiRouter());
+  app.use(handleApiError);
 
   app.get("/", async (req, res) => {
-    const result = await sql`SELECT version()`;
-    const { version } = result[0];
-    res.writeHead(200, { "Content-Type": "text/plain" });
-    res.end(version);
+    res.status(StatusCodes.OK).json({
+      success: true,
+      message: "OK"
+    });
   });
 
   app.get("/health-check", async (req, res) => {
     res.status(StatusCodes.OK).json({
-      message: "Healthcheck API passed!",
+      success: true,
+      message: "Healthcheck passed!"
     });
   });
 
-  server.listen(process.env.APP_PORT || 8000, () => {
-    console.log(
-      `Server is running at http://${process.env.APP_HOST}:${process.env.APP_PORT}`
-    );
+  server.listen(process.env.APP_PORT || 8080, () => {
+    console.log(`Server is running at http://${process.env.APP_HOST}:${process.env.APP_PORT}`);
   });
 };
 
-// Only start the server after database connection is established (IIFE)
-(() => {
+(async () => {
   try {
-    connectDb();
+    await embeddingProvider
+      .initialize()
+      .then(() => {
+        console.log("Embedding service pre-initialization process started successfully.");
+      })
+      .catch((err) => {
+        throw err;
+      });
+
     startServer();
   } catch (error) {
     console.error(error);

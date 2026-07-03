@@ -2,36 +2,38 @@ import { StatusCodes } from "http-status-codes";
 
 import conversationService from "../services/conversation-service.js";
 
-const createOneConversation = async (req, res, next) => {
+const getConversationsOfUser = async (req, res, next) => {
   try {
-    const conversationId = await conversationService.createOneConversation(
-      req.body
-    );
+    const conversations = await conversationService.getManyConversationsByUserId(req.user.id);
 
-    return res.status(StatusCodes.CREATED).json({
+    res.status(StatusCodes.OK).json({
       success: true,
-      conversationId,
+      data: { conversations }
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
-const getManyConversationsByUserId = async (req, res, next) => {
+const getParticipantsOfConversation = async (req, res, next) => {
   try {
-    const conversations =
-      await conversationService.getManyConversationsByUserId(req.params.userId);
+    const participants = await conversationService.getParticipantsOfConversation(
+      req.params.id,
+      req.user.id
+    );
 
-    return res.status(StatusCodes.OK).json({
+    res.status(StatusCodes.OK).json({
       success: true,
-      conversations,
+      data: {
+        participants
+      }
     });
   } catch (error) {
-    return next(error);
+    next(error);
   }
 };
 
 export default {
-  createOneConversation,
-  getManyConversationsByUserId,
+  getConversationsOfUser,
+  getParticipantsOfConversation
 };

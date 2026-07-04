@@ -10,7 +10,7 @@ let ioInstance = null;
 const setupSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: [process.env.CLIENT_ORIGIN, "https://localhost:3000"],
+      origin: [...process.env.CLIENT_ORIGIN.split(","), "https://localhost:3000"],
       methods: ["GET", "POST"],
       credentials: true
     }

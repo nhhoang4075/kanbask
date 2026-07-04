@@ -30,7 +30,7 @@ const getOneTaskAttachmentById = async (task_id, id) => {
       .select(
         "sa.id",
         "ta.task_id",
-        "sa.supabase_path",
+        "sa.storage_key",
         "sa.original_name",
         "sa.mime_type",
         "sa.size_bytes",
@@ -56,7 +56,7 @@ const getManyAttachmentsByTaskId = async (task_id) => {
       .select(
         "sa.id",
         "ta.task_id",
-        "sa.supabase_path",
+        "sa.storage_key",
         "sa.original_name",
         "sa.mime_type",
         "sa.size_bytes",
@@ -82,7 +82,7 @@ const getManyAttachmentsByMessageId = async (message_id) => {
       .select(
         "sa.id",
         "ma.message_id",
-        "sa.supabase_path",
+        "sa.storage_key",
         "sa.original_name",
         "sa.mime_type",
         "sa.size_bytes",

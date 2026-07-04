@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 
 import LoginForm from "@/components/auth/login-form";
@@ -21,7 +22,9 @@ export default function LoginPage() {
         />
       </div>
       <div className="flex-1 max-w-[500px] p-12 shadow-lg bg-ghost-white flex flex-col justify-center ">
-        <LoginForm />
+        <Suspense fallback={null}>
+          <LoginForm />
+        </Suspense>
       </div>
     </div>
   );

@@ -27,7 +27,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/custom-input";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { getColumns } from "@/components/team/team-manage/team-project-column";

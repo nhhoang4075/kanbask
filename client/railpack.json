@@ -6,6 +6,7 @@
   },
   "steps": {
     "install": {
+      "inputs": [{ "local": true, "include": ["."] }],
       "commands": ["yarn install --frozen-lockfile"]
     },
     "build": {

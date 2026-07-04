@@ -4,7 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import UserModel from "../models/user-model.js";
 import ApiError from "../../utils/api-error.js";
 import embeddingProvider from "../../config/embedding-provider.js";
-import supabaseProvider from "../../config/supabase-provider.js";
+import storageProvider from "../../config/storage-provider.js";
 import { sanitizeUser, sanitizeAllowedFields } from "../../utils/helper.js";
 
 const getOneUserById = async (userId) => {
@@ -88,9 +88,9 @@ export const uploadUserAvatar = async (userId, file) => {
     }
 
     const path = `avatars/${userId}`;
-    const metadata = await supabaseProvider.uploadToStorage(file, path);
+    const metadata = await storageProvider.uploadToStorage(file, path);
 
-    const publicUrl = supabaseProvider.generatePublicUrl(metadata.supabase_path);
+    const publicUrl = storageProvider.generatePublicUrl(metadata.storage_key);
 
     await UserModel.updateOneUserById(userId, { avatar_url: publicUrl });
 

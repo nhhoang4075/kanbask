@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 
 import ForgotPasswordForm from "@/components/auth/forgot-password-form";
@@ -21,7 +22,9 @@ export default function ForgotPasswordPage() {
         />
       </div>
       <div className="flex-1 max-w-[500px] p-12 shadow-lg bg-ghost-white flex flex-col justify-center ">
-        <ForgotPasswordForm />
+        <Suspense fallback={null}>
+          <ForgotPasswordForm />
+        </Suspense>
       </div>
     </div>
   );

@@ -5,6 +5,9 @@ import authService from "../services/auth-service.js";
 import jwtProvider from "../../config/jwt-provider.js";
 import ApiError from "../../utils/api-error.js";
 
+const isProd = process.env.NODE_ENV === "production";
+const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
+
 const register = async (req, res, next) => {
   try {
     const user = await authService.register(req.body);
@@ -42,8 +45,9 @@ const login = async (req, res, next) => {
     res.cookie("access_token", accessToken, {
       maxAge: ms("1h"),
       httpOnly: true,
-      secure: true,
-      sameSite: "none"
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      domain: cookieDomain
     });
 
     if (remember) {
@@ -57,7 +61,8 @@ const login = async (req, res, next) => {
         maxAge: ms("7 days"),
         httpOnly: true,
         secure: true,
-        sameSite: "none"
+        sameSite: "none",
+        domain: cookieDomain
       });
     }
 
@@ -113,8 +118,9 @@ const refreshSession = async (req, res, next) => {
     res.cookie("access_token", accessToken, {
       maxAge: ms("1h"),
       httpOnly: true,
-      secure: true,
-      sameSite: "none"
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      domain: cookieDomain
     });
 
     res.status(StatusCodes.OK).json({
@@ -128,8 +134,8 @@ const refreshSession = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    res.clearCookie("access_token");
-    res.clearCookie("refresh_token");
+    res.clearCookie("access_token", { domain: cookieDomain });
+    res.clearCookie("refresh_token", { domain: cookieDomain });
 
     const userId = await authService.logout(req.user.id);
 

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "node",
+  "packages": {
+    "node": "22"
+  },
+  "steps": {
+    "install": {
+      "commands": ["yarn install --frozen-lockfile"]
+    },
+    "build": {
+      "inputs": [{ "step": "install" }],
+      "commands": ["yarn run build"]
+    }
+  },
+  "deploy": {
+    "startCommand": "yarn run start",
+    "variables": {
+      "NODE_ENV": "production"
+    }
+  }
+}

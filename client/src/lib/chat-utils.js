@@ -51,5 +51,3 @@ export function linkifyMessage(message) {
     return <span key={idx}>{part}</span>;
   });
 }
-
-export { groupMessages, linkifyMessage };

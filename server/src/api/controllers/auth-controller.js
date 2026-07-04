@@ -134,8 +134,16 @@ const refreshSession = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    res.clearCookie("access_token", { domain: cookieDomain });
-    res.clearCookie("refresh_token", { domain: cookieDomain });
+    res.clearCookie("access_token", {
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
+      domain: cookieDomain
+    });
+    res.clearCookie("refresh_token", {
+      secure: true,
+      sameSite: "none",
+      domain: cookieDomain
+    });
 
     const userId = await authService.logout(req.user.id);
 

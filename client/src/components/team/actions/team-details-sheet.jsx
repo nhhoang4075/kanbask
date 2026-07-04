@@ -19,7 +19,7 @@ import {
   FormDescription
 } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/custom-input";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";

@@ -1,3 +1,5 @@
+-- Requires the pgvector extension binary to be installed on the Postgres instance
+-- (Railway: deploy the "PostgreSQL + pgvector" template, not the plain postgres image)
 CREATE EXTENSION IF NOT EXISTS VECTOR;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -194,7 +196,7 @@ CREATE INDEX IF NOT EXISTS idx_notifications_reference ON notifications (referen
 
 CREATE TABLE IF NOT EXISTS storage_attachments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  supabase_path TEXT UNIQUE NOT NULL,
+  storage_key TEXT UNIQUE NOT NULL,
   original_name TEXT NOT NULL,
   mime_type VARCHAR(100) NOT NULL,
   size_bytes BIGINT NOT NULL,

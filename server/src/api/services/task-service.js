@@ -7,7 +7,7 @@ import attachmentModel from "../models/attachment-model.js";
 import notificationModel from "../models/notification-model.js";
 import ApiError from "../../utils/api-error.js";
 import embeddingProvider from "../../config/embedding-provider.js";
-import supabaseProvider from "../../config/supabase-provider.js";
+import storageProvider from "../../config/storage-provider.js";
 import { emitNewNotification } from "../../socket/notification-socket.js";
 import { sanitizeAllowedFields } from "../../utils/helper.js";
 
@@ -229,7 +229,7 @@ const uploadAttachmentsToTask = async (taskId, files, actorId) => {
     await Promise.all(
       files.map(async (file) => {
         const path = `tasks/${actorId}`;
-        const metadata = await supabaseProvider.uploadToStorage(file, path);
+        const metadata = await storageProvider.uploadToStorage(file, path);
 
         const attachmentId = await attachmentModel.createOneAttachment({
           ...metadata,
@@ -252,9 +252,9 @@ const uploadAttachmentsToTask = async (taskId, files, actorId) => {
     const attachments = await Promise.all(
       attachmentIds.map(async (id) => {
         const attachment = await attachmentModel.getOneTaskAttachmentById(taskId, id);
-        const url = await supabaseProvider.generateSignedUrl(attachment.supabase_path);
+        const url = await storageProvider.generateSignedUrl(attachment.storage_key);
 
-        delete attachment.supabase_path;
+        delete attachment.storage_key;
 
         return { ...attachment, url };
       })
@@ -284,9 +284,9 @@ const getManyAttachmentsByTaskId = async (taskId, actorId) => {
 
     const formattedAttachments = await Promise.all(
       attachments.map(async (a) => {
-        const url = await supabaseProvider.generateSignedUrl(a.supabase_path);
+        const url = await storageProvider.generateSignedUrl(a.storage_key);
 
-        delete a.supabase_path;
+        delete a.storage_key;
 
         return { ...a, url };
       })
@@ -320,7 +320,7 @@ const deleteAttachmentsFromTask = async (taskId, attachmentIds, actorId) => {
       attachmentIds.map(async (id) => {
         const attachment = await attachmentModel.getOneAttachmentById(id);
 
-        await supabaseProvider.deleteFromStorage(attachment.supabase_path);
+        await storageProvider.deleteFromStorage(attachment.storage_key);
         await attachmentModel.deleteOneAttachmentById(attachment.id);
       })
     );

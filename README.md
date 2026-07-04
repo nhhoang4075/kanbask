@@ -44,7 +44,8 @@ Kanbask là một nền tảng quản lý dự án hỗ trợ các cá nhân và
 | -------------------- | --------------------------------------- |
 | **Frontend**         | Next.js (React Framework), Tailwind CSS |
 | **Backend**          | Express.js                              |
-| **Database**         | NeonDB (Serverless Postgres Database)   |
+| **Database**         | Railway (PostgreSQL + pgvector)         |
+| **File Storage**     | Cloudflare R2 (S3-compatible)           |
 | **Authentication**   | JWT                                     |
 | **Real-time**        | Socket.IO                               |
 | **Containerization** | Docker                                  |

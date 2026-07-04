@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { Form, FormField, FormItem, FormControl, FormMessage } from "@/components/ui/form";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/custom-input";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useTeam } from "@/hooks/use-team";

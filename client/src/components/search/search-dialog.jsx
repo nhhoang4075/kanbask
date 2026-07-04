@@ -3,7 +3,7 @@ import { SearchIcon } from "lucide-react";
 import SearchOptions from "@/components/search/search-options";
 import SearchResults from "@/components/search/search-results";
 import { DialogHeader, DialogContent, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/custom-input";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useSearch } from "@/hooks/use-search";
 import { capitalCase } from "@/lib/utils";

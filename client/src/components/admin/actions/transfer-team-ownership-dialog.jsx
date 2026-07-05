@@ -57,7 +57,9 @@ export default function TransferTeamOwnershipDialog({ isOpen, onOpenChange, team
       try {
         const detail = await getTeamDetail(team.id);
         if (!cancelled) {
-          setMembers((detail.members || []).filter((member) => member.id !== team.owner_id));
+          setMembers(
+            (detail.team?.members || []).filter((member) => member.id !== team.owner_id)
+          );
         }
       } finally {
         if (!cancelled) setLoadingMembers(false);

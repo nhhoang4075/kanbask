@@ -62,7 +62,9 @@ export default function TransferProjectOwnershipDialog({
       try {
         const detail = await getProjectDetail(project.id);
         if (!cancelled) {
-          setMembers((detail.members || []).filter((member) => member.id !== project.owner_id));
+          setMembers(
+            (detail.project?.members || []).filter((member) => member.id !== project.owner_id)
+          );
         }
       } finally {
         if (!cancelled) setLoadingMembers(false);

@@ -5,6 +5,8 @@ import { useTeam } from "@/hooks/use-team";
 export default function TeamInformationCard() {
   const { selectedTeam } = useTeam();
 
+  if (!selectedTeam) return null;
+
   return (
     <Card className="w-full gap-2 rounded-md shadow-none">
       <CardHeader>

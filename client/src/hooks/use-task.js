@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { createContext, useContext, useEffect, useCallback, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import {
   getTasksOfProject,
@@ -10,6 +12,7 @@ import {
   deleteTask
 } from "@/actions/task-actions";
 import { useProject } from "@/hooks/use-project";
+import { useSocket } from "@/hooks/use-socket";
 
 const TaskContext = createContext();
 
@@ -19,62 +22,85 @@ export function useTask() {
 
 export function TaskProvider({ children }) {
   const { selectedProject, projectMembers } = useProject();
+  const { socket, connected } = useSocket();
+  const queryClient = useQueryClient();
 
-  const [tasks, setTasks] = useState([]);
-  const [myAssignedTasks, setMyAssignedTasks] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Fetch tasks
-  const fetchTasks = useCallback(async () => {
-    if (!selectedProject) return;
-
-    try {
-      setLoading(true);
-      setError(null);
+  const tasksQuery = useQuery({
+    queryKey: ["tasks", selectedProject?.id],
+    queryFn: async () => {
       const data = await getTasksOfProject(selectedProject.id);
-      setTasks(data.tasks);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedProject]);
+      return data.tasks;
+    },
+    enabled: !!selectedProject?.id
+  });
+  const tasks = tasksQuery.data ?? [];
 
-  const fetchMyAssignedTasks = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const myAssignedTasksQuery = useQuery({
+    queryKey: ["my-assigned-tasks"],
+    queryFn: async () => {
       const data = await getMyAssignedTasks();
-      setMyAssignedTasks(data.tasks);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
+      return data.tasks;
     }
-  }, []);
+  });
+  const myAssignedTasks = myAssignedTasksQuery.data ?? [];
 
-  // Initial fetch
-  useEffect(() => {
-    fetchTasks();
-  }, [fetchTasks]);
+  const [mutationError, setMutationError] = useState(null);
 
-  // Initial fetch
+  const loading = tasksQuery.isLoading || myAssignedTasksQuery.isLoading;
+  const error = tasksQuery.error || myAssignedTasksQuery.error || mutationError;
+
+  const fetchMyAssignedTasks = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: ["my-assigned-tasks"] }),
+    [queryClient]
+  );
+
+  // Real-time sync: another member created/updated/deleted/reordered a task
   useEffect(() => {
-    fetchMyAssignedTasks();
-  }, [tasks, fetchMyAssignedTasks]);
+    if (!socket || !connected) return;
+
+    const handleTaskChanged = (payload) => {
+      if (payload?.project_id) {
+        queryClient.invalidateQueries({ queryKey: ["tasks", payload.project_id] });
+      }
+      queryClient.invalidateQueries({ queryKey: ["my-assigned-tasks"] });
+    };
+
+    socket.on("task_changed", handleTaskChanged);
+
+    return () => {
+      socket.off("task_changed", handleTaskChanged);
+    };
+  }, [socket, connected, queryClient]);
+
+  const handleConflict = useCallback(
+    async (err) => {
+      if (err?.status === 409) {
+        toast.error(err.message || "This task was updated by someone else. Refreshing...");
+        await queryClient.invalidateQueries({ queryKey: ["tasks", selectedProject?.id] });
+        return true;
+      }
+      return false;
+    },
+    [queryClient, selectedProject]
+  );
 
   // Create a new task
-  const handleCreateTask = useCallback(async (taskData) => {
-    try {
-      const newTaskData = await createTask(taskData);
+  const handleCreateTask = useCallback(
+    async (taskData) => {
+      try {
+        const newTaskData = await createTask(taskData);
 
-      setTasks((prev) => [...prev, newTaskData.task]);
-    } catch (err) {
-      setError(err);
-    }
-  }, []);
+        queryClient.setQueryData(["tasks", selectedProject?.id], (prev = []) => [
+          ...prev,
+          newTaskData.task
+        ]);
+        await queryClient.invalidateQueries({ queryKey: ["my-assigned-tasks"] });
+      } catch (err) {
+        setMutationError(err);
+      }
+    },
+    [queryClient, selectedProject]
+  );
 
   // Update a task
   const handleUpdateTask = useCallback(
@@ -112,7 +138,7 @@ export function TaskProvider({ children }) {
         }
 
         // Optimistic update: always update the task with new fields
-        setTasks((prev) =>
+        queryClient.setQueryData(["tasks", selectedProject?.id], (prev = []) =>
           prev.map((task) =>
             task.id === taskId
               ? {
@@ -125,33 +151,49 @@ export function TaskProvider({ children }) {
           )
         );
 
-        await updateTask(taskId, updates);
+        await updateTask(taskId, { ...updates, updated_at: currentTask?.updated_at });
+        await queryClient.invalidateQueries({ queryKey: ["my-assigned-tasks"] });
       } catch (err) {
-        setError(err);
+        const isConflict = await handleConflict(err);
+        if (!isConflict) setMutationError(err);
       }
     },
-    [tasks, projectMembers]
+    [tasks, projectMembers, queryClient, selectedProject, handleConflict]
   );
 
   // Delete a task
-  const handleDeleteTask = useCallback(async (taskId) => {
-    try {
-      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+  const handleDeleteTask = useCallback(
+    async (taskId) => {
+      try {
+        queryClient.setQueryData(["tasks", selectedProject?.id], (prev = []) =>
+          prev.filter((task) => task.id !== taskId)
+        );
 
-      await deleteTask(taskId);
-    } catch (err) {
-      setError(err);
-    }
-  }, []);
+        await deleteTask(taskId);
+        await queryClient.invalidateQueries({ queryKey: ["my-assigned-tasks"] });
+      } catch (err) {
+        setMutationError(err);
+        await queryClient.invalidateQueries({ queryKey: ["tasks", selectedProject?.id] });
+      }
+    },
+    [queryClient, selectedProject]
+  );
 
   // Reorder tasks (for drag and drop in list view)
-  const handleReorderTask = useCallback(async (taskId, newPosition) => {
-    try {
-      await updateTask(taskId, { position: newPosition });
-    } catch (err) {
-      setError(err);
-    }
-  }, []);
+  const handleReorderTask = useCallback(
+    async (taskId, newPosition) => {
+      try {
+        const currentTask = tasks.find((task) => task.id === taskId);
+
+        await updateTask(taskId, { position: newPosition, updated_at: currentTask?.updated_at });
+        await queryClient.invalidateQueries({ queryKey: ["tasks", selectedProject?.id] });
+      } catch (err) {
+        const isConflict = await handleConflict(err);
+        if (!isConflict) setMutationError(err);
+      }
+    },
+    [tasks, queryClient, selectedProject, handleConflict]
+  );
 
   const contextValue = {
     tasks,

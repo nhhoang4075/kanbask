@@ -13,6 +13,7 @@ RUN yarn install --production --frozen-lockfile
 
 # Copy local directories to the current local directory of our docker image (/app)
 COPY ./src ./src
+COPY ./public ./public
 
 EXPOSE 8080
 

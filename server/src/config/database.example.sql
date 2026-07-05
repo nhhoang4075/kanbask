@@ -187,7 +187,7 @@ CREATE TABLE IF NOT EXISTS notifications (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   title VARCHAR(255) NOT NULL,
   content TEXT NOT NULL,
-  reference_type VARCHAR(30) NOT NULL CHECK (reference_type IN ('team','project','task')),
+  reference_type VARCHAR(30) NOT NULL CHECK (reference_type IN ('team','project','task','message')),
   reference_id INT,
   is_read BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

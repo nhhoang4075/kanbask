@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef } f
 import { useRouter, usePathname } from "next/navigation";
 import { useSession } from "@/hooks/use-session";
 import { useSocket } from "@/hooks/use-socket";
-import { getConversations } from "@/actions/conversation-actions";
+import { getConversations, getParticipantsOfConversation } from "@/actions/conversation-actions";
 import { getMessagesOfConversation } from "@/actions/message-actions";
 
 const ChatContext = createContext();
@@ -22,6 +22,7 @@ export function ChatProvider({ children }) {
   const [conversations, setConversations] = useState([]);
   const [selectedConversationId, setSelectedConversationId] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [participants, setParticipants] = useState([]);
   const [lastReadMessageId, setLastReadMessageId] = useState(null);
   const [highlightId, setHighlightId] = useState(null);
   const [scrollTargetId, setScrollTargetId] = useState(null);
@@ -109,6 +110,7 @@ export function ChatProvider({ children }) {
     socket.on("new_message", handleNewMsg);
 
     setLoading(true);
+    setParticipants([]);
 
     getMessagesOfConversation(selectedConversationId)
       .then((data) => {
@@ -116,6 +118,13 @@ export function ChatProvider({ children }) {
       })
       .catch((err) => setError(err))
       .finally(() => setLoading(false));
+
+    // Used for the @mention picker and for highlighting mentions in
+    // messages — not part of the initial page load path, so failures here
+    // shouldn't surface as a conversation-level error.
+    getParticipantsOfConversation(selectedConversationId)
+      .then((data) => setParticipants(data.participants))
+      .catch(() => {});
 
     return () => {
       socket.off("update_conversation", handleUpdateConv);
@@ -140,11 +149,15 @@ export function ChatProvider({ children }) {
   );
 
   const sendMessage = useCallback(
-    (content) => {
+    (content, mentionedUserIds = []) => {
       const trimmed = content.trim();
       const cid = selectedIdRef.current;
       if (!socketConnected || !cid || !trimmed) return;
-      socket.emit("send_message", { conversation_id: cid, content: trimmed });
+      socket.emit("send_message", {
+        conversation_id: cid,
+        content: trimmed,
+        mentioned_user_ids: [...new Set(mentionedUserIds)]
+      });
     },
     [socket, socketConnected]
   );
@@ -168,6 +181,7 @@ export function ChatProvider({ children }) {
         selectedConversationId,
         changeConversation,
         messages,
+        participants,
         lastReadMessageId,
         sendMessage,
         typingUserIds,

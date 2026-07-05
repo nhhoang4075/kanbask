@@ -67,22 +67,48 @@ export function getTypingParticipants(conversation, typingUserIds, messages, cur
   }));
 }
 
-export function linkifyMessage(message) {
-  const urlRegex = /(https?:\/\/[\w.-]+(?:\/[\w\-._~:\/?#[\]@!$&'()*+,;=]*)?)/g;
-  return message.split(urlRegex).map((part, idx) => {
-    if (urlRegex.test(part)) {
-      return (
-        <Link
-          key={idx}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-green hover:underline"
-        >
-          {part}
-        </Link>
-      );
-    }
-    return <span key={idx}>{part}</span>;
-  });
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// Highlights "@Full Name" mentions alongside the existing URL linkification.
+// Matches against known participant names (rather than any "@word") so a
+// message that merely contains a literal "@" isn't mistaken for a mention.
+// A lookahead (not \b) ends the match, since \b is ASCII-word-boundary only
+// and misbehaves right after names with diacritics (e.g. Vietnamese names).
+export function linkifyMessage(message, mentionNames = []) {
+  const urlPattern = "(https?://[\\w.-]+(?:/[\\w\\-._~:/?#[\\]@!$&'()*+,;=]*)?)";
+  const sortedNames = [...mentionNames].sort((a, b) => b.length - a.length);
+  const mentionPattern = sortedNames.length
+    ? `(@(?:${sortedNames.map(escapeRegExp).join("|")})(?=\\s|$|[.,!?;:]))`
+    : null;
+
+  const regex = new RegExp(mentionPattern ? `${urlPattern}|${mentionPattern}` : urlPattern, "g");
+
+  return message
+    .split(regex)
+    .filter((part) => part !== undefined)
+    .map((part, idx) => {
+      if (/^https?:\/\//.test(part)) {
+        return (
+          <Link
+            key={idx}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-green hover:underline"
+          >
+            {part}
+          </Link>
+        );
+      }
+      if (part[0] === "@" && sortedNames.some((name) => part === `@${name}`)) {
+        return (
+          <span key={idx} className="text-blue-green font-medium bg-blue-green/10 rounded px-1">
+            {part}
+          </span>
+        );
+      }
+      return <span key={idx}>{part}</span>;
+    });
 }

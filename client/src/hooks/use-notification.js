@@ -33,7 +33,8 @@ export function NotificationProvider({ children }) {
     { value: "all", label: "All Notifications" },
     { value: "team", label: "Team Notifications" },
     { value: "project", label: "Project Notifications" },
-    { value: "task", label: "Task Notifications" }
+    { value: "task", label: "Task Notifications" },
+    { value: "message", label: "Mention Notifications" }
   ];
 
   // Fetch notifications

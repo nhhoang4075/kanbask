@@ -46,7 +46,7 @@ export default function CommentInput({ task }) {
 
   return (
     <form onSubmit={handleSubmit} className="w-full p-6">
-      <div className="flex flex-col items-end px-1 bg-white border-1 rounded-md shadow-md overflow-hidden">
+      <div className="flex flex-col items-end px-1 bg-white border-1 rounded-md overflow-hidden">
         <Textarea
           ref={textareaRef}
           value={content}

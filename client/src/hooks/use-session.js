@@ -116,11 +116,26 @@ export function SessionProvider({ children }) {
     }
   }, [handleSession]);
 
+  // Re-reads the current user from the still-valid access token (GET
+  // /auth/me) — unlike refreshSession, this doesn't touch /auth/refresh, so
+  // it works regardless of whether "remember me" was checked at login. Use
+  // this after an update that changes the logged-in user's own data (e.g.
+  // profile/avatar) and just needs the cached session to reflect it.
+  const refetchSessionHandler = useCallback(async () => {
+    if (isRefreshingRef.current) return;
+    try {
+      await handleSession(false);
+    } catch (err) {
+      setError(err);
+    }
+  }, [handleSession]);
+
   const contextValue = {
     user,
     loading,
     error,
     refreshSession: refreshSessionHandler,
+    refetchSession: refetchSessionHandler,
     logout: logoutHandler
   };
 

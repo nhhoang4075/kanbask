@@ -1,0 +1,22 @@
+@startuml UC_Chat
+left to right direction
+skinparam packageStyle rectangle
+skinparam linetype polyline
+skinparam usecase {
+  BackgroundColor #FEFEFE
+  BorderColor #333333
+}
+
+actor "User" as User
+
+rectangle "Giao tiếp" {
+  usecase "UC23: Giao tiếp qua tin nhắn"          as UC23
+  usecase "UC27: Xem danh sách thông báo"         as UC27
+  usecase "UC28: Đánh dấu thông báo đã đọc"       as UC28
+
+  UC28 ..> UC27 : <<extend>>
+}
+
+User -- UC23
+User -- UC27
+@enduml

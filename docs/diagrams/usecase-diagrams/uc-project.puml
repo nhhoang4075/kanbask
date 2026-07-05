@@ -1,0 +1,27 @@
+@startuml UC_Project
+left to right direction
+skinparam packageStyle rectangle
+skinparam linetype polyline
+skinparam usecase {
+  BackgroundColor #FEFEFE
+  BorderColor #333333
+}
+
+actor "User" as User
+
+rectangle "Quản lý Project" {
+  usecase "UC10: Tạo Project"                      as UC10
+  usecase "UC11: Sửa thông tin Project"            as UC11
+  usecase "UC12: Xoá Project"                      as UC12
+  usecase "UC13: Thêm thành viên vào Project"      as UC13
+  usecase "UC14: Đổi vai trò thành viên Project"   as UC14
+  usecase "UC15: Xoá thành viên khỏi Project"      as UC15
+}
+
+User -- UC10
+User -- UC11
+User -- UC12
+User -- UC13
+User -- UC14
+User -- UC15
+@enduml

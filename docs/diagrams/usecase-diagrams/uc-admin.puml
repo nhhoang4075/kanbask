@@ -1,0 +1,23 @@
+@startuml UC_Admin
+left to right direction
+skinparam packageStyle rectangle
+skinparam linetype polyline
+skinparam usecase {
+  BackgroundColor #FEFEFE
+  BorderColor #333333
+}
+
+actor "Admin" as Admin
+
+rectangle "Quản trị hệ thống" {
+  usecase "UC29: Quản lý người dùng hệ thống"         as UC29
+  usecase "UC30: Quản lý Team/Project hệ thống"       as UC30
+  usecase "UC31: Xem thống kê tổng quan hệ thống"     as UC31
+  usecase "UC32: Kiểm tra tình trạng hệ thống"        as UC32
+}
+
+Admin -- UC29
+Admin -- UC30
+Admin -- UC31
+Admin -- UC32
+@enduml

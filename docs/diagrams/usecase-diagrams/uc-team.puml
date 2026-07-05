@@ -1,0 +1,31 @@
+@startuml UC_Team
+left to right direction
+skinparam packageStyle rectangle
+skinparam linetype polyline
+skinparam usecase {
+  BackgroundColor #FEFEFE
+  BorderColor #333333
+}
+
+actor "User" as User
+
+rectangle "Quản lý Team" {
+  usecase "UC02: Tạo Team"                       as UC02
+  usecase "UC03: Cập nhật Team"                  as UC03
+  usecase "UC04: Xoá Team"                       as UC04
+  usecase "UC05: Xin vào Team"                   as UC05
+  usecase "UC06: Rời Team"                       as UC06
+  usecase "UC07: Xoá thành viên khỏi Team"       as UC07
+  usecase "UC08: Đổi vai trò thành viên Team"    as UC08
+  usecase "UC09: Duyệt thành viên vào Team"      as UC09
+}
+
+User -- UC02
+User -- UC03
+User -- UC04
+User -- UC05
+User -- UC06
+User -- UC07
+User -- UC08
+User -- UC09
+@enduml

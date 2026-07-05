@@ -1,0 +1,45 @@
+@startuml Deployment_Diagram
+skinparam nodeStyle rectangle
+skinparam ranksep 60
+skinparam nodesep 40
+skinparam padding 4
+
+node "Thiết bị người dùng" as ClientDevice {
+  node "Trình duyệt (Browser)" as Browser
+}
+
+node "Railway Cloud Platform" as Railway {
+  node "Client Service\n(build bằng Railpack)" as ClientNode {
+    artifact "Next.js App\n(SSR + Static Assets)" as NextApp
+  }
+
+  node "Server Service\n(Docker container, Node 22)" as ServerNode {
+    artifact "Express.js REST API" as ExpressAPI
+    artifact "Socket.IO Server" as SocketIO
+    artifact "Embedding Service\n(@xenova/transformers, chạy nội bộ)" as EmbeddingService
+  }
+
+  database "PostgreSQL + pgvector" as DB
+}
+
+node "Cloudflare" as CloudflareCloud {
+  node "Cloudflare R2" as R2Node {
+    artifact "Object Storage\n(S3-compatible)" as Storage
+  }
+}
+
+node "Resend" as ResendCloud {
+  node "Resend Mail API" as ResendNode {
+    artifact "Email Sending Service" as MailService
+  }
+}
+
+Browser --> NextApp : HTTPS (tải trang, SSR)
+Browser --> ExpressAPI : HTTPS (REST API)
+Browser --> SocketIO : WebSocket (real-time)
+
+ExpressAPI --> DB : TCP 5432 (Knex/pg)
+ExpressAPI --> Storage : HTTPS (S3 API)
+ExpressAPI --> MailService : HTTPS (REST API)
+
+@enduml

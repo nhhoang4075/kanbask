@@ -1,0 +1,24 @@
+@startuml UC_Search
+left to right direction
+skinparam packageStyle rectangle
+skinparam linetype polyline
+skinparam usecase {
+  BackgroundColor #FEFEFE
+  BorderColor #333333
+}
+
+actor "User" as User
+
+rectangle "Tìm kiếm" {
+  usecase "Tìm kiếm"                     as UC_SearchBase
+  usecase "UC24: Tìm kiếm người dùng"    as UC24
+  usecase "UC25: Tìm kiếm công việc"     as UC25
+  usecase "UC26: Tìm kiếm tin nhắn"      as UC26
+
+  UC24 --|> UC_SearchBase
+  UC25 --|> UC_SearchBase
+  UC26 --|> UC_SearchBase
+}
+
+User -- UC_SearchBase
+@enduml

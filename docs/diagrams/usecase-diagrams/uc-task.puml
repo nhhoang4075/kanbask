@@ -1,0 +1,29 @@
+@startuml UC_Task
+left to right direction
+skinparam packageStyle rectangle
+skinparam linetype polyline
+skinparam usecase {
+  BackgroundColor #FEFEFE
+  BorderColor #333333
+}
+
+actor "User" as User
+
+rectangle "Quản lý nhiệm vụ" {
+  usecase "UC16: Tạo công việc"                     as UC16
+  usecase "UC17: Sửa thông tin công việc"           as UC17
+  usecase "UC18: Xoá công việc"                     as UC18
+  usecase "UC19: Đính file vào công việc"           as UC19
+  usecase "UC20: Bình luận về công việc"            as UC20
+  usecase "UC21: Xem lịch sử thay đổi của công việc" as UC21
+  usecase "UC22: Xem lịch biểu công việc cá nhân"    as UC22
+}
+
+User -- UC16
+User -- UC17
+User -- UC18
+User -- UC19
+User -- UC20
+User -- UC21
+User -- UC22
+@enduml

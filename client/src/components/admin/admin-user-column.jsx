@@ -6,8 +6,27 @@ import { BadgeCheck, BadgeX } from "lucide-react";
 import AdminUserActions from "@/components/admin/admin-user-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { useSocket } from "@/hooks/use-socket";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 import { cn, formatDate, capitalCase } from "@/lib/utils";
+
+function OnlineStatusCell({ user }) {
+  const { onlineUserIds } = useSocket();
+  const isOnline = onlineUserIds.has(user.id);
+
+  return (
+    <div className="flex flex-col items-center gap-0.5">
+      <Badge
+        className={cn("rounded-sm", isOnline ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600")}
+      >
+        {isOnline ? "Online" : "Offline"}
+      </Badge>
+      {!isOnline && user.last_active && (
+        <span className="text-[10px] text-muted-foreground">{formatDate(user.last_active)}</span>
+      )}
+    </div>
+  );
+}
 
 export function getColumns(listParams) {
   return [
@@ -80,6 +99,11 @@ export function getColumns(listParams) {
           </Badge>
         );
       }
+    },
+    {
+      accessorKey: "is_active",
+      header: "Online",
+      cell: ({ row }) => <OnlineStatusCell user={row.original} />
     },
     {
       accessorKey: "email_verified",

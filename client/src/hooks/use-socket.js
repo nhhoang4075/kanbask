@@ -15,6 +15,7 @@ export function SocketProvider({ children }) {
   const { user, loading, logout } = useSession(); // get current user from session
   const socketRef = useRef(null);
   const [connected, setConnected] = useState(false);
+  const [onlineUserIds, setOnlineUserIds] = useState(new Set());
 
   useEffect(() => {
     // Only connect when session is loaded and user is present
@@ -36,6 +37,24 @@ export function SocketProvider({ children }) {
         logout();
       });
 
+      // Full snapshot on connect, then incremental updates as people
+      // connect/disconnect elsewhere.
+      socketRef.current.on("online_users", (userIds) => {
+        setOnlineUserIds(new Set(userIds));
+      });
+
+      socketRef.current.on("user_status_changed", ({ user_id, is_active }) => {
+        setOnlineUserIds((prev) => {
+          const next = new Set(prev);
+          if (is_active) {
+            next.add(user_id);
+          } else {
+            next.delete(user_id);
+          }
+          return next;
+        });
+      });
+
       // Emit setup event with userId to authenticate socket
       socketRef.current.emit("setup");
       setConnected(true);
@@ -47,12 +66,13 @@ export function SocketProvider({ children }) {
         socketRef.current.disconnect();
         socketRef.current = null;
         setConnected(false);
+        setOnlineUserIds(new Set());
       }
     };
   }, [loading, user]); // rerun when loading or user changes
 
   return (
-    <SocketContext.Provider value={{ socket: socketRef.current, connected }}>
+    <SocketContext.Provider value={{ socket: socketRef.current, connected, onlineUserIds }}>
       {children}
     </SocketContext.Provider>
   );

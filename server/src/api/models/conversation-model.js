@@ -213,10 +213,25 @@ const getDetailOfConversation = async (conversation_id, user_id) => {
           [user_id]
         ),
         db.raw(
-          `(SELECT COUNT(*) 
-            FROM conversation_participants cp3 
+          `(SELECT COUNT(*)
+            FROM conversation_participants cp3
             WHERE cp3.conversation_id = v.conversation_id
           ) AS participant_count`
+        ),
+        // The other participant's id, for direct conversations, so the client
+        // can look up their live online/offline status.
+        db.raw(
+          `CASE
+            WHEN v.type = 'direct' THEN (
+              SELECT uv.id
+              FROM conversation_participants cp2
+              JOIN user_public_view uv ON cp2.user_id = uv.id
+              WHERE cp2.conversation_id = v.conversation_id AND uv.id <> ?
+              LIMIT 1
+            )
+            ELSE NULL
+          END AS direct_user_id`,
+          [user_id]
         ),
         db.raw("COALESCE(um.unread_count, 0) AS unread_count")
       ])

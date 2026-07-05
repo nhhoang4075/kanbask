@@ -1,11 +1,31 @@
 import { Server } from "socket.io";
 
 import authMiddleware from "../middlewares/auth-middleware.js";
+import userModel from "../api/models/user-model.js";
 import registerConversationHandlers from "./conversation-socket.js";
 import registerMessageHandlers from "./message-socket.js";
 import registerTaskCommentHandlers from "./task-comment-socket.js";
 
 let ioInstance = null;
+
+// Real presence tracking: userId -> Set<socketId> of currently-open connections.
+// A user is "online" as long as this set is non-empty (covers multiple open
+// tabs/devices). Going offline is debounced so a page refresh's brief
+// disconnect/reconnect doesn't flicker someone's status to everyone else.
+const connectionsByUser = new Map();
+const offlineTimers = new Map();
+const OFFLINE_GRACE_MS = 5000;
+
+const markUserOffline = (io, userId) => {
+  offlineTimers.delete(userId);
+
+  if (connectionsByUser.get(userId)?.size) return; // reconnected during the grace period
+
+  const lastActive = new Date().toISOString();
+
+  userModel.updateOneUserById(userId, { is_active: false, last_active: lastActive }).catch(() => {});
+  io.emit("user_status_changed", { user_id: userId, is_active: false, last_active: lastActive });
+};
 
 const setupSocket = (server) => {
   const io = new Server(server, {
@@ -21,14 +41,34 @@ const setupSocket = (server) => {
   io.use(authMiddleware.authenticateSocket);
 
   io.on("connection", (socket) => {
-    // console.log("A client connected: " + socket.id);
+    const userId = socket.data.user?.id;
+
+    if (userId) {
+      const pendingOfflineTimer = offlineTimers.get(userId);
+      if (pendingOfflineTimer) {
+        clearTimeout(pendingOfflineTimer);
+        offlineTimers.delete(userId);
+      }
+
+      const sockets = connectionsByUser.get(userId) ?? new Set();
+      const wasOffline = sockets.size === 0;
+      sockets.add(socket.id);
+      connectionsByUser.set(userId, sockets);
+
+      if (wasOffline) {
+        userModel.updateOneUserById(userId, { is_active: true }).catch(() => {});
+        io.emit("user_status_changed", { user_id: userId, is_active: true });
+      }
+    }
 
     socket.on("setup", () => {
       const userId = socket.data.user.id;
 
       if (userId) {
         socket.join(`user_${userId}`);
-        // console.log(`User ${userId} joined personal room`);
+        // Fresh connections need the full current snapshot; going forward
+        // they get incremental updates via "user_status_changed".
+        socket.emit("online_users", Array.from(connectionsByUser.keys()));
       }
     });
 
@@ -36,17 +76,22 @@ const setupSocket = (server) => {
     registerMessageHandlers(io, socket);
     registerTaskCommentHandlers(io, socket);
 
-    // socket.on("disconnect", (reason) => {
-    //   console.log(`Client disconnected: ${socket.id}, Reason: ${reason}`);
-    // });
+    socket.on("disconnect", () => {
+      if (!userId) return;
 
-    // socket.on("error", (error) => {
-    //   console.error("Socket Error on connection:", error);
-    // });
+      const sockets = connectionsByUser.get(userId);
+      if (!sockets) return;
 
-    // socket.on("connect_error", (error) => {
-    //   console.log(`connect_error due to ${error.message}`);
-    // });
+      sockets.delete(socket.id);
+
+      if (sockets.size === 0) {
+        connectionsByUser.delete(userId);
+        offlineTimers.set(
+          userId,
+          setTimeout(() => markUserOffline(io, userId), OFFLINE_GRACE_MS)
+        );
+      }
+    });
   });
 };
 

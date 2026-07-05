@@ -10,7 +10,7 @@ export default function ProjectInformationCard() {
   if (!selectedProject) return null;
 
   return (
-    <Card className="w-full gap-2 rounded-md shadow-none">
+    <Card className="w-full gap-2 rounded-md">
       <CardHeader>
         <div className="flex flex-row justify-between items-start">
           <div>

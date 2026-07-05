@@ -32,19 +32,19 @@ export default function TeamManageWindow() {
             <TabsList className="justify-start w-full px-6 gap-x-6 rounded-none border-b bg-white">
               <TabsTrigger
                 value="members"
-                className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+                className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
               >
                 Members
               </TabsTrigger>
               <TabsTrigger
                 value="projects"
-                className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+                className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
               >
                 Projects
               </TabsTrigger>
               <TabsTrigger
                 value="invitations"
-                className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+                className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
               >
                 Invitations
               </TabsTrigger>

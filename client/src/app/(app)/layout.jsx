@@ -11,6 +11,7 @@ import { ProjectProvider } from "@/hooks/use-project";
 import { TaskProvider } from "@/hooks/use-task";
 import { ChatProvider } from "@/hooks/use-chat";
 import { NotificationProvider } from "@/hooks/use-notification";
+import { ExclusiveMenuProvider } from "@/hooks/use-exclusive-menu";
 import { Toaster } from "sonner";
 
 export default async function RootLayout({ children }) {
@@ -26,15 +27,17 @@ export default async function RootLayout({ children }) {
               <ProjectProvider>
                 <TaskProvider>
                   <ChatProvider>
-                    <SidebarProvider defaultOpen={defaultOpen}>
-                      <SearchProvider>
-                        <AppSidebar variant="inset" />
-                        <SidebarInset>
-                          <main className="flex-1 min-h-[95dvh] bg-prussian-blue">{children}</main>
-                        </SidebarInset>
-                        <Toaster position="top-right" />
-                      </SearchProvider>
-                    </SidebarProvider>
+                    <ExclusiveMenuProvider>
+                      <SidebarProvider defaultOpen={defaultOpen}>
+                        <SearchProvider>
+                          <AppSidebar variant="inset" />
+                          <SidebarInset>
+                            <main className="flex-1 min-h-[95dvh] bg-prussian-blue">{children}</main>
+                          </SidebarInset>
+                          <Toaster position="top-right" />
+                        </SearchProvider>
+                      </SidebarProvider>
+                    </ExclusiveMenuProvider>
                   </ChatProvider>
                 </TaskProvider>
               </ProjectProvider>

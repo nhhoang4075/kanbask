@@ -317,11 +317,21 @@ const getSystemStats = async () => {
   }
 };
 
-const checkDependency = async (name, fn) => {
+const withTimeout = (promise, ms) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`Timed out after ${ms}ms`)), ms))
+  ]);
+
+// Some dependency checks (e.g. raw SMTP .verify()) can hang far longer than a
+// health check should ever take — notably Railway blocks outbound SMTP on
+// sub-Pro plans, so an unreachable mail server would otherwise stall the
+// whole /admin/health response indefinitely. Bound every check individually.
+const checkDependency = async (name, fn, timeoutMs = 5000) => {
   const start = Date.now();
 
   try {
-    await fn();
+    await withTimeout(fn(), timeoutMs);
 
     return { name, status: "up", latency_ms: Date.now() - start };
   } catch (err) {

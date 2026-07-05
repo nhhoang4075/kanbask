@@ -27,7 +27,7 @@ export default function ChatHeader() {
   return (
     <div className="flex w-full h-20 max-w-full gap-4 items-center border-b bg-white px-6 py-4">
       <div className="relative h-12 w-12 flex-none">
-        <Avatar className="h-12 w-12">
+        <Avatar key={currConversation.id} className="h-12 w-12">
           <AvatarImage
             src={currConversation.avatar_url}
             alt={currConversation.title}

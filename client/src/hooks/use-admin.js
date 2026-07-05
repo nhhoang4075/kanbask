@@ -61,17 +61,7 @@ export function AdminProvider({ children }) {
     },
     enabled: false
   });
-  const fetchStats = useCallback(
-    () =>
-      queryClient.fetchQuery({
-        queryKey: ["admin-stats"],
-        queryFn: async () => {
-          const data = await getStats();
-          return data.stats;
-        }
-      }),
-    [queryClient]
-  );
+  const fetchStats = useCallback(() => statsQuery.refetch(), [statsQuery.refetch]);
 
   const healthQuery = useQuery({
     queryKey: ["admin-health"],
@@ -81,17 +71,7 @@ export function AdminProvider({ children }) {
     },
     enabled: false
   });
-  const fetchHealth = useCallback(
-    () =>
-      queryClient.fetchQuery({
-        queryKey: ["admin-health"],
-        queryFn: async () => {
-          const data = await getHealth();
-          return data.health;
-        }
-      }),
-    [queryClient]
-  );
+  const fetchHealth = useCallback(() => healthQuery.refetch(), [healthQuery.refetch]);
 
   const loading =
     usersQuery.isFetching ||
@@ -99,6 +79,9 @@ export function AdminProvider({ children }) {
     projectsQuery.isFetching ||
     statsQuery.isFetching ||
     healthQuery.isFetching;
+
+  const statsLoading = statsQuery.isFetching;
+  const healthLoading = healthQuery.isFetching;
 
   const error =
     usersQuery.error ||
@@ -200,9 +183,11 @@ export function AdminProvider({ children }) {
     handleTransferProjectOwnership,
 
     stats: statsQuery.data ?? null,
+    statsLoading,
     fetchStats,
 
     health: healthQuery.data ?? null,
+    healthLoading,
     fetchHealth
   };
 

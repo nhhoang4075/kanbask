@@ -25,7 +25,7 @@ function formatUptime(seconds) {
 }
 
 export default function AdminHealthPanel() {
-  const { health, fetchHealth, loading } = useAdmin();
+  const { health, error, fetchHealth, healthLoading } = useAdmin();
 
   useEffect(() => {
     fetchHealth();
@@ -33,15 +33,16 @@ export default function AdminHealthPanel() {
 
   return (
     <div className="space-y-4">
+      {error && <p className="text-sm text-red-500">{error.message}</p>}
       <div className="flex justify-end">
         <Button
           variant="outline"
           size="sm"
           className="flex flex-row items-center gap-2"
           onClick={() => fetchHealth()}
-          disabled={loading}
+          disabled={healthLoading}
         >
-          <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+          <RefreshCw className={cn("h-4 w-4", healthLoading && "animate-spin")} />
           Refresh
         </Button>
       </div>

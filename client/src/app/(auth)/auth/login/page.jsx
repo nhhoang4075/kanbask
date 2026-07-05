@@ -21,7 +21,7 @@ export default function LoginPage() {
           className="h-full w-full rounded-r-xl object-cover"
         />
       </div>
-      <div className="flex-1 max-w-[500px] p-12 border-l bg-ghost-white flex flex-col justify-center ">
+      <div className="flex-1 max-w-[500px] p-12 bg-ghost-white flex flex-col justify-center ">
         <Suspense fallback={null}>
           <LoginForm />
         </Suspense>

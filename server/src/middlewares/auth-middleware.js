@@ -49,6 +49,33 @@ const authenticate = async (req, res, next) => {
   }
 };
 
+// Logging out an already-revoked session (disabled account, force-logout, or
+// a stale token_version) must still succeed at clearing cookies — otherwise a
+// force-logged-out user can never log out at all. Only verify the token's
+// signature, not whether the DB still considers this session live.
+const authenticateAllowRevoked = (req, res, next) => {
+  try {
+    const token = req.cookies ? req.cookies.access_token : null;
+
+    if (!token) {
+      return next(new ApiError(StatusCodes.UNAUTHORIZED, "Please login to access this"));
+    }
+
+    const decoded = jwtProvider.verifyToken(token, process.env.ACCESS_TOKEN_SECRET);
+
+    req.user = {
+      id: decoded.id,
+      email: decoded.email,
+      role: decoded.role,
+      exp: decoded.exp
+    };
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
 const authorizeAdmin = (req, res, next) => {
   try {
     if (!req.user) {
@@ -96,6 +123,7 @@ const authenticateSocket = async (socket, next) => {
 
 export default {
   authenticate,
+  authenticateAllowRevoked,
   authorizeAdmin,
   authenticateSocket
 };

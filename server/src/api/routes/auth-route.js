@@ -12,7 +12,7 @@ const authRoute = (router) => {
 
   router.route("/auth/refresh").post(authController.refreshSession);
 
-  router.use("/auth/logout", authMiddleware.authenticate);
+  router.use("/auth/logout", authMiddleware.authenticateAllowRevoked);
   router.route("/auth/logout").post(authController.logout);
 
   router.use("/mail/verify-email", authMiddleware.authenticate);

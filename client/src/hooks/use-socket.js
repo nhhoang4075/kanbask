@@ -12,7 +12,7 @@ export function useSocket() {
 }
 
 export function SocketProvider({ children }) {
-  const { user, loading } = useSession(); // get current user from session
+  const { user, loading, logout } = useSession(); // get current user from session
   const socketRef = useRef(null);
   const [connected, setConnected] = useState(false);
 
@@ -26,6 +26,14 @@ export function SocketProvider({ children }) {
 
       socketRef.current.on("connect", () => {
         setConnected(true);
+      });
+
+      // An admin disabled/force-logged-out this account — the server has
+      // already killed this socket connection; drop the client-side session
+      // and send the user to login right away instead of leaving them on a
+      // page whose API calls now silently 401.
+      socketRef.current.on("force_logout", () => {
+        logout();
       });
 
       // Emit setup event with userId to authenticate socket

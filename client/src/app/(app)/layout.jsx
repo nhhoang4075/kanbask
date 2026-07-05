@@ -18,8 +18,8 @@ export default async function RootLayout({ children }) {
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   return (
-    <QueryProvider>
-      <SessionProvider>
+    <SessionProvider>
+      <QueryProvider>
         <SocketProvider>
           <NotificationProvider>
             <TeamProvider>
@@ -41,7 +41,7 @@ export default async function RootLayout({ children }) {
             </TeamProvider>
           </NotificationProvider>
         </SocketProvider>
-      </SessionProvider>
-    </QueryProvider>
+      </QueryProvider>
+    </SessionProvider>
   );
 }

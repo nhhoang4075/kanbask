@@ -26,6 +26,9 @@ const disconnectUserSockets = (userId) => {
 
   for (const socket of io.sockets.sockets.values()) {
     if (socket.data?.user?.id === userId) {
+      // Let the client redirect to /auth/login immediately instead of only
+      // discovering the revoked session next time an API call 401s.
+      socket.emit("force_logout");
       socket.disconnect(true);
     }
   }

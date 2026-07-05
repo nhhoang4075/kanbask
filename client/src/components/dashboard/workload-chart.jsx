@@ -117,7 +117,7 @@ export default function WorkloadChart() {
 
     const data = payload[0].payload;
     return (
-      <div className="bg-white p-4 rounded-lg shadow-lg border">
+      <div className="bg-white p-4 rounded-lg border">
         <p className="font-medium mb-2">{data.name}</p>
         <div className="space-y-1">
           <p className="flex items-center justify-between gap-4">

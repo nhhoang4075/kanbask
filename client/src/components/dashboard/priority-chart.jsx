@@ -66,7 +66,7 @@ export default function PriorityChart() {
     if (!active || !payload || !payload.length) return null;
 
     return (
-      <div className="bg-white p-4 rounded-lg shadow-lg border">
+      <div className="bg-white p-4 rounded-lg border">
         <p className="font-medium mb-2">{label} Priority</p>
         <div className="space-y-1">
           <p className="flex items-center justify-between gap-4">

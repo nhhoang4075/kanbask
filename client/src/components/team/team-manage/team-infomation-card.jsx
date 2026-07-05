@@ -8,7 +8,7 @@ export default function TeamInformationCard() {
   if (!selectedTeam) return null;
 
   return (
-    <Card className="w-full gap-2 rounded-md shadow-none">
+    <Card className="w-full gap-2 rounded-md">
       <CardHeader>
         <div className="flex flex-row justify-between items-start">
           <div>

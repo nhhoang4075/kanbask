@@ -29,7 +29,7 @@ export default function ProjectManageWindow({ teamId, projectId }) {
             <TabsList className="justify-start w-full px-6 gap-x-4 rounded-none border-b bg-white">
               <TabsTrigger
                 value="members"
-                className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+                className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
               >
                 Members
               </TabsTrigger>

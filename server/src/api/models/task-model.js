@@ -209,6 +209,16 @@ const getAssigneesOfTask = async (task_id) => {
   }
 };
 
+const countTasks = async () => {
+  try {
+    const [{ count }] = await db("tasks").count("id AS count");
+
+    return parseInt(count, 10);
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const getMaxTaskPositionOfProject = async (project_id) => {
   try {
     const [{ max }] = await db("tasks").where({ project_id }).max("position AS max");
@@ -250,6 +260,7 @@ export default {
   getOneTaskById,
   getManyTasksByProjectId,
   getAssignedTasksByUserId,
+  countTasks,
   updateOneTaskById,
   deleteOneTaskById,
   getAssigneesOfTask,

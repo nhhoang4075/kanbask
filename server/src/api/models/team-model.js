@@ -57,6 +57,60 @@ const getManyTeamsByUserId = async (user_id) => {
   }
 };
 
+const getManyTeamsPaginated = async (q, { limit, offset }) => {
+  try {
+    const query = db("teams AS t")
+      .leftJoin("team_members AS tm", (join) => {
+        join.on("tm.team_id", "=", "t.id").andOn("tm.role", "=", db.raw("'owner'"));
+      })
+      .leftJoin("users AS u", "u.id", "=", "tm.user_id")
+      .select(
+        "t.*",
+        "u.id AS owner_id",
+        "u.full_name AS owner_full_name",
+        "u.email AS owner_email",
+        db.raw(`
+          (
+            SELECT COUNT(*)
+            FROM team_members tm2
+            WHERE tm2.team_id = t.id
+          )::int AS member_count
+        `)
+      )
+      .orderBy("t.created_at", "desc")
+      .limit(limit)
+      .offset(offset);
+
+    if (q) {
+      query.where((builder) => {
+        builder.whereILike("t.name", `%${q}%`).orWhereILike("t.code", `%${q}%`);
+      });
+    }
+
+    return await query;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const countTeams = async (q) => {
+  try {
+    const query = db("teams");
+
+    if (q) {
+      query.where((builder) => {
+        builder.whereILike("name", `%${q}%`).orWhereILike("code", `%${q}%`);
+      });
+    }
+
+    const [{ count }] = await query.count("id AS count");
+
+    return parseInt(count, 10);
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const isUserInTeam = async (team_id, user_id) => {
   const [record] = await db("team_members").where({ team_id, user_id }).limit(1);
 
@@ -222,6 +276,8 @@ export default {
   getOneTeamById,
   getOneTeamByCode,
   getManyTeamsByUserId,
+  getManyTeamsPaginated,
+  countTeams,
   isUserInTeam,
   updateOneTeamById,
   deleteOneTeamById,

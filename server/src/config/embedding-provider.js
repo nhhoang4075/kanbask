@@ -6,6 +6,7 @@ env.remoteHost = "https://huggingface.co";
 
 const modelName = "Xenova/all-MiniLM-L6-v2";
 let embeddingPipelinePromise = null;
+let status = "initializing";
 
 const getEmbeddingPipeline = async () => {
   if (embeddingPipelinePromise === null) {
@@ -43,9 +44,13 @@ const generateEmbedding = async (text) => {
 const initialize = async () => {
   try {
     await getEmbeddingPipeline();
+    status = "ready";
   } catch (error) {
+    status = "failed";
     throw error;
   }
 };
 
-export default { generateEmbedding, initialize };
+const getStatus = () => status;
+
+export default { generateEmbedding, initialize, getStatus };

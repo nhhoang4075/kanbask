@@ -71,6 +71,62 @@ const getManyProjectsByUserId = async (user_id) => {
   }
 };
 
+const getManyProjectsPaginated = async (q, { limit, offset }) => {
+  try {
+    const query = db("projects AS p")
+      .join("teams AS t", "t.id", "=", "p.team_id")
+      .leftJoin("project_members AS pm", (join) => {
+        join.on("pm.project_id", "=", "p.id").andOn("pm.role", "=", db.raw("'owner'"));
+      })
+      .leftJoin("users AS u", "u.id", "=", "pm.user_id")
+      .select(
+        "p.*",
+        "t.name AS team_name",
+        "u.id AS owner_id",
+        "u.full_name AS owner_full_name",
+        "u.email AS owner_email",
+        db.raw(`
+          (
+            SELECT COUNT(*)
+            FROM project_members pm2
+            WHERE pm2.project_id = p.id
+          )::int AS member_count
+        `)
+      )
+      .orderBy("p.created_at", "desc")
+      .limit(limit)
+      .offset(offset);
+
+    if (q) {
+      query.where((builder) => {
+        builder.whereILike("p.name", `%${q}%`).orWhereILike("t.name", `%${q}%`);
+      });
+    }
+
+    return await query;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const countProjects = async (q) => {
+  try {
+    const query = db("projects AS p").join("teams AS t", "t.id", "=", "p.team_id");
+
+    if (q) {
+      query.where((builder) => {
+        builder.whereILike("p.name", `%${q}%`).orWhereILike("t.name", `%${q}%`);
+      });
+    }
+
+    const [{ count }] = await query.count("p.id AS count");
+
+    return parseInt(count, 10);
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const isUserInProject = async (project_id, user_id) => {
   try {
     const [record] = await db("project_members")
@@ -189,6 +245,8 @@ export default {
   getOneProjectById,
   getManyProjectsByTeamId,
   getManyProjectsByUserId,
+  getManyProjectsPaginated,
+  countProjects,
   isUserInProject,
   updateOneProjectById,
   deleteOneProjectById,

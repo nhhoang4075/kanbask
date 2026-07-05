@@ -57,9 +57,34 @@ const login = async (data) => {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid credentials");
     }
 
+    if (!existedUser.is_enabled) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "This account has been disabled");
+    }
+
     await userModel.updateOneUserById(existedUser.id, { is_active: true });
 
     const user = await userModel.getOneUserById(existedUser.id);
+    return sanitizeUser(user);
+  } catch (err) {
+    throw err;
+  }
+};
+
+const refreshAccessToken = async (userId, tokenVersion) => {
+  try {
+    const user = await userModel.getOneUserById(userId);
+    if (!user) {
+      throw new ApiError(StatusCodes.NOT_FOUND, `User with id '${userId}' not found`);
+    }
+
+    if (!user.is_enabled) {
+      throw new ApiError(StatusCodes.FORBIDDEN, "This account has been disabled");
+    }
+
+    if (user.token_version !== tokenVersion) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, "Session has been revoked, please login again");
+    }
+
     return sanitizeUser(user);
   } catch (err) {
     throw err;
@@ -238,6 +263,7 @@ const resetPassword = async (data) => {
 export default {
   register,
   login,
+  refreshAccessToken,
   getSession,
   logout,
   sendVerificationMail,

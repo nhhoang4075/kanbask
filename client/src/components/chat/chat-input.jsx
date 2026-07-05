@@ -44,7 +44,7 @@ export default function ChatInput() {
 
   return (
     <form onSubmit={handleSubmit} className="w-full px-4">
-      <div className="flex flex-col items-end px-1 bg-white border-1 rounded-md shadow-md overflow-hidden">
+      <div className="flex flex-col items-end px-1 bg-white border-1 rounded-md overflow-hidden">
         <Textarea
           ref={textareaRef}
           value={message}

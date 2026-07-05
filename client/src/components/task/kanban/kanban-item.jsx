@@ -18,7 +18,7 @@ export default function KanbanItem({ task, columnId }) {
 
   return (
     <Card
-      className="p-0 cursor-grab active:cursor-grabbing shadow-xs"
+      className="p-0 cursor-grab active:cursor-grabbing"
       draggable
       onDragStart={handleDragStart}
     >

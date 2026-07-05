@@ -24,7 +24,7 @@ export function AccountProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { refreshSession, logout } = useSession();
+  const { refetchSession, logout } = useSession();
 
   const fetchAccount = useCallback(async () => {
     try {
@@ -48,7 +48,7 @@ export function AccountProvider({ children }) {
         setAccount((prev) => ({ ...prev, ...data }));
 
         await updateMyProfile(data);
-        await refreshSession();
+        await refetchSession();
       } catch (err) {
         setError(err);
       }
@@ -69,7 +69,7 @@ export function AccountProvider({ children }) {
   const handleUploadAvatar = useCallback(async (file) => {
     try {
       const avatarData = await uploadMyAvatar(file);
-      await refreshSession();
+      await refetchSession();
 
       setAccount((prev) => ({ ...prev, avatar_url: avatarData.avatar_url }));
     } catch (err) {

@@ -123,6 +123,22 @@ const refreshSession = async (req, res, next) => {
       domain: cookieDomain
     });
 
+    // Rolling session: as long as the user keeps coming back within 7 days,
+    // extend the "remember me" refresh token instead of letting it hard-expire.
+    const newRefreshToken = jwtProvider.generateToken(
+      payload,
+      process.env.REFRESH_TOKEN_SECRET,
+      "7 days"
+    );
+
+    res.cookie("refresh_token", newRefreshToken, {
+      maxAge: ms("7 days"),
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      domain: cookieDomain
+    });
+
     res.status(StatusCodes.OK).json({
       success: true,
       message: "Refreshed session successfully"

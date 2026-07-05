@@ -15,11 +15,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useTaskComment } from "@/hooks/use-task-comment";
 import { useSession } from "@/hooks/use-session";
+import { useExclusiveMenu } from "@/hooks/use-exclusive-menu";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 
 export default function CommentItem({ comment }) {
   const { handleUpdateComment, handleDeleteComment } = useTaskComment();
   const { user } = useSession();
+  const menuProps = useExclusiveMenu();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
@@ -66,7 +68,7 @@ export default function CommentItem({ comment }) {
           </div>
 
           {comment.commenter_id === user.id && (
-            <DropdownMenu modal={false}>
+            <DropdownMenu modal={false} {...menuProps}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-4 w-4 bg-transparent">
                   <MoreHorizontal className="h-4 w-4" />

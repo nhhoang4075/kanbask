@@ -246,7 +246,8 @@ const getManyTeamJoinRequestsOfTeam = async (team_id) => {
         "v.email AS requester_email",
         "v.avatar_url AS requester_avatar_url"
       )
-      .where({ team_id });
+      .where({ team_id })
+      .orderBy("tjr.created_at", "desc");
 
     return requests;
   } catch (err) {

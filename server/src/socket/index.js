@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 
 import authMiddleware from "../middlewares/auth-middleware.js";
 import userModel from "../api/models/user-model.js";
+import conversationService from "../api/services/conversation-service.js";
 import registerConversationHandlers from "./conversation-socket.js";
 import registerMessageHandlers from "./message-socket.js";
 import registerTaskCommentHandlers from "./task-comment-socket.js";
@@ -83,9 +84,17 @@ const setupSocket = (server) => {
 
       const currentConversationId = socket.data.conversation_id;
       if (currentConversationId) {
-        socket
-          .to(`conversation_${currentConversationId}`)
-          .emit("user_stopped_typing", { conversation_id: currentConversationId, user_id: userId });
+        conversationService
+          .getParticipantsOfConversation(currentConversationId, userId)
+          .then((participants) => {
+            participants.forEach((p) => {
+              io.to(`user_${p.id}`).emit("user_stopped_typing", {
+                conversation_id: currentConversationId,
+                user_id: userId
+              });
+            });
+          })
+          .catch(() => {});
       }
 
       const sockets = connectionsByUser.get(userId);

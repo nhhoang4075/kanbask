@@ -32,6 +32,41 @@ export function groupMessages(messages) {
   return groupedMessages;
 }
 
+// Resolves typing user ids to a displayable {id, full_name, avatar_url} —
+// direct conversations always resolve via the conversation itself (the
+// title/avatar_url already ARE the other participant's), group conversations
+// only resolve for senders already seen in the loaded message history, since
+// no participants list is fetched for the chat view.
+export function getTypingParticipants(conversation, typingUserIds, messages, currentUserId) {
+  if (!conversation) return [];
+
+  const typistIds = typingUserIds.filter((id) => id !== currentUserId);
+  if (!typistIds.length) return [];
+
+  if (conversation.type === "direct") {
+    return typistIds.includes(conversation.direct_user_id)
+      ? [
+          {
+            id: conversation.direct_user_id,
+            full_name: conversation.title,
+            avatar_url: conversation.avatar_url
+          }
+        ]
+      : [];
+  }
+
+  const byId = new Map();
+  messages.forEach((msg) =>
+    byId.set(msg.sender_id, { full_name: msg.sender_full_name, avatar_url: msg.sender_avatar_url })
+  );
+
+  return typistIds.map((id) => ({
+    id,
+    full_name: byId.get(id)?.full_name ?? "Someone",
+    avatar_url: byId.get(id)?.avatar_url ?? null
+  }));
+}
+
 export function linkifyMessage(message) {
   const urlRegex = /(https?:\/\/[\w.-]+(?:\/[\w\-._~:\/?#[\]@!$&'()*+,;=]*)?)/g;
   return message.split(urlRegex).map((part, idx) => {

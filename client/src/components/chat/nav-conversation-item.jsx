@@ -4,13 +4,20 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useChat } from "@/hooks/use-chat";
 import { useSocket } from "@/hooks/use-socket";
+import { useSession } from "@/hooks/use-session";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 import { cn, capitalCase, formatShortTimestamp } from "@/lib/utils";
 
 export default function NavConversationItem({ conversation }) {
   const { selectedConversationId, changeConversation } = useChat();
-  const { onlineUserIds } = useSocket();
+  const { onlineUserIds, typingByConversation } = useSocket();
+  const { user } = useSession();
   const selected = conversation.id === selectedConversationId;
+
+  // No message history is loaded for conversations other than the open one,
+  // so group-chat typists can't be resolved to a name here (unlike the chat
+  // header) — only direct conversations can, via their already-known title.
+  const isTyping = (typingByConversation[conversation.id] ?? []).some((id) => id !== user?.id);
 
   return (
     <li
@@ -75,14 +82,20 @@ export default function NavConversationItem({ conversation }) {
             </Badge>
           )}
         </div>
-        <p
-          className={cn(
-            "text-left text-xs text-gray-500 truncate",
-            conversation.unread_count > 0 && "font-bold"
-          )}
-        >
-          {conversation.latest_message_content || "No messages yet"}
-        </p>
+        {isTyping ? (
+          <p className="text-left text-xs text-blue-green italic animate-pulse truncate">
+            {conversation.type === "direct" ? `${conversation.title} is typing...` : "Someone is typing..."}
+          </p>
+        ) : (
+          <p
+            className={cn(
+              "text-left text-xs text-gray-500 truncate",
+              conversation.unread_count > 0 && "font-bold"
+            )}
+          >
+            {conversation.latest_message_content || "No messages yet"}
+          </p>
+        )}
       </div>
 
       {/* Column 3: Timestamp */}

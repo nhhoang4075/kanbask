@@ -111,6 +111,14 @@ const countTeams = async (q) => {
   }
 };
 
+const getAllCreatedAtTimestamps = async () => {
+  try {
+    return await db("teams").select("created_at");
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const isUserInTeam = async (team_id, user_id) => {
   const [record] = await db("team_members").where({ team_id, user_id }).limit(1);
 
@@ -278,6 +286,7 @@ export default {
   getManyTeamsByUserId,
   getManyTeamsPaginated,
   countTeams,
+  getAllCreatedAtTimestamps,
   isUserInTeam,
   updateOneTeamById,
   deleteOneTeamById,

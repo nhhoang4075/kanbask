@@ -16,8 +16,8 @@ export default function NavConversationItem({ conversation }) {
     <li
       onClick={() => changeConversation(conversation.id)}
       className={cn(
-        "grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 w-full px-5 py-3 transition duration-200 ease-in-out",
-        selected ? "bg-prussian-blue/5" : "hover:bg-prussian-blue/5"
+        "grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-4 w-full rounded-xl px-3 py-2.5 cursor-pointer transition-colors duration-200 ease-in-out",
+        selected ? "bg-prussian-blue/8" : "hover:bg-prussian-blue/5"
       )}
     >
       {/* Column 1: Avatar */}

@@ -42,7 +42,7 @@ export default function NavConversation() {
           <TabsContent value="all" className="m-0 h-full">
             {notPendingConversations.length ? (
               <ScrollArea className="h-[calc(98vh-100px)] overflow-y-auto">
-                <ul className="divide-y divide-border">
+                <ul className="flex flex-col gap-1 p-3">
                   {notPendingConversations.map((conversation) => (
                     <NavConversationItem key={conversation.id} conversation={conversation} />
                   ))}
@@ -55,7 +55,7 @@ export default function NavConversation() {
           <TabsContent value="unread" className="m-0 h-full">
             {unreadConversations.length ? (
               <ScrollArea className="h-[calc(98vh-100px)] overflow-y-auto">
-                <ul className="divide-y divide-border">
+                <ul className="flex flex-col gap-1 p-3">
                   {unreadConversations.map((conversation) => (
                     <NavConversationItem key={conversation.id} conversation={conversation} />
                   ))}

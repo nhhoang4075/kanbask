@@ -38,16 +38,24 @@ Kanbask là một nền tảng quản lý dự án hỗ trợ các cá nhân và
 - **Docs Management:** Tạo và quản lý cấu trúc tài liệu dự án.
 - **File Upload/Download:** Cho phép tải lên và tải xuống các file liên quan đến dự án.
 
+### e. System Administration
+
+- **User Management:** Xem danh sách, chi tiết người dùng toàn hệ thống; đổi vai trò, khóa/mở tài khoản, đăng xuất bắt buộc, gửi lại email đặt lại mật khẩu.
+- **Team & Project Oversight:** Xem danh sách, chi tiết team/dự án toàn hệ thống; chuyển quyền sở hữu team/dự án.
+- **System Dashboard:** Thống kê tổng quan số lượng người dùng, team, dự án, nhiệm vụ.
+- **System Health Check:** Theo dõi tình trạng kết nối database, storage, mail, embedding service và tài nguyên hệ thống.
+
 ## 3. Tech Stack
 
-| Component            | Technology                              |
-| -------------------- | --------------------------------------- |
-| **Frontend**         | Next.js (React Framework), Tailwind CSS |
-| **Backend**          | Express.js                              |
-| **Database**         | Railway (PostgreSQL + pgvector)         |
-| **File Storage**     | Cloudflare R2 (S3-compatible)           |
-| **Authentication**   | JWT                                     |
-| **Real-time**        | Socket.IO                               |
-| **Containerization** | Docker                                  |
-| **Deployment**       | Contabo, GitLab                         |
-| **Version Control**  | Git, GitHub                             |
+| Component            | Technology                                       |
+| -------------------- | ------------------------------------------------- |
+| **Frontend**         | Next.js (React Framework), Tailwind CSS, shadcn/ui |
+| **Backend**          | Express.js                                       |
+| **Database**         | Railway (PostgreSQL + pgvector)                  |
+| **File Storage**     | Cloudflare R2 (S3-compatible)                    |
+| **Email**            | Resend                                           |
+| **Authentication**   | JWT                                              |
+| **Real-time**        | Socket.IO                                        |
+| **Containerization** | Docker (server)                                  |
+| **Deployment**       | Railway                                          |
+| **Version Control**  | Git, GitHub                                      |

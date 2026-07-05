@@ -20,6 +20,35 @@ function getTokenPayload(token) {
   }
 }
 
+// Access token expired but a "remember me" refresh token is still around — mint
+// a new access token instead of bouncing the user to /auth/login.
+async function tryRefreshAccessToken(refreshToken) {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/refresh`, {
+      method: "POST",
+      headers: { Cookie: `refresh_token=${refreshToken}` }
+    });
+
+    if (!res.ok) return null;
+
+    // The refresh response sets both a new access_token and a rotated refresh_token
+    // (rolling session); Set-Cookie headers can't be safely comma-joined (Expires
+    // contains commas), so read them out individually where supported.
+    const setCookies = res.headers.getSetCookie
+      ? res.headers.getSetCookie()
+      : [res.headers.get("set-cookie")].filter(Boolean);
+
+    const accessCookie = setCookies.find((cookie) => cookie.startsWith("access_token="));
+    const match = accessCookie?.match(/access_token=([^;]+)/);
+
+    if (!match) return null;
+
+    return { accessToken: match[1], setCookies };
+  } catch (e) {
+    return null;
+  }
+}
+
 /**
  * Middleware to guard protected routes.
  * - Skips public routes and assets.
@@ -44,8 +73,25 @@ export async function middleware(request) {
   const isVerificationRoute = VERIFICATION_ROUTES.includes(pathname);
   const isProtectedRoute = PROTECTED_ROUTES.includes(pathname);
 
-  const access_token = cookies.get("access_token")?.value;
+  let access_token = cookies.get("access_token")?.value;
+  const refresh_token = cookies.get("refresh_token")?.value;
+  let refreshedSetCookies = null;
+
+  if (!access_token && refresh_token) {
+    const refreshed = await tryRefreshAccessToken(refresh_token);
+    if (refreshed) {
+      access_token = refreshed.accessToken;
+      refreshedSetCookies = refreshed.setCookies;
+    }
+  }
+
   const isAuthenticated = !!access_token;
+
+  // Carries the refreshed access_token/refresh_token cookies (if any) onto whichever response we return
+  const withRefreshedCookie = (response) => {
+    refreshedSetCookies?.forEach((cookie) => response.headers.append("set-cookie", cookie));
+    return response;
+  };
 
   // Handle unauthenticated users
   if (!isAuthenticated && !isAuthRoute) {
@@ -57,7 +103,7 @@ export async function middleware(request) {
   // Handle authenticated users trying to access auth routes
   if (isAuthenticated && isAuthRoute) {
     url.pathname = DEFAULT_LOGIN_REDIRECT;
-    return NextResponse.redirect(url);
+    return withRefreshedCookie(NextResponse.redirect(url));
   }
 
   // Check email verification status for authenticated users
@@ -68,17 +114,17 @@ export async function middleware(request) {
     // If email not verified and not on verification route, redirect to verification
     if (!isEmailVerified && isProtectedRoute) {
       url.pathname = "/auth/verify";
-      return NextResponse.redirect(url);
+      return withRefreshedCookie(NextResponse.redirect(url));
     }
 
     // If email is verified and trying to access verification route, redirect to app
     if (isEmailVerified && isVerificationRoute) {
       url.pathname = DEFAULT_LOGIN_REDIRECT;
-      return NextResponse.redirect(url);
+      return withRefreshedCookie(NextResponse.redirect(url));
     }
   }
 
-  return NextResponse.next();
+  return withRefreshedCookie(NextResponse.next());
 }
 
 /**

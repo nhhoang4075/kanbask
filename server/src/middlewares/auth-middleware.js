@@ -2,9 +2,24 @@ import { parse } from "cookie";
 import { StatusCodes } from "http-status-codes";
 
 import jwtProvider from "../config/jwt-provider.js";
+import userModel from "../api/models/user-model.js";
 import ApiError from "../utils/api-error.js";
 
-const authenticate = (req, res, next) => {
+// A still-valid access_token JWT only proves the user was enabled, had this
+// token_version, and held this role at issuance time (up to 1h ago) — re-fetch
+// the user so an admin's force-logout/disable-account/role-change takes effect
+// immediately instead of only once the client happens to hit /auth/refresh.
+const getActiveUserForToken = async (decoded) => {
+  const user = await userModel.getOneUserById(decoded.id);
+
+  if (!user || !user.is_enabled || user.token_version !== decoded.token_version) {
+    return null;
+  }
+
+  return user;
+};
+
+const authenticate = async (req, res, next) => {
   try {
     const token = req.cookies ? req.cookies.access_token : null;
 
@@ -13,11 +28,18 @@ const authenticate = (req, res, next) => {
     }
 
     const decoded = jwtProvider.verifyToken(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await getActiveUserForToken(decoded);
+
+    if (!user) {
+      return next(
+        new ApiError(StatusCodes.UNAUTHORIZED, "Session has been revoked, please login again")
+      );
+    }
 
     req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role,
+      id: user.id,
+      email: user.email,
+      role: user.role,
       exp: decoded.exp
     };
 
@@ -52,11 +74,18 @@ const authenticateSocket = async (socket, next) => {
     }
 
     const decoded = jwtProvider.verifyToken(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await getActiveUserForToken(decoded);
+
+    if (!user) {
+      return next(
+        new ApiError(StatusCodes.UNAUTHORIZED, "Session has been revoked, please login again")
+      );
+    }
 
     socket.data.user = {
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role
+      id: user.id,
+      email: user.email,
+      role: user.role
     };
 
     next();

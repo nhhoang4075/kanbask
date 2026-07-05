@@ -33,7 +33,8 @@ const login = async (req, res, next) => {
       id: user.id,
       email: user.email,
       role: user.role,
-      email_verified: user.email_verified
+      email_verified: user.email_verified,
+      token_version: user.token_version
     };
 
     const accessToken = jwtProvider.generateToken(
@@ -106,11 +107,17 @@ const refreshSession = async (req, res, next) => {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
     }
 
+    const user = await authService.refreshAccessToken(
+      decodedRefreshToken.id,
+      decodedRefreshToken.token_version
+    );
+
     const payload = {
-      id: decodedRefreshToken.id,
-      email: decodedRefreshToken.email,
-      role: decodedRefreshToken.role,
-      email_verified: decodedRefreshToken.email_verified
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      email_verified: user.email_verified,
+      token_version: user.token_version
     };
 
     const accessToken = jwtProvider.generateToken(payload, process.env.ACCESS_TOKEN_SECRET, "1h");
@@ -120,6 +127,22 @@ const refreshSession = async (req, res, next) => {
       httpOnly: true,
       secure: isProd,
       sameSite: isProd ? "none" : "lax",
+      domain: cookieDomain
+    });
+
+    // Rolling session: as long as the user keeps coming back within 7 days,
+    // extend the "remember me" refresh token instead of letting it hard-expire.
+    const newRefreshToken = jwtProvider.generateToken(
+      payload,
+      process.env.REFRESH_TOKEN_SECRET,
+      "7 days"
+    );
+
+    res.cookie("refresh_token", newRefreshToken, {
+      maxAge: ms("7 days"),
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
       domain: cookieDomain
     });
 

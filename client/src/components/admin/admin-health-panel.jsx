@@ -64,7 +64,9 @@ export default function AdminHealthPanel() {
         <div
           className={cn(
             "flex items-center justify-between gap-4 rounded-xl p-6 text-white",
-            allHealthy ? "bg-prussian-blue" : "bg-gradient-to-br from-prussian-blue to-red-900"
+            allHealthy
+              ? "bg-prussian-blue"
+              : "bg-gradient-to-r from-blue-green from-0% via-blue-green via-65% to-red-900 to-100%"
           )}
         >
           <div>

@@ -12,7 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTeam } from "@/hooks/use-team";
 
 export default function TeamManageWindow() {
-  const { teams } = useTeam();
+  const { selectedTeam } = useTeam();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -26,7 +26,7 @@ export default function TeamManageWindow() {
 
   return (
     <div className="w-full h-full bg-white">
-      {teams.length ? (
+      {selectedTeam ? (
         <>
           <Tabs value={tab} onValueChange={changeTab} className="w-full h-full bg-white">
             <TabsList className="justify-start w-full px-6 gap-x-6 rounded-none border-b bg-white">

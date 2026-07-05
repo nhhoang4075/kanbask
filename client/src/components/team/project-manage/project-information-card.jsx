@@ -7,6 +7,8 @@ export default function ProjectInformationCard() {
   const { selectedProject } = useProject();
   const { selectedTeam } = useTeam();
 
+  if (!selectedProject) return null;
+
   return (
     <Card className="w-full gap-2 rounded-md shadow-none">
       <CardHeader>
@@ -23,7 +25,7 @@ export default function ProjectInformationCard() {
         <div className="flex flex-col gap-2">
           <div>
             <h3 className="text-sm font-semibold">Team</h3>
-            <p className="text-sm text-muted-foreground line-clamp-3">{selectedTeam.name}</p>
+            <p className="text-sm text-muted-foreground line-clamp-3">{selectedTeam?.name}</p>
           </div>
           <div>
             <h3 className="text-sm font-semibold">Description</h3>

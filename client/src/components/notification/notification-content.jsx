@@ -65,13 +65,13 @@ export default function NotificationContent() {
       <TabsList className="justify-start w-full px-4 gap-x-6 rounded-none border-b bg-white">
         <TabsTrigger
           value="all"
-          className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+          className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
         >
           All
         </TabsTrigger>
         <TabsTrigger
           value="unread"
-          className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+          className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
         >
           {unreadCount > 0 ? `Unread (${unreadCount})` : "Unread"}
         </TabsTrigger>

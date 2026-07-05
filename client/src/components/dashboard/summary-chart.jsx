@@ -104,7 +104,7 @@ export default function SummaryChart() {
         <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
         <XAxis dataKey="date" tick={{ fontSize: 12 }} tickMargin={10} />
         <YAxis allowDecimals={false} tick={{ fontSize: 12 }} tickMargin={10} />
-        <ChartTooltip content={<ChartTooltipContent className="bg-white p-4 space-y-2" />} />
+        <ChartTooltip content={<ChartTooltipContent className="p-4 space-y-2" />} />
         <ChartLegend content={<ChartLegendContent />} />
         <Line
           type="monotone"

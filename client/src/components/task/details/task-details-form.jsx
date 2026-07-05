@@ -29,6 +29,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useProject } from "@/hooks/use-project";
 import { cn, capitalCase, formatDateShort } from "@/lib/utils";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
@@ -65,7 +66,7 @@ export default function TaskDetailsForm({ task, onSubmit, initialValues }) {
   const { projectMembers } = useProject();
 
   const availableMembers = projectMembers?.filter(
-    (member) => !task?.assignees.some((assignee) => assignee.id === member.id)
+    (member) => !task?.assignees.some((assignee) => assignee.user_id === member.id)
   );
 
   const form = useForm({
@@ -239,35 +240,62 @@ export default function TaskDetailsForm({ task, onSubmit, initialValues }) {
                         {field.value.length > 0 ? (
                           <div className="flex flex-wrap gap-2 w-full">
                             {field.value.map((assigneeId) => {
+                              // Prefer the live project-member record (current avatar/name),
+                              // but fall back to the task's own already-joined assignee data —
+                              // someone can still be assigned to a task after leaving the
+                              // project/team, and we keep that history rather than deleting it.
                               const member = projectMembers.find((m) => m.id === assigneeId);
+                              const assigneeRecord = task?.assignees.find(
+                                (a) => a.user_id === assigneeId
+                              );
+                              const fullName = member?.full_name ?? assigneeRecord?.full_name ?? "Unknown user";
+                              const avatarUrl = member?.avatar_url ?? assigneeRecord?.avatar_url;
+                              const hasLeftProject = !member;
 
-                              return (
+                              const chip = (
                                 <div
-                                  key={member.id}
-                                  className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs bg-mustard/50 max-w-2/5"
+                                  className={cn(
+                                    "flex items-center gap-2 px-2 py-1.5 rounded-md text-xs bg-mustard/50 max-w-2/5",
+                                    hasLeftProject && "opacity-50"
+                                  )}
                                 >
                                   <Avatar className="h-6 w-6">
                                     <AvatarImage
                                       className="object-cover"
-                                      src={member.avatar_url}
-                                      alt={member.full_name}
+                                      src={avatarUrl}
+                                      alt={fullName}
                                     />
-                                    <AvatarFallback style={pickAvatarColor(member.full_name)}>
-                                      {getInitials(member.full_name)}
+                                    <AvatarFallback style={pickAvatarColor(fullName)}>
+                                      {getInitials(fullName)}
                                     </AvatarFallback>
                                   </Avatar>
-                                  <span className="truncate">{member.full_name}</span>
+                                  <span className="truncate">{fullName}</span>
                                   <div
                                     className="h-4 w-4 p-0 hover:text-prussian-blue cursor-pointer"
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
-                                      field.onChange(field.value.filter((id) => id !== member.id));
+                                      field.onChange(field.value.filter((id) => id !== assigneeId));
                                     }}
                                   >
                                     <X className="h-4 w-4" />
                                   </div>
                                 </div>
+                              );
+
+                              if (!hasLeftProject) {
+                                return <div key={assigneeId}>{chip}</div>;
+                              }
+
+                              return (
+                                <TooltipProvider key={assigneeId}>
+                                  <Tooltip delayDuration={300}>
+                                    <TooltipTrigger asChild>{chip}</TooltipTrigger>
+                                    <TooltipContent side="top">
+                                      <p>No longer a project member</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
                               );
                             })}
                           </div>

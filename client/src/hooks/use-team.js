@@ -54,12 +54,16 @@ export function TeamProvider({ children }) {
     setSelectedTeamId(team?.id ?? null);
   }, []);
 
-  // Auto-select the first team once teams load, if none selected yet
+  // Auto-select the first team once teams load, if none selected yet.
+  // Uses a functional update (reads the latest state at apply-time, not this
+  // render's stale closure) so it can't clobber a team the URL just picked
+  // via setSelectedTeam in the same effect flush — a plain `!selectedTeamId`
+  // check here raced with TeamSelector's own effect and always lost to
+  // whichever ran second, regardless of what the URL said.
   useEffect(() => {
-    if (teams.length > 0 && !selectedTeamId) {
-      setSelectedTeamId(teams[0].id);
-    }
-  }, [teams, selectedTeamId]);
+    if (teams.length === 0) return;
+    setSelectedTeamId((prev) => (prev !== null ? prev : teams[0].id));
+  }, [teams]);
 
   const teamMembersQuery = useQuery({
     queryKey: ["team-members", selectedTeamId],

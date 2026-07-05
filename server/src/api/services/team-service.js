@@ -7,6 +7,7 @@ import conversationModel from "../models/conversation-model.js";
 import notificationModel from "../models/notification-model.js";
 import ApiError from "../../utils/api-error.js";
 import { emitNewNotification } from "../../socket/notification-socket.js";
+import { emitTeamChanged } from "../../socket/team-socket.js";
 import { sanitizeAllowedFields, generateTeamCode } from "../../utils/helper.js";
 
 const createOneTeam = async (data, actorId) => {
@@ -75,6 +76,18 @@ const updateOneTeamById = async (teamId, updateData, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can update team info");
     }
 
+    const team = await teamModel.getOneTeamById(teamId);
+
+    if (
+      updateData.updated_at &&
+      new Date(updateData.updated_at).getTime() !== new Date(team.updated_at).getTime()
+    ) {
+      throw new ApiError(
+        StatusCodes.CONFLICT,
+        "This team was updated by someone else. Please refresh and try again."
+      );
+    }
+
     const allowedData = sanitizeAllowedFields(updateData, ["name", "description", "join_policy"]);
 
     if (Object.keys(allowedData).length === 0) {
@@ -95,6 +108,8 @@ const updateOneTeamById = async (teamId, updateData, actorId) => {
 
     await teamModel.updateOneTeamById(teamId, allowedData);
 
+    await emitTeamChanged(teamId);
+
     return teamId;
   } catch (err) {
     throw err;
@@ -114,6 +129,8 @@ const deleteOneTeamById = async (teamId, actorId) => {
     if (role != "owner") {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can delete team");
     }
+
+    await emitTeamChanged(teamId);
 
     const conversation = await conversationModel.getOneConversationByTeamId(teamId);
     await conversationModel.deleteOneConversationById(conversation.id);
@@ -185,6 +202,8 @@ const removeMembersFromTeam = async (teamId, userIds, actorId) => {
       );
     }
 
+    await emitTeamChanged(teamId);
+
     return teamId;
   } catch (err) {
     throw err;
@@ -218,6 +237,8 @@ const updateTeamRoleOfUser = async (teamId, updateData, actorId) => {
       `Role of <@${user.full_name}> in the team has been changed by <@${actor.full_name}>.`
     );
 
+    await emitTeamChanged(teamId);
+
     return teamId;
   } catch (err) {
     throw err;
@@ -247,6 +268,8 @@ const joinOneTeamByCode = async (code, actorId) => {
       await conversationModel.addParticipantsToConversation(conversation.id, [actorId]);
 
       await notifyMembersOfTeam(team.id, `<@${user.full_name}> has joined the team.`);
+
+      await emitTeamChanged(team.id);
     } else {
       const isRequestPending = await teamModel.isTeamJoinRequestPending(team.id, actorId);
 
@@ -254,6 +277,8 @@ const joinOneTeamByCode = async (code, actorId) => {
         await teamModel.createOneTeamJoinRequest(team.id, actorId);
 
         await notifyMembersOfTeam(team.id, `<@${user.full_name}> has requested to join the team.`);
+
+        await emitTeamChanged(team.id);
       }
     }
 
@@ -295,6 +320,8 @@ const leaveOneTeamById = async (teamId, actorId) => {
 
     const user = await userModel.getOneUserById(actorId);
     await notifyMembersOfTeam(teamId, `<@${user.full_name}> has left the team.`);
+
+    await emitTeamChanged(teamId);
 
     return teamId;
   } catch (err) {
@@ -354,6 +381,8 @@ const approveTeamJoinRequest = async (requestId, actorId) => {
       `Request to join the team of <@${user.full_name}> was approved by <@${actor.full_name}>.`
     );
 
+    await emitTeamChanged(request.team_id);
+
     return request.team_id;
   } catch (err) {
     throw err;
@@ -387,6 +416,8 @@ const rejectTeamJoinRequest = async (requestId, actorId) => {
       request.team_id,
       `Request to join the team of <@${user.full_name}> was rejected by <@${actor.full_name}>.`
     );
+
+    await emitTeamChanged(request.team_id);
 
     return request.team_id;
   } catch (err) {

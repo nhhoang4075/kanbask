@@ -5,14 +5,12 @@ import { useState } from "react";
 import { ArrowUpDown, Clock, GripVertical, PanelRight } from "lucide-react";
 
 import TaskActions from "@/components/task/task-actions";
-import { AvatarGroup } from "@/components/ui/avatar-group";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import TaskAssigneeAvatars from "@/components/task/task-assignee-avatars";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { pickPriorityColor, pickStatusColor, comparePriority } from "@/lib/task-utils";
-import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 import { cn, formatDateShort, capitalCase } from "@/lib/utils";
 
 export const getColumns = () => {
@@ -203,23 +201,7 @@ export const getColumns = () => {
         const task = row.original;
 
         return task.assignees.length > 0 ? (
-          <AvatarGroup className="flex items-center justify-center -space-x-2.5">
-            {task.assignees.slice(0, 3).map((assignee) => (
-              <Avatar key={assignee.user_id} className="h-8 w-8 text-xs">
-                <AvatarImage className="object-cover" src={assignee.avatar_url} />
-                <AvatarFallback style={pickAvatarColor(assignee.full_name)}>
-                  {getInitials(assignee.full_name)}
-                </AvatarFallback>
-              </Avatar>
-            ))}
-            {task.assignees.length > 3 && (
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="text-xs font-medium bg-blue-100 text-prussian-blue">
-                  +{task.assignees.length - 3}
-                </AvatarFallback>
-              </Avatar>
-            )}
-          </AvatarGroup>
+          <TaskAssigneeAvatars assignees={task.assignees} />
         ) : (
           <div className="text-center text-sm text-muted-foreground">-</div>
         );

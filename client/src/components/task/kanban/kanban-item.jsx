@@ -1,12 +1,10 @@
 "use client";
 
 import TaskActions from "@/components/task/task-actions";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import TaskAssigneeAvatars from "@/components/task/task-assignee-avatars";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { AvatarGroup } from "@/components/ui/avatar-group";
 import { Badge } from "@/components/ui/badge";
 import { pickPriorityColor } from "@/lib/task-utils";
-import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 import { cn, formatDate, capitalCase } from "@/lib/utils";
 
 export default function KanbanItem({ task, columnId }) {
@@ -47,23 +45,7 @@ export default function KanbanItem({ task, columnId }) {
       <CardFooter className="px-4 pb-2 flex justify-between items-end">
         <div className="flex items-center gap-2">
           {task.assignees && task.assignees.length > 0 ? (
-            <AvatarGroup className="flex items-center justify-center -space-x-2.5">
-              {task.assignees.slice(0, 3).map((assignee) => (
-                <Avatar key={assignee.user_id} className="h-8 w-8 text-xs">
-                  <AvatarImage className="object-cover" src={assignee.avatar_url} />
-                  <AvatarFallback style={pickAvatarColor(assignee.full_name)}>
-                    {getInitials(assignee.full_name)}
-                  </AvatarFallback>
-                </Avatar>
-              ))}
-              {task.assignees.length > 3 && (
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback className="text-xs font-medium bg-blue-100 text-prussian-blue">
-                    +{task.assignees.length - 3}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-            </AvatarGroup>
+            <TaskAssigneeAvatars assignees={task.assignees} />
           ) : (
             <span className="h-6 w-6" />
           )}

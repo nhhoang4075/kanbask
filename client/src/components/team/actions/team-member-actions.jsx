@@ -12,14 +12,16 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useExclusiveMenu } from "@/hooks/use-exclusive-menu";
 
 export default function TeamMemberActions({ member }) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const menuProps = useExclusiveMenu();
 
   return (
     <div>
-      <DropdownMenu>
+      <DropdownMenu {...menuProps}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
             <MoreHorizontal className="h-4 w-4" />

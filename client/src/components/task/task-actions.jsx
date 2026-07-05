@@ -13,9 +13,11 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useExclusiveMenu } from "@/hooks/use-exclusive-menu";
 
 export default function TaskActions({ task }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const menuProps = useExclusiveMenu();
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -28,7 +30,7 @@ export default function TaskActions({ task }) {
 
   return (
     <div>
-      <DropdownMenu className="dropdown-menu-selector">
+      <DropdownMenu {...menuProps} className="dropdown-menu-selector">
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm">
             <MoreVertical className="h-4 w-4" />

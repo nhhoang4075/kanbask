@@ -14,16 +14,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useAdmin } from "@/hooks/use-admin";
+import { useExclusiveMenu } from "@/hooks/use-exclusive-menu";
 
 export default function AdminUserActions({ user, listParams }) {
   const { handleSetUserEnabled, handleResendPasswordReset } = useAdmin();
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
   const [isDisableDialogOpen, setIsDisableDialogOpen] = useState(false);
   const [isForceLogoutDialogOpen, setIsForceLogoutDialogOpen] = useState(false);
+  const menuProps = useExclusiveMenu();
 
   return (
     <div>
-      <DropdownMenu>
+      <DropdownMenu {...menuProps}>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
             <MoreHorizontal className="h-4 w-4" />

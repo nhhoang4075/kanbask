@@ -22,7 +22,7 @@ export default function NavConversation() {
   );
 
   return (
-    <Card className="h-full p-0 rounded-none bg-ghost-white overflow-hidden">
+    <Card className="h-full p-0 rounded-none overflow-hidden">
       <CardContent className="p-0 h-full">
         <Tabs defaultValue="all" className="h-full">
           <TabsList className="justify-start w-full px-6 gap-x-6 rounded-none border-b bg-white">

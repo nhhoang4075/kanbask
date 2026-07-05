@@ -50,7 +50,7 @@ export default function TypingBubble({ typists }) {
           <div className="flex items-end gap-x-3">
             <AvatarGroup className="flex items-center -space-x-2.5">
               {typists.slice(0, MAX_AVATARS).map((typist) => (
-                <Avatar key={typist.id} className="h-8 w-8 text-xs ring-2 ring-ghost-white">
+                <Avatar key={typist.id} className="h-8 w-8 text-xs ring-2 ring-white">
                   <AvatarImage
                     src={typist.avatar_url}
                     alt={typist.full_name}
@@ -62,7 +62,7 @@ export default function TypingBubble({ typists }) {
                 </Avatar>
               ))}
               {typists.length > MAX_AVATARS && (
-                <Avatar className="h-8 w-8 ring-2 ring-ghost-white">
+                <Avatar className="h-8 w-8 ring-2 ring-white">
                   <AvatarFallback className="text-xs font-medium bg-blue-100 text-prussian-blue">
                     +{typists.length - MAX_AVATARS}
                   </AvatarFallback>

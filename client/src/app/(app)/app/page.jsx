@@ -13,7 +13,7 @@ export default function DashboardPage() {
       <AppHeader name="Dashboard">
         <DashboardHeader />
       </AppHeader>
-      <div className="flex-1 flex flex-col rounded-md bg-ghost-white overflow-auto">
+      <div className="flex-1 flex flex-col rounded-md bg-white overflow-auto">
         <DashboardWindow />
       </div>
     </div>

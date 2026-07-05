@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback } from "react";
+import { useState, useCallback } from "react";
 import { MoreVertical, Info, Trash } from "lucide-react";
 
 import TaskDetailsSheet from "@/components/task/task-details-sheet";
+import DeleteTaskDialog from "@/components/task/delete-task-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +13,9 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { useTask } from "@/hooks/use-task";
 
 export default function TaskActions({ task }) {
-  const { handleDeleteTask } = useTask();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,7 +46,7 @@ export default function TaskActions({ task }) {
           </DropdownMenuItem>
           <DropdownMenuItem
             className="text-red-500 focus:text-red-500"
-            onClick={() => handleDeleteTask(task.id)}
+            onSelect={() => setIsDeleteDialogOpen(true)}
           >
             <Trash className="h-4 w-4" />
             <span>Delete</span>
@@ -54,6 +54,7 @@ export default function TaskActions({ task }) {
         </DropdownMenuContent>
       </DropdownMenu>
       <TaskDetailsSheet task={task} />
+      <DeleteTaskDialog isOpen={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen} task={task} />
     </div>
   );
 }

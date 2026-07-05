@@ -16,6 +16,14 @@ export function SocketProvider({ children }) {
   const socketRef = useRef(null);
   const [connected, setConnected] = useState(false);
   const [onlineUserIds, setOnlineUserIds] = useState(new Set());
+  // conversationId -> array of user ids currently typing there. Kept here
+  // (rather than in useChat) so it covers every conversation the user is a
+  // member of, not just whichever one is currently open — the server relays
+  // "typing" to each participant's personal room regardless of what they
+  // have open, so this map can power both the open chat header and the
+  // conversation list.
+  const [typingByConversation, setTypingByConversation] = useState({});
+  const typingTimeoutsRef = useRef({});
 
   useEffect(() => {
     // Only connect when session is loaded and user is present
@@ -55,6 +63,44 @@ export function SocketProvider({ children }) {
         });
       });
 
+      const clearTypingTimeout = (key) => {
+        clearTimeout(typingTimeoutsRef.current[key]);
+        delete typingTimeoutsRef.current[key];
+      };
+
+      const removeTypingUser = (conversation_id, user_id) => {
+        clearTypingTimeout(`${conversation_id}:${user_id}`);
+        setTypingByConversation((prev) => {
+          const existing = prev[conversation_id];
+          if (!existing?.length) return prev;
+          return { ...prev, [conversation_id]: existing.filter((id) => id !== user_id) };
+        });
+      };
+
+      // Safety net: auto-clear after 4s in case a "stop_typing" emit is
+      // lost (dropped connection, tab closed mid-typing).
+      const addTypingUser = (conversation_id, user_id) => {
+        setTypingByConversation((prev) => {
+          const existing = prev[conversation_id] ?? [];
+          if (existing.includes(user_id)) return prev;
+          return { ...prev, [conversation_id]: [...existing, user_id] };
+        });
+
+        const key = `${conversation_id}:${user_id}`;
+        clearTypingTimeout(key);
+        typingTimeoutsRef.current[key] = setTimeout(() => {
+          delete typingTimeoutsRef.current[key];
+          removeTypingUser(conversation_id, user_id);
+        }, 4000);
+      };
+
+      socketRef.current.on("user_typing", ({ conversation_id, user_id }) =>
+        addTypingUser(conversation_id, user_id)
+      );
+      socketRef.current.on("user_stopped_typing", ({ conversation_id, user_id }) =>
+        removeTypingUser(conversation_id, user_id)
+      );
+
       // Emit setup event with userId to authenticate socket
       socketRef.current.emit("setup");
       setConnected(true);
@@ -68,11 +114,17 @@ export function SocketProvider({ children }) {
         setConnected(false);
         setOnlineUserIds(new Set());
       }
+
+      Object.values(typingTimeoutsRef.current).forEach(clearTimeout);
+      typingTimeoutsRef.current = {};
+      setTypingByConversation({});
     };
   }, [loading, user]); // rerun when loading or user changes
 
   return (
-    <SocketContext.Provider value={{ socket: socketRef.current, connected, onlineUserIds }}>
+    <SocketContext.Provider
+      value={{ socket: socketRef.current, connected, onlineUserIds, typingByConversation }}
+    >
       {children}
     </SocketContext.Provider>
   );

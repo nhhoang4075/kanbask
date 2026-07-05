@@ -15,7 +15,7 @@ export function useChat() {
 
 export function ChatProvider({ children }) {
   const { loading: sessionLoading } = useSession();
-  const { socket, connected: socketConnected } = useSocket();
+  const { socket, connected: socketConnected, typingByConversation } = useSocket();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -27,10 +27,10 @@ export function ChatProvider({ children }) {
   const [scrollTargetId, setScrollTargetId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [typingUserIds, setTypingUserIds] = useState([]);
+
+  const typingUserIds = typingByConversation[selectedConversationId] ?? [];
 
   const selectedIdRef = useRef(selectedConversationId);
-  const typingTimeoutsRef = useRef({});
   // Tracks which not-yet-cached conversation id we've already retried a fetch
   // for, so the URL-matching effect below retries once instead of looping.
   const attemptedFetchIdRef = useRef(null);
@@ -105,39 +105,10 @@ export function ChatProvider({ children }) {
       }
     };
 
-    // Guards against a "stop_typing" emit getting lost (dropped connection,
-    // tab closed mid-typing) leaving a stale "is typing..." indicator forever.
-    const clearTypingTimeout = (userId) => {
-      clearTimeout(typingTimeoutsRef.current[userId]);
-      delete typingTimeoutsRef.current[userId];
-    };
-
-    const handleUserTyping = ({ conversation_id, user_id }) => {
-      if (conversation_id !== selectedConversationId) return;
-
-      setTypingUserIds((prev) => (prev.includes(user_id) ? prev : [...prev, user_id]));
-
-      clearTypingTimeout(user_id);
-      typingTimeoutsRef.current[user_id] = setTimeout(() => {
-        delete typingTimeoutsRef.current[user_id];
-        setTypingUserIds((prev) => prev.filter((id) => id !== user_id));
-      }, 4000);
-    };
-
-    const handleUserStoppedTyping = ({ conversation_id, user_id }) => {
-      if (conversation_id !== selectedConversationId) return;
-
-      clearTypingTimeout(user_id);
-      setTypingUserIds((prev) => prev.filter((id) => id !== user_id));
-    };
-
     socket.on("update_conversation", handleUpdateConv);
     socket.on("new_message", handleNewMsg);
-    socket.on("user_typing", handleUserTyping);
-    socket.on("user_stopped_typing", handleUserStoppedTyping);
 
     setLoading(true);
-    setTypingUserIds([]);
 
     getMessagesOfConversation(selectedConversationId)
       .then((data) => {
@@ -149,11 +120,6 @@ export function ChatProvider({ children }) {
     return () => {
       socket.off("update_conversation", handleUpdateConv);
       socket.off("new_message", handleNewMsg);
-      socket.off("user_typing", handleUserTyping);
-      socket.off("user_stopped_typing", handleUserStoppedTyping);
-
-      Object.values(typingTimeoutsRef.current).forEach(clearTimeout);
-      typingTimeoutsRef.current = {};
     };
   }, [socket, socketConnected, sessionLoading, selectedConversationId]);
 

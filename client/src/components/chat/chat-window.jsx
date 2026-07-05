@@ -74,7 +74,7 @@ export default function ChatWindow() {
   }
 
   return (
-    <div className="relative flex-1 flex flex-col w-full overflow-hidden bg-ghost-white">
+    <div className="relative flex-1 flex flex-col w-full overflow-hidden bg-white">
       {loading ? (
         <div className="flex-1 flex w-full">
           <Spinner size="lg" className="-translate-y-16" />

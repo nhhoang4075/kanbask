@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useState, useEffect, createContext, useContext } from "react";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import {
   createProject,
@@ -13,6 +15,7 @@ import {
   getProjectsInTeamOfUser
 } from "@/actions/project-actions";
 import { useTeam } from "@/hooks/use-team";
+import { useSocket } from "@/hooks/use-socket";
 
 const ProjectContext = createContext();
 
@@ -22,37 +25,21 @@ export function useProject() {
 
 export function ProjectProvider({ children }) {
   const { selectedTeam } = useTeam();
-  const [projects, setProjects] = useState({});
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [projectMembers, setProjectMembers] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const { socket, connected } = useSocket();
+  const queryClient = useQueryClient();
+
   const [error, setError] = useState(null);
+  const [requestedTeamIds, setRequestedTeamIds] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
 
-  const fetchProjects = useCallback(async (teamId) => {
-    if (!teamId) return;
-
-    try {
-      setLoading(true);
-      const data = await getProjectsInTeamOfUser(teamId);
-      setProjects((prev) => ({ ...prev, [teamId]: data.projects }));
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchProjectMembers = useCallback(async (projectId) => {
-    try {
-      setLoading(true);
-      const data = await getMembersOfProject(projectId);
-      setProjectMembers(data.members);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchProjects = useCallback(
+    (teamId) => {
+      if (!teamId) return;
+      setRequestedTeamIds((prev) => (prev.includes(teamId) ? prev : [...prev, teamId]));
+      return queryClient.invalidateQueries({ queryKey: ["projects", teamId] });
+    },
+    [queryClient]
+  );
 
   useEffect(() => {
     if (selectedTeam) {
@@ -60,17 +47,89 @@ export function ProjectProvider({ children }) {
     }
   }, [selectedTeam, fetchProjects]);
 
+  const projectQueries = useQueries({
+    queries: requestedTeamIds.map((teamId) => ({
+      queryKey: ["projects", teamId],
+      queryFn: async () => {
+        const data = await getProjectsInTeamOfUser(teamId);
+        return data.projects;
+      },
+      enabled: !!teamId
+    }))
+  });
+
+  // Keep the same lazily-populated { [teamId]: Project[] } shape existing
+  // components rely on (some index by team id, some flatten with Object.values).
+  const projects = requestedTeamIds.reduce((acc, teamId, idx) => {
+    acc[teamId] = projectQueries[idx]?.data ?? [];
+    return acc;
+  }, {});
+
+  const selectedProject =
+    (projects[selectedTeam?.id] || []).find((p) => p.id === selectedProjectId) ?? null;
+
+  const setSelectedProject = useCallback((project) => {
+    setSelectedProjectId(project?.id ?? null);
+  }, []);
+
+  const projectMembersQuery = useQuery({
+    queryKey: ["project-members", selectedProject?.id],
+    queryFn: async () => {
+      const data = await getMembersOfProject(selectedProject.id);
+      return data.members;
+    },
+    enabled: !!selectedProject?.id
+  });
+  const projectMembers = projectMembersQuery.data ?? [];
+
+  const fetchProjectMembers = useCallback(
+    (projectId) => {
+      if (!projectId) return;
+      return queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
+    },
+    [queryClient]
+  );
+
+  const loading = projectQueries.some((q) => q.isLoading) || projectMembersQuery.isLoading;
+
+  // Real-time sync: another member's project create/update/delete/membership change
   useEffect(() => {
-    if (selectedProject) {
-      fetchProjectMembers(selectedProject.id);
-    }
-  }, [selectedProject, fetchProjectMembers]);
+    if (!socket || !connected) return;
+
+    const handleProjectChanged = (payload) => {
+      if (payload?.team_id) {
+        queryClient.invalidateQueries({ queryKey: ["projects", payload.team_id] });
+      }
+      if (payload?.project_id) {
+        queryClient.invalidateQueries({ queryKey: ["project-members", payload.project_id] });
+      }
+    };
+
+    socket.on("project_changed", handleProjectChanged);
+
+    return () => {
+      socket.off("project_changed", handleProjectChanged);
+    };
+  }, [socket, connected, queryClient]);
+
+  const handleConflict = useCallback(
+    async (err, invalidateKeys) => {
+      if (err?.status === 409) {
+        toast.error(err.message || "This was updated by someone else. Refreshing...");
+        await Promise.all(
+          invalidateKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey }))
+        );
+        return true;
+      }
+      return false;
+    },
+    [queryClient]
+  );
 
   // Project actions
   const handleCreateProject = useCallback(
     async (projectData) => {
       try {
-        setLoading(true);
         const newProject = await createProject(projectData);
         await fetchProjects(selectedTeam.id);
         setSelectedProject(newProject);
@@ -78,40 +137,36 @@ export function ProjectProvider({ children }) {
       } catch (err) {
         setError(err);
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
-    [fetchProjects, selectedTeam]
+    [fetchProjects, selectedTeam, setSelectedProject]
   );
 
   const handleUpdateProject = useCallback(
     async (projectId, updates) => {
       try {
-        setLoading(true);
-        await updateProject(projectId, updates);
+        const currentProject = (projects[selectedTeam?.id] || []).find((p) => p.id === projectId);
+        await updateProject(projectId, { ...updates, updated_at: currentProject?.updated_at });
         await fetchProjects(selectedTeam.id);
       } catch (err) {
-        setError(err);
-        throw err;
-      } finally {
-        setLoading(false);
+        const isConflict = await handleConflict(err, [["projects", selectedTeam?.id]]);
+        if (!isConflict) {
+          setError(err);
+          throw err;
+        }
       }
     },
-    [fetchProjects, selectedTeam]
+    [fetchProjects, selectedTeam, projects, handleConflict]
   );
 
   const handleDeleteProject = useCallback(
     async (projectId) => {
       try {
-        setLoading(true);
         await deleteProject(projectId);
         await fetchProjects(selectedTeam.id);
       } catch (err) {
         setError(err);
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
     [fetchProjects, selectedTeam]
@@ -120,14 +175,11 @@ export function ProjectProvider({ children }) {
   const handleAddProjectMembers = useCallback(
     async (projectId, data) => {
       try {
-        setLoading(true);
         await addMembersToProject(projectId, data);
         await fetchProjectMembers(projectId);
       } catch (err) {
         setError(err);
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
     [fetchProjectMembers]
@@ -136,14 +188,11 @@ export function ProjectProvider({ children }) {
   const handleRemoveProjectMembers = useCallback(
     async (projectId, data) => {
       try {
-        setLoading(true);
         await removeMembersFromProject(projectId, data);
         await fetchProjectMembers(projectId);
       } catch (err) {
         setError(err);
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
     [fetchProjectMembers]
@@ -152,14 +201,11 @@ export function ProjectProvider({ children }) {
   const handleUpdateProjectRoleOfMember = useCallback(
     async (projectId, data) => {
       try {
-        setLoading(true);
         await updateProjectRoleOfMember(projectId, data);
         await fetchProjectMembers(projectId);
       } catch (err) {
         setError(err);
         throw err;
-      } finally {
-        setLoading(false);
       }
     },
     [fetchProjectMembers]

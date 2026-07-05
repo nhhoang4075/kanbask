@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 
 import AppSidebar from "@/components/app/app-sidebar";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { QueryProvider } from "@/providers/query-provider";
 import { SessionProvider } from "@/hooks/use-session";
 import { SocketProvider } from "@/hooks/use-socket";
 import { SearchProvider } from "@/hooks/use-search";
@@ -17,28 +18,30 @@ export default async function RootLayout({ children }) {
   const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
 
   return (
-    <SessionProvider>
-      <SocketProvider>
-        <NotificationProvider>
-          <TeamProvider>
-            <ProjectProvider>
-              <TaskProvider>
-                <ChatProvider>
-                  <SidebarProvider defaultOpen={defaultOpen}>
-                    <SearchProvider>
-                      <AppSidebar variant="inset" />
-                      <SidebarInset>
-                        <main className="flex-1 min-h-[95dvh] bg-prussian-blue">{children}</main>
-                      </SidebarInset>
-                      <Toaster position="top-right" />
-                    </SearchProvider>
-                  </SidebarProvider>
-                </ChatProvider>
-              </TaskProvider>
-            </ProjectProvider>
-          </TeamProvider>
-        </NotificationProvider>
-      </SocketProvider>
-    </SessionProvider>
+    <QueryProvider>
+      <SessionProvider>
+        <SocketProvider>
+          <NotificationProvider>
+            <TeamProvider>
+              <ProjectProvider>
+                <TaskProvider>
+                  <ChatProvider>
+                    <SidebarProvider defaultOpen={defaultOpen}>
+                      <SearchProvider>
+                        <AppSidebar variant="inset" />
+                        <SidebarInset>
+                          <main className="flex-1 min-h-[95dvh] bg-prussian-blue">{children}</main>
+                        </SidebarInset>
+                        <Toaster position="top-right" />
+                      </SearchProvider>
+                    </SidebarProvider>
+                  </ChatProvider>
+                </TaskProvider>
+              </ProjectProvider>
+            </TeamProvider>
+          </NotificationProvider>
+        </SocketProvider>
+      </SessionProvider>
+    </QueryProvider>
   );
 }

@@ -26,25 +26,27 @@ export default function ChatHeader() {
 
   return (
     <div className="flex w-full h-20 max-w-full gap-4 items-center border-b bg-white px-6 py-4">
-      <Avatar className="h-12 w-12 relative">
-        <AvatarImage
-          src={currConversation.avatar_url}
-          alt={currConversation.title}
-          className="object-cover"
-        />
-        <AvatarFallback style={pickAvatarColor(currConversation.title)}>
-          {currConversation.type === "direct" ? (
-            getInitials(currConversation.title)
-          ) : currConversation.type === "team" ? (
-            <Users />
-          ) : (
-            <FolderKanban />
-          )}
-        </AvatarFallback>
+      <div className="relative h-12 w-12 flex-none">
+        <Avatar className="h-12 w-12">
+          <AvatarImage
+            src={currConversation.avatar_url}
+            alt={currConversation.title}
+            className="object-cover"
+          />
+          <AvatarFallback style={pickAvatarColor(currConversation.title)}>
+            {currConversation.type === "direct" ? (
+              getInitials(currConversation.title)
+            ) : currConversation.type === "team" ? (
+              <Users />
+            ) : (
+              <FolderKanban />
+            )}
+          </AvatarFallback>
+        </Avatar>
         {currConversation.type === "direct" && onlineUserIds.has(currConversation.direct_user_id) && (
           <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white" />
         )}
-      </Avatar>
+      </div>
       <div className="max-w-4/5">
         <div className="flex-none text-xl font-semibold truncate">
           {currConversation.title ||

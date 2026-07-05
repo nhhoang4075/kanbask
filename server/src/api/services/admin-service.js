@@ -11,8 +11,25 @@ import mailProvider from "../../config/mail-provider.js";
 import storageProvider from "../../config/storage-provider.js";
 import embeddingProvider from "../../config/embedding-provider.js";
 import { getIoInstance } from "../../socket/index.js";
+import { emitTeamChanged } from "../../socket/team-socket.js";
+import { emitProjectChanged } from "../../socket/project-socket.js";
 import ApiError from "../../utils/api-error.js";
 import { sanitizeUser } from "../../utils/helper.js";
+
+// token_version bump only blocks *future* requests/refreshes — an already-open
+// socket connection was authenticated once at connect time and stays open, so
+// force-logout/disable needs to explicitly kick any live sockets for this user.
+const disconnectUserSockets = (userId) => {
+  const io = getIoInstance();
+
+  if (!io) return;
+
+  for (const socket of io.sockets.sockets.values()) {
+    if (socket.data?.user?.id === userId) {
+      socket.disconnect(true);
+    }
+  }
+};
 
 const listUsers = async (q, { limit, offset }) => {
   try {
@@ -86,6 +103,10 @@ const setUserEnabled = async (userId, isEnabled, actorId) => {
 
     await userModel.updateOneUserById(userId, updateData);
 
+    if (!isEnabled) {
+      disconnectUserSockets(userId);
+    }
+
     return userId;
   } catch (err) {
     throw err;
@@ -101,6 +122,8 @@ const forceLogoutUser = async (userId) => {
     }
 
     await userModel.updateOneUserById(userId, { token_version: user.token_version + 1 });
+
+    disconnectUserSockets(userId);
 
     return userId;
   } catch (err) {
@@ -196,6 +219,8 @@ const transferTeamOwnership = async (teamId, newOwnerUserId) => {
 
     await teamModel.updateTeamRoleOfUser(teamId, newOwnerUserId, "owner");
 
+    await emitTeamChanged(teamId);
+
     return teamId;
   } catch (err) {
     throw err;
@@ -263,6 +288,8 @@ const transferProjectOwnership = async (projectId, newOwnerUserId) => {
     }
 
     await projectModel.updateProjectRoleOfUser(projectId, newOwnerUserId, "owner");
+
+    await emitProjectChanged(project.team_id, projectId);
 
     return projectId;
   } catch (err) {

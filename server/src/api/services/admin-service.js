@@ -300,20 +300,43 @@ const transferProjectOwnership = async (projectId, newOwnerUserId) => {
   }
 };
 
+// Turns a list of { created_at } rows into an N-point cumulative growth curve
+// (how many existed at each of N evenly-spaced points between the first
+// record and now), for the dashboard's stat-card sparklines.
+const buildGrowthTrend = (rows, points = 8) => {
+  if (!rows.length) return Array(points).fill(0);
+
+  const timestamps = rows.map((r) => new Date(r.created_at).getTime()).sort((a, b) => a - b);
+  const start = timestamps[0];
+  const end = Date.now();
+  const step = Math.max(end - start, 1) / (points - 1);
+
+  return Array.from({ length: points }, (_, i) => {
+    const boundary = start + step * i;
+    return timestamps.filter((t) => t <= boundary).length;
+  });
+};
+
 const getSystemStats = async () => {
   try {
-    const [userCount, teamCount, projectCount, taskCount] = await Promise.all([
-      userModel.countUsers(),
-      teamModel.countTeams(),
-      projectModel.countProjects(),
-      taskModel.countTasks()
+    const [users, teams, projects, tasks] = await Promise.all([
+      userModel.getAllCreatedAtTimestamps(),
+      teamModel.getAllCreatedAtTimestamps(),
+      projectModel.getAllCreatedAtTimestamps(),
+      taskModel.getAllCreatedAtTimestamps()
     ]);
 
     return {
-      user_count: userCount,
-      team_count: teamCount,
-      project_count: projectCount,
-      task_count: taskCount
+      user_count: users.length,
+      team_count: teams.length,
+      project_count: projects.length,
+      task_count: tasks.length,
+      history: {
+        users: buildGrowthTrend(users),
+        teams: buildGrowthTrend(teams),
+        projects: buildGrowthTrend(projects),
+        tasks: buildGrowthTrend(tasks)
+      }
     };
   } catch (err) {
     throw err;

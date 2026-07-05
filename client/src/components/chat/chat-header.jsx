@@ -7,11 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChat } from "@/hooks/use-chat";
+import { useSocket } from "@/hooks/use-socket";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 import { cn, capitalCase } from "@/lib/utils";
 
 export default function ChatHeader() {
   const { conversations, selectedConversationId } = useChat();
+  const { onlineUserIds } = useSocket();
 
   const currConversation = useMemo(
     () => conversations.find((c) => c.id === selectedConversationId),
@@ -39,6 +41,9 @@ export default function ChatHeader() {
             <FolderKanban />
           )}
         </AvatarFallback>
+        {currConversation.type === "direct" && onlineUserIds.has(currConversation.direct_user_id) && (
+          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white" />
+        )}
       </Avatar>
       <div className="max-w-4/5">
         <div className="flex-none text-xl font-semibold truncate">

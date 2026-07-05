@@ -5,12 +5,13 @@ import { MoveDown } from "lucide-react";
 
 import ChatInput from "@/components/chat/chat-input";
 import MessageBubble from "@/components/chat/message-bubble";
+import TypingBubble from "@/components/chat/typing-bubble";
 import Spinner from "@/components/app/spinner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { useChat } from "@/hooks/use-chat";
 import { useSession } from "@/hooks/use-session";
-import { groupMessages } from "@/lib/chat-utils";
+import { groupMessages, getTypingParticipants } from "@/lib/chat-utils";
 
 const SCROLL_THRESHOLD = 300;
 
@@ -20,6 +21,7 @@ export default function ChatWindow() {
     messages,
     conversations,
     selectedConversationId,
+    typingUserIds,
     loading,
     scrollTargetId,
     setScrollTargetId,
@@ -35,17 +37,24 @@ export default function ChatWindow() {
     [conversations, selectedConversationId]
   );
 
+  const typists = useMemo(
+    () => getTypingParticipants(currConversation, typingUserIds, messages, user?.id),
+    [currConversation, typingUserIds, messages, user?.id]
+  );
+
   const handleScroll = (e) => {
     const { scrollTop, scrollHeight, clientHeight } = e.target;
     setShowScrollToBottom(scrollHeight - scrollTop - clientHeight > SCROLL_THRESHOLD);
   };
 
-  // Always scroll to bottom on new messages (unless hidden by user scroll)
+  // Always scroll to bottom on new messages (unless hidden by user scroll).
+  // Also re-run when the typing bubble appears/disappears so it isn't left
+  // just out of view below the fold.
   useEffect(() => {
     if (!showScrollToBottom && bottomRef.current) {
       bottomRef.current.scrollIntoView({ behavior: "instant" });
     }
-  }, [messages]);
+  }, [messages, typists.length]);
 
   useEffect(() => {
     if (!loading && scrollTargetId && scrollAreaRef.current) {
@@ -79,6 +88,7 @@ export default function ChatWindow() {
           {groupMessages(messages)?.map((msgGroup, idx) => (
             <MessageBubble key={idx} msgGroup={msgGroup} isMe={msgGroup.sender_id === user?.id} />
           ))}
+          <TypingBubble typists={typists} />
           <div ref={bottomRef} />
         </ScrollArea>
       )}

@@ -26,7 +26,7 @@ export default function TaskWindow() {
         <TabsList className="justify-start w-full px-6 gap-x-6 rounded-none border-b bg-white">
           <TabsTrigger
             value="list"
-            className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
           >
             <div className="flex items-center gap-2">
               <TableProperties className="h-4 w-4" />
@@ -35,7 +35,7 @@ export default function TaskWindow() {
           </TabsTrigger>
           <TabsTrigger
             value="kanban"
-            className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
           >
             <div className="flex items-center gap-2">
               <AlignStartHorizontal className="h-4 w-4" />

@@ -28,31 +28,31 @@ export default function AdminWindow() {
         <TabsList className="justify-start w-full px-6 gap-x-6 rounded-none border-b bg-white">
           <TabsTrigger
             value="dashboard"
-            className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
           >
             Dashboard
           </TabsTrigger>
           <TabsTrigger
             value="users"
-            className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
           >
             Users
           </TabsTrigger>
           <TabsTrigger
             value="teams"
-            className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
           >
             Teams
           </TabsTrigger>
           <TabsTrigger
             value="projects"
-            className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
           >
             Projects
           </TabsTrigger>
           <TabsTrigger
             value="health"
-            className="flex-none p-0 text-sm text-gray-500 rounded-none shadow-none data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-none"
+            className="flex-none p-0 text-sm text-gray-500 rounded-none data-[state=active]:bg-white data-[state=active]:text-black"
           >
             Health
           </TabsTrigger>

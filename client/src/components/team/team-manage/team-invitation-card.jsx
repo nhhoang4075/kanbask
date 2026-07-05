@@ -6,7 +6,7 @@ export default function TeamInvitationCard() {
   const { selectedTeam } = useTeam();
 
   return (
-    <Card className="w-full gap-2 rounded-md shadow-none">
+    <Card className="w-full gap-2 rounded-md">
       <CardHeader>
         <CardTitle className="w-full font-bold text-2xl line-clamp-2">Invitation Code</CardTitle>
       </CardHeader>

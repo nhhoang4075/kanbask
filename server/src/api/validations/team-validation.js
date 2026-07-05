@@ -22,7 +22,8 @@ const validateUpdateTeam = validate(
       .object({
         name: z.string().max(100).optional(),
         description: z.string().max(1000).optional(),
-        join_policy: z.enum(["auto", "manual"]).optional()
+        join_policy: z.enum(["auto", "manual"]).optional(),
+        updated_at: z.coerce.date().optional()
       })
       .strict(),
     params: z.object({}).optional(),

@@ -6,6 +6,7 @@ import userModel from "../models/user-model.js";
 import conversationModel from "../models/conversation-model.js";
 import notificationModel from "../models/notification-model.js";
 import { emitNewNotification } from "../../socket/notification-socket.js";
+import { emitProjectChanged } from "../../socket/project-socket.js";
 import ApiError from "../../utils/api-error.js";
 import { sanitizeAllowedFields } from "../../utils/helper.js";
 
@@ -49,6 +50,8 @@ const createOneProject = async (data, actorId) => {
 
     const project = projectModel.getOneProjectById(projectId);
 
+    await emitProjectChanged(allowedData.team_id, projectId);
+
     return project;
   } catch (err) {
     throw err;
@@ -85,6 +88,18 @@ const updateOneProjectById = async (projectId, updateData, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can update project info");
     }
 
+    const project = await projectModel.getOneProjectById(projectId);
+
+    if (
+      updateData.updated_at &&
+      new Date(updateData.updated_at).getTime() !== new Date(project.updated_at).getTime()
+    ) {
+      throw new ApiError(
+        StatusCodes.CONFLICT,
+        "This project was updated by someone else. Please refresh and try again."
+      );
+    }
+
     const allowedData = sanitizeAllowedFields(updateData, ["name", "description"]);
 
     if (Object.keys(allowedData).length === 0) {
@@ -92,6 +107,8 @@ const updateOneProjectById = async (projectId, updateData, actorId) => {
     }
 
     await projectModel.updateOneProjectById(projectId, allowedData);
+
+    await emitProjectChanged(project.team_id, projectId);
 
     return projectId;
   } catch (err) {
@@ -113,10 +130,14 @@ const deleteOneProjectById = async (projectId, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only owner can delete project");
     }
 
+    const project = await projectModel.getOneProjectById(projectId);
+
     const conversation = await conversationModel.getOneConversationByProjectId(projectId);
     await conversationModel.deleteOneConversationById(conversation.id);
 
     await projectModel.deleteOneProjectById(projectId);
+
+    await emitProjectChanged(project.team_id, projectId);
 
     return projectId;
   } catch (err) {
@@ -164,6 +185,8 @@ const addMembersToProject = async (projectId, userIds, actorId) => {
       );
     }
 
+    await emitProjectChanged(project.team_id, projectId);
+
     return projectId;
   } catch (err) {
     throw err;
@@ -204,6 +227,8 @@ const removeMembersFromProject = async (projectId, userIds, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not delete self");
     }
 
+    const project = await projectModel.getOneProjectById(projectId);
+
     const conversation = await conversationModel.getOneConversationByProjectId(projectId);
     await conversationModel.removeParticipantsFromConversation(conversation.id, userIds);
 
@@ -217,6 +242,8 @@ const removeMembersFromProject = async (projectId, userIds, actorId) => {
         `<@${user.full_name}> was removed from the project by <@${actor.full_name}>.`
       );
     }
+
+    await emitProjectChanged(project.team_id, projectId);
 
     return projectId;
   } catch (err) {
@@ -242,6 +269,8 @@ const updateProjectRoleOfUser = async (projectId, updateData, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Owner can not update self");
     }
 
+    const project = await projectModel.getOneProjectById(projectId);
+
     await projectModel.updateProjectRoleOfUser(projectId, updateData.user_id, updateData.role);
 
     const actor = await userModel.getOneUserById(actorId);
@@ -250,6 +279,8 @@ const updateProjectRoleOfUser = async (projectId, updateData, actorId) => {
       projectId,
       `Role of <@${user.full_name}> in the project has been changed by <@${actor.full_name}>.`
     );
+
+    await emitProjectChanged(project.team_id, projectId);
 
     return projectId;
   } catch (err) {

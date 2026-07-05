@@ -9,6 +9,7 @@ import ApiError from "../../utils/api-error.js";
 import embeddingProvider from "../../config/embedding-provider.js";
 import storageProvider from "../../config/storage-provider.js";
 import { emitNewNotification } from "../../socket/notification-socket.js";
+import { emitTaskChanged } from "../../socket/task-socket.js";
 import { sanitizeAllowedFields } from "../../utils/helper.js";
 
 const createOneTask = async (data, actorId) => {
@@ -60,6 +61,8 @@ const createOneTask = async (data, actorId) => {
     const taskAssignees = await taskModel.getAssigneesOfTask(taskId);
 
     const formattedTask = { ...task, assignees: taskAssignees };
+
+    await emitTaskChanged(project_id);
 
     return formattedTask;
   } catch (err) {
@@ -118,6 +121,16 @@ const updateOneTaskById = async (id, data, actorId) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "Only members of project can access this");
     }
 
+    if (
+      data.updated_at &&
+      new Date(data.updated_at).getTime() !== new Date(task.updated_at).getTime()
+    ) {
+      throw new ApiError(
+        StatusCodes.CONFLICT,
+        "This task was updated by someone else. Please refresh and try again."
+      );
+    }
+
     const allowedData = sanitizeAllowedFields(data, [
       "title",
       "description",
@@ -172,6 +185,8 @@ const updateOneTaskById = async (id, data, actorId) => {
       );
     }
 
+    await emitTaskChanged(task.project_id);
+
     return task.id;
   } catch (err) {
     throw err;
@@ -199,6 +214,8 @@ const deleteOneTaskById = async (id, actorId) => {
       details: { deleted_task_title: task.title }
     });
     await taskModel.deleteOneTaskById(task.id);
+
+    await emitTaskChanged(task.project_id);
 
     return task.id;
   } catch (err) {

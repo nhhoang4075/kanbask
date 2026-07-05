@@ -32,7 +32,8 @@ const validateUpdateTask = validate(
         due_date: z.coerce.date().optional(),
         completed_at: z.coerce.date().optional(),
         position: z.coerce.number().int().positive().optional(),
-        assignees: z.array(z.string().uuid()).optional()
+        assignees: z.array(z.string().uuid()).optional(),
+        updated_at: z.coerce.date().optional()
       })
       .strict(),
     params: z

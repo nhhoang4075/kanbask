@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { Send, Paperclip } from "lucide-react";
+import { Send } from "lucide-react";
 
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -84,9 +84,6 @@ export default function ChatInput() {
           style={{ minHeight: "2rem" }}
         />
         <div className="p-2 space-x-2">
-          <Button type="button" variant="outline" className="flex-shrink-0 h-10 w-10 rounded-full">
-            <Paperclip />
-          </Button>
           <Button
             type="submit"
             className="flex-shrink-0 h-10 w-10 rounded-full bg-prussian-blue text-ghost-white"

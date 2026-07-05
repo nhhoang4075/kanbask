@@ -37,10 +37,10 @@ export default function NavConversationItem({ conversation }) {
               <FolderKanban />
             )}
           </AvatarFallback>
-          {conversation.type === "direct" && onlineUserIds.has(conversation.direct_user_id) && (
-            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white" />
-          )}
         </Avatar>
+        {conversation.type === "direct" && onlineUserIds.has(conversation.direct_user_id) && (
+          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-white" />
+        )}
         {conversation.unread_count > 0 && (
           <Badge className="text-xs bg-prussian-blue absolute h-5 w-5 -bottom-1 -right-1 transform -translate-y-0.5 z-10">
             {conversation.unread_count < 10 ? conversation.unread_count : "9+"}

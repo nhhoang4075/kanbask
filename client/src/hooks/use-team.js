@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import {
   createTeam,
@@ -18,6 +20,7 @@ import {
 } from "@/actions/team-actions";
 
 import { useSession } from "@/hooks/use-session";
+import { useSocket } from "@/hooks/use-socket";
 
 const TeamContext = createContext();
 
@@ -27,215 +30,205 @@ export function useTeam() {
 
 export function TeamProvider({ children }) {
   const { user } = useSession();
-  const [loading, setLoading] = useState(true);
+  const { socket, connected } = useSocket();
+  const queryClient = useQueryClient();
+
   const [error, setError] = useState(null);
+  const [selectedTeamId, setSelectedTeamId] = useState(null);
 
-  // Team state
-  const [teams, setTeams] = useState([]);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [teamMembers, setTeamMembers] = useState([]);
-  const [teamJoinRequests, setTeamJoinRequests] = useState([]);
-
-  // Fetch teams
-  const fetchTeams = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const teamsQuery = useQuery({
+    queryKey: ["teams"],
+    queryFn: async () => {
       const data = await getTeamsOfUser();
-      setTeams(data.teams);
-      if (data.teams.length > 0 && !selectedTeam) {
-        setSelectedTeam(data.teams[0]);
-      }
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
-  // Fetch team members
-  const fetchTeamMembers = useCallback(
-    async (teamId) => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getMembersOfTeam(teamId);
-        setTeamMembers(data.members);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
+      return data.teams;
     },
-    [user]
-  );
+    enabled: !!user
+  });
 
-  // Fetch team requests
-  const fetchTeamJoinRequests = useCallback(
-    async (teamId) => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await getJoinRequestsOfTeam(teamId);
-        setTeamJoinRequests(data.requests);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [user]
-  );
+  const teams = teamsQuery.data ?? [];
+  // Re-derive from the cached list on every render so an edit to the selected
+  // team (rename, etc.) shows up immediately without a manual re-select.
+  const selectedTeam = teams.find((t) => t.id === selectedTeamId) ?? null;
 
-  // Initial data fetch
+  const setSelectedTeam = useCallback((team) => {
+    setSelectedTeamId(team?.id ?? null);
+  }, []);
+
+  // Auto-select the first team once teams load, if none selected yet
   useEffect(() => {
-    fetchTeams();
-  }, [fetchTeams]);
-
-  // Fetch team members and requests when team changes
-  useEffect(() => {
-    if (selectedTeam) {
-      fetchTeamMembers(selectedTeam.id);
-      fetchTeamJoinRequests(selectedTeam.id);
+    if (teams.length > 0 && !selectedTeamId) {
+      setSelectedTeamId(teams[0].id);
     }
-  }, [selectedTeam, fetchTeamMembers, fetchTeamJoinRequests]);
+  }, [teams, selectedTeamId]);
+
+  const teamMembersQuery = useQuery({
+    queryKey: ["team-members", selectedTeamId],
+    queryFn: async () => {
+      const data = await getMembersOfTeam(selectedTeamId);
+      return data.members;
+    },
+    enabled: !!selectedTeamId
+  });
+
+  const teamJoinRequestsQuery = useQuery({
+    queryKey: ["team-join-requests", selectedTeamId],
+    queryFn: async () => {
+      const data = await getJoinRequestsOfTeam(selectedTeamId);
+      return data.requests;
+    },
+    enabled: !!selectedTeamId
+  });
+
+  const teamMembers = teamMembersQuery.data ?? [];
+  const teamJoinRequests = teamJoinRequestsQuery.data ?? [];
+
+  const loading = teamsQuery.isLoading || teamMembersQuery.isLoading || teamJoinRequestsQuery.isLoading;
+
+  // Real-time sync: another member's create/update/delete/membership change
+  useEffect(() => {
+    if (!socket || !connected) return;
+
+    const handleTeamChanged = (payload) => {
+      queryClient.invalidateQueries({ queryKey: ["teams"] });
+      if (payload?.team_id) {
+        queryClient.invalidateQueries({ queryKey: ["team-members", payload.team_id] });
+        queryClient.invalidateQueries({ queryKey: ["team-join-requests", payload.team_id] });
+      }
+    };
+
+    socket.on("team_changed", handleTeamChanged);
+
+    return () => {
+      socket.off("team_changed", handleTeamChanged);
+    };
+  }, [socket, connected, queryClient]);
+
+  const handleConflict = useCallback(
+    async (err, invalidateKeys) => {
+      if (err?.status === 409) {
+        toast.error(err.message || "This was updated by someone else. Refreshing...");
+        await Promise.all(
+          invalidateKeys.map((queryKey) => queryClient.invalidateQueries({ queryKey }))
+        );
+        return true;
+      }
+      return false;
+    },
+    [queryClient]
+  );
 
   // Team actions
   const handleCreateTeam = useCallback(
     async (teamData) => {
       try {
-        setLoading(true);
         const newTeam = await createTeam(teamData);
-        await fetchTeams();
+        await queryClient.invalidateQueries({ queryKey: ["teams"] });
         setSelectedTeam(newTeam);
         return newTeam;
       } catch (err) {
         setError(err);
-      } finally {
-        setLoading(false);
       }
     },
-    [fetchTeams]
+    [queryClient, setSelectedTeam]
   );
 
   const handleUpdateTeam = useCallback(
     async (teamId, updates) => {
       try {
-        setLoading(true);
-        await updateTeam(teamId, updates);
-        await fetchTeams();
+        const currentTeam = teams.find((t) => t.id === teamId);
+        await updateTeam(teamId, { ...updates, updated_at: currentTeam?.updated_at });
+        await queryClient.invalidateQueries({ queryKey: ["teams"] });
       } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
+        const isConflict = await handleConflict(err, [["teams"]]);
+        if (!isConflict) setError(err);
       }
     },
-    [fetchTeams]
+    [teams, queryClient, handleConflict]
   );
 
   const handleDeleteTeam = useCallback(
     async (teamId) => {
       try {
-        setLoading(true);
         await deleteTeam(teamId);
-        await fetchTeams();
+        await queryClient.invalidateQueries({ queryKey: ["teams"] });
       } catch (err) {
         setError(err);
-      } finally {
-        setLoading(false);
       }
     },
-    [fetchTeams]
+    [queryClient]
   );
 
   const handleJoinTeam = useCallback(
     async (code) => {
       try {
-        setLoading(true);
         await joinTeam(code);
-        await fetchTeams();
+        await queryClient.invalidateQueries({ queryKey: ["teams"] });
       } catch (err) {
         setError(err);
-      } finally {
-        setLoading(false);
       }
     },
-    [fetchTeams]
+    [queryClient]
   );
 
   const handleLeaveTeam = useCallback(
     async (teamId) => {
       try {
-        setLoading(true);
         await leaveTeam(teamId);
-        await fetchTeams();
+        await queryClient.invalidateQueries({ queryKey: ["teams"] });
       } catch (err) {
         setError(err);
-      } finally {
-        setLoading(false);
       }
     },
-    [fetchTeams]
+    [queryClient]
   );
 
   const handleRemoveTeamMembers = useCallback(
     async (teamId, data) => {
       try {
-        setLoading(true);
         await removeMembersFromTeam(teamId, data);
-        await fetchTeamMembers(teamId);
+        await queryClient.invalidateQueries({ queryKey: ["team-members", teamId] });
       } catch (err) {
         setError(err);
-      } finally {
-        setLoading(false);
       }
     },
-    [fetchTeamMembers]
+    [queryClient]
   );
 
   const handleUpdateTeamRoleOfMember = useCallback(
     async (teamId, data) => {
       try {
-        setLoading(true);
         await updateTeamRoleOfMember(teamId, data);
-        await fetchTeamMembers(teamId);
+        await queryClient.invalidateQueries({ queryKey: ["team-members", teamId] });
       } catch (err) {
         setError(err);
-      } finally {
-        setLoading(false);
       }
     },
-    [fetchTeamMembers]
+    [queryClient]
   );
 
   const handleApproveJoinRequest = useCallback(
     async (requestId) => {
       try {
-        setLoading(true);
         await approveJoinRequest(requestId);
-        await fetchTeamJoinRequests(selectedTeam.id);
+        await queryClient.invalidateQueries({ queryKey: ["team-join-requests", selectedTeam?.id] });
+        await queryClient.invalidateQueries({ queryKey: ["team-members", selectedTeam?.id] });
       } catch (err) {
         setError(err);
-      } finally {
-        setLoading(false);
       }
     },
-    [fetchTeamJoinRequests, selectedTeam]
+    [queryClient, selectedTeam]
   );
 
   const handleRejectJoinRequest = useCallback(
     async (requestId) => {
       try {
-        setLoading(true);
         await rejectJoinRequest(requestId);
-        await fetchTeamJoinRequests(selectedTeam.id);
+        await queryClient.invalidateQueries({ queryKey: ["team-join-requests", selectedTeam?.id] });
       } catch (err) {
         setError(err);
-      } finally {
-        setLoading(false);
       }
     },
-    [fetchTeamJoinRequests, selectedTeam]
+    [queryClient, selectedTeam]
   );
 
   const contextValue = {

@@ -1,0 +1,55 @@
+@startuml UC_Overview
+left to right direction
+skinparam packageStyle rectangle
+skinparam linetype polyline
+skinparam usecase {
+  BackgroundColor #FEFEFE
+  BorderColor #333333
+}
+
+actor "Guest" as Guest
+actor "User" as User
+actor "Admin" as Admin
+actor "Dịch vụ Email" as Mail <<external system>>
+
+Admin --|> User
+
+rectangle "Hệ thống Kanbask" {
+  usecase "Đăng ký tài khoản"        as UC_Register
+  usecase "Đăng nhập"                as UC01
+  usecase "Quên mật khẩu"            as UC_Forgot
+  usecase "Gửi email"                as UC_SendMail
+  usecase "Đăng xuất"                as UC_Logout
+
+  usecase "Quản lý Team"             as UC_Team
+  usecase "Quản lý Project"          as UC_Project
+  usecase "Quản lý nhiệm vụ"         as UC_Task
+  usecase "Giao tiếp"                as UC_Chat
+  usecase "Tìm kiếm"                 as UC_Search
+
+  usecase "Quản lý người dùng hệ thống"     as UC29
+  usecase "Quản lý Team/Project hệ thống"   as UC30
+  usecase "Xem thống kê tổng quan hệ thống" as UC31
+  usecase "Kiểm tra tình trạng hệ thống"    as UC32
+
+  UC_Forgot ..> UC_SendMail : <<include>>
+}
+
+Guest -- UC_Register
+Guest -- UC01
+Guest -- UC_Forgot
+
+User -- UC_Logout
+User -- UC_Team
+User -- UC_Project
+User -- UC_Task
+User -- UC_Chat
+User -- UC_Search
+
+Admin -- UC29
+Admin -- UC30
+Admin -- UC31
+Admin -- UC32
+
+UC_SendMail -- Mail
+@enduml

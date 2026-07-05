@@ -219,6 +219,14 @@ const countTasks = async () => {
   }
 };
 
+const getAllCreatedAtTimestamps = async () => {
+  try {
+    return await db("tasks").select("created_at");
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const getMaxTaskPositionOfProject = async (project_id) => {
   try {
     const [{ max }] = await db("tasks").where({ project_id }).max("position AS max");
@@ -261,6 +269,7 @@ export default {
   getManyTasksByProjectId,
   getAssignedTasksByUserId,
   countTasks,
+  getAllCreatedAtTimestamps,
   updateOneTaskById,
   deleteOneTaskById,
   getAssigneesOfTask,

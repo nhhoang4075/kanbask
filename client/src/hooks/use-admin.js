@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   getUsers,
@@ -25,178 +26,160 @@ export function useAdmin() {
   return useContext(AdminContext);
 }
 
+const DEFAULT_LIST_PARAMS = { limit: 10, offset: 0, q: "" };
+
 export function AdminProvider({ children }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
+  const [mutationError, setMutationError] = useState(null);
 
-  const [users, setUsers] = useState([]);
-  const [usersTotal, setUsersTotal] = useState(0);
+  const [usersParams, setUsersParams] = useState(DEFAULT_LIST_PARAMS);
+  const usersQuery = useQuery({
+    queryKey: ["admin-users", usersParams],
+    queryFn: () => getUsers(usersParams)
+  });
+  const fetchUsers = useCallback((params) => setUsersParams(params), []);
 
-  const [teams, setTeams] = useState([]);
-  const [teamsTotal, setTeamsTotal] = useState(0);
+  const [teamsParams, setTeamsParams] = useState(DEFAULT_LIST_PARAMS);
+  const teamsQuery = useQuery({
+    queryKey: ["admin-teams", teamsParams],
+    queryFn: () => getTeams(teamsParams)
+  });
+  const fetchTeams = useCallback((params) => setTeamsParams(params), []);
 
-  const [projects, setProjects] = useState([]);
-  const [projectsTotal, setProjectsTotal] = useState(0);
+  const [projectsParams, setProjectsParams] = useState(DEFAULT_LIST_PARAMS);
+  const projectsQuery = useQuery({
+    queryKey: ["admin-projects", projectsParams],
+    queryFn: () => getProjects(projectsParams)
+  });
+  const fetchProjects = useCallback((params) => setProjectsParams(params), []);
 
-  const [stats, setStats] = useState(null);
-  const [health, setHealth] = useState(null);
+  const statsQuery = useQuery({
+    queryKey: ["admin-stats"],
+    queryFn: async () => {
+      const data = await getStats();
+      return data.stats;
+    },
+    enabled: false
+  });
+  const fetchStats = useCallback(
+    () =>
+      queryClient.fetchQuery({
+        queryKey: ["admin-stats"],
+        queryFn: async () => {
+          const data = await getStats();
+          return data.stats;
+        }
+      }),
+    [queryClient]
+  );
 
-  const fetchUsers = useCallback(async (params) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getUsers(params);
-      setUsers(data.users);
-      setUsersTotal(data.total);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const healthQuery = useQuery({
+    queryKey: ["admin-health"],
+    queryFn: async () => {
+      const data = await getHealth();
+      return data.health;
+    },
+    enabled: false
+  });
+  const fetchHealth = useCallback(
+    () =>
+      queryClient.fetchQuery({
+        queryKey: ["admin-health"],
+        queryFn: async () => {
+          const data = await getHealth();
+          return data.health;
+        }
+      }),
+    [queryClient]
+  );
 
+  const loading =
+    usersQuery.isFetching ||
+    teamsQuery.isFetching ||
+    projectsQuery.isFetching ||
+    statsQuery.isFetching ||
+    healthQuery.isFetching;
+
+  const error =
+    usersQuery.error ||
+    teamsQuery.error ||
+    projectsQuery.error ||
+    statsQuery.error ||
+    healthQuery.error ||
+    mutationError;
+
+  // Admin mutations always re-pull the current list (invalidating by key
+  // prefix refreshes whatever page/search is currently on screen).
   const handleUpdateUserRole = useCallback(
-    async (userId, role, params) => {
+    async (userId, role) => {
       try {
-        setLoading(true);
         await updateUserRole(userId, role);
-        await fetchUsers(params);
+        await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
+        setMutationError(err);
       }
     },
-    [fetchUsers]
+    [queryClient]
   );
 
   const handleSetUserEnabled = useCallback(
-    async (userId, isEnabled, params) => {
+    async (userId, isEnabled) => {
       try {
-        setLoading(true);
         await setUserEnabled(userId, isEnabled);
-        await fetchUsers(params);
+        await queryClient.invalidateQueries({ queryKey: ["admin-users"] });
       } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
+        setMutationError(err);
       }
     },
-    [fetchUsers]
+    [queryClient]
   );
 
   const handleForceLogoutUser = useCallback(async (userId) => {
     try {
-      setLoading(true);
       await forceLogoutUser(userId);
     } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
+      setMutationError(err);
     }
   }, []);
 
   const handleResendPasswordReset = useCallback(async (userId) => {
     try {
-      setLoading(true);
       await resendPasswordReset(userId);
     } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchTeams = useCallback(async (params) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getTeams(params);
-      setTeams(data.teams);
-      setTeamsTotal(data.total);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
+      setMutationError(err);
     }
   }, []);
 
   const handleTransferTeamOwnership = useCallback(
-    async (teamId, userId, params) => {
+    async (teamId, userId) => {
       try {
-        setLoading(true);
         await transferTeamOwnership(teamId, userId);
-        await fetchTeams(params);
+        await queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
       } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
+        setMutationError(err);
       }
     },
-    [fetchTeams]
+    [queryClient]
   );
-
-  const fetchProjects = useCallback(async (params) => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getProjects(params);
-      setProjects(data.projects);
-      setProjectsTotal(data.total);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   const handleTransferProjectOwnership = useCallback(
-    async (projectId, userId, params) => {
+    async (projectId, userId) => {
       try {
-        setLoading(true);
         await transferProjectOwnership(projectId, userId);
-        await fetchProjects(params);
+        await queryClient.invalidateQueries({ queryKey: ["admin-projects"] });
       } catch (err) {
-        setError(err);
-      } finally {
-        setLoading(false);
+        setMutationError(err);
       }
     },
-    [fetchProjects]
+    [queryClient]
   );
-
-  const fetchStats = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getStats();
-      setStats(data.stats);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const fetchHealth = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await getHealth();
-      setHealth(data.health);
-    } catch (err) {
-      setError(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   const contextValue = {
     loading,
     error,
 
-    users,
-    usersTotal,
+    users: usersQuery.data?.users ?? [],
+    usersTotal: usersQuery.data?.total ?? 0,
     fetchUsers,
     getUserDetail,
     handleUpdateUserRole,
@@ -204,22 +187,22 @@ export function AdminProvider({ children }) {
     handleForceLogoutUser,
     handleResendPasswordReset,
 
-    teams,
-    teamsTotal,
+    teams: teamsQuery.data?.teams ?? [],
+    teamsTotal: teamsQuery.data?.total ?? 0,
     fetchTeams,
     getTeamDetail,
     handleTransferTeamOwnership,
 
-    projects,
-    projectsTotal,
+    projects: projectsQuery.data?.projects ?? [],
+    projectsTotal: projectsQuery.data?.total ?? 0,
     fetchProjects,
     getProjectDetail,
     handleTransferProjectOwnership,
 
-    stats,
+    stats: statsQuery.data ?? null,
     fetchStats,
 
-    health,
+    health: healthQuery.data ?? null,
     fetchHealth
   };
 

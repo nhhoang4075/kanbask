@@ -2,9 +2,13 @@ import { StatusCodes } from "http-status-codes";
 
 import messageModel from "../models/message-model.js";
 import conversationModel from "../models/conversation-model.js";
+import notificationModel from "../models/notification-model.js";
 import ApiError from "../../utils/api-error.js";
 import embeddingProvider from "../../config/embedding-provider.js";
+import { emitNewNotification } from "../../socket/notification-socket.js";
 import { sanitizeAllowedFields } from "../../utils/helper.js";
+
+const MENTION_PREVIEW_LENGTH = 120;
 
 const createOneMessage = async (data) => {
   try {
@@ -79,8 +83,38 @@ const updateOneMessageById = async (id, data, actorId) => {
   }
 };
 
+const notifyMentionedUsers = async (message, mentionedUserIds) => {
+  try {
+    const { conversation_id, sender_id, sender_full_name, content } = message;
+
+    const preview =
+      content.length > MENTION_PREVIEW_LENGTH
+        ? `${content.slice(0, MENTION_PREVIEW_LENGTH)}...`
+        : content;
+
+    const recipients = [...new Set(mentionedUserIds)].filter((id) => id !== sender_id);
+
+    for (const userId of recipients) {
+      const notificationId = await notificationModel.createOneNotification({
+        user_id: userId,
+        reference_type: "message",
+        reference_id: conversation_id,
+        title: "New mention",
+        content: `<@${sender_full_name}> mentioned you: "${preview}"`
+      });
+
+      const notification = await notificationModel.getOneNotificationById(notificationId);
+
+      emitNewNotification(userId, notification);
+    }
+  } catch (err) {
+    throw err;
+  }
+};
+
 export default {
   createOneMessage,
   getManyMessagesByConversationId,
-  updateOneMessageById
+  updateOneMessageById,
+  notifyMentionedUsers
 };

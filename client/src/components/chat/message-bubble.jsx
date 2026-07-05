@@ -17,7 +17,8 @@ function messageBubbleStyle(curIdx, msgGroupLength, isMe) {
 }
 
 export default function MessageBubble({ msgGroup, isMe }) {
-  const { highlightId } = useChat();
+  const { highlightId, participants } = useChat();
+  const mentionNames = participants.map((p) => p.full_name);
 
   return (
     <div className={cn("flex justify-start gap-x-3 my-4", isMe ? "flex-row-reverse" : "flex-row")}>
@@ -54,7 +55,7 @@ export default function MessageBubble({ msgGroup, isMe }) {
                 )}
               >
                 <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                  {linkifyMessage(msg.content)}
+                  {linkifyMessage(msg.content, mentionNames)}
                 </p>
               </div>
               <span

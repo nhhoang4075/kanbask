@@ -2,7 +2,7 @@ import conversationService from "../api/services/conversation-service.js";
 import messageService from "../api/services/message-service.js";
 
 const registerMessageHandlers = (io, socket) => {
-  socket.on("send_message", async ({ conversation_id, content }) => {
+  socket.on("send_message", async ({ conversation_id, content, mentioned_user_ids = [] }) => {
     try {
       const { id: sender_id } = socket.data.user;
 
@@ -59,6 +59,19 @@ const registerMessageHandlers = (io, socket) => {
           io.to(`user_${p.id}`).emit("update_conversation", conversation);
         })
       );
+
+      if (mentioned_user_ids.length) {
+        // Only notify ids that are actually participants of this
+        // conversation — the mention list comes from the client, so this
+        // guards against a spoofed/stale id being used to notify someone
+        // who was never in this chat.
+        const participantIds = new Set(participants.map((p) => p.id));
+        const validMentions = mentioned_user_ids.filter((id) => participantIds.has(id));
+
+        if (validMentions.length) {
+          await messageService.notifyMentionedUsers(message, validMentions);
+        }
+      }
     } catch (error) {
       socket.emit("error", { message: error.message });
     }

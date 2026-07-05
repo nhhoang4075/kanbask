@@ -1,4 +1,4 @@
-import { Users, FolderKanban, SquareCheckBig } from "lucide-react";
+import { Users, FolderKanban, SquareCheckBig, AtSign } from "lucide-react";
 
 import { useNotification } from "@/hooks/use-notification";
 import { cn, formatTimestampHour } from "@/lib/utils";
@@ -34,12 +34,14 @@ export default function NotificationList({ group }) {
                 "p-3 rounded-md",
                 notification.reference_type === "team" && "bg-blue-green text-white",
                 notification.reference_type === "project" && "bg-prussian-blue text-white",
-                notification.reference_type === "task" && "bg-mustard text-prussian-blue"
+                notification.reference_type === "task" && "bg-mustard text-prussian-blue",
+                notification.reference_type === "message" && "bg-sky-blue text-prussian-blue"
               )}
             >
               {notification.reference_type === "team" && <Users className="w-5 h-5" />}
               {notification.reference_type === "project" && <FolderKanban className="w-5 h-5" />}
               {notification.reference_type === "task" && <SquareCheckBig className="w-5 h-5" />}
+              {notification.reference_type === "message" && <AtSign className="w-5 h-5" />}
             </div>
             <div className="space-y-1">
               <p className="text-sm font-medium truncate">{notification.title}</p>

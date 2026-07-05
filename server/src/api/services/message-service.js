@@ -56,6 +56,32 @@ const getManyMessagesByConversationId = async (conversationId, actorId) => {
   }
 };
 
+const getOneMessageById = async (id, actorId) => {
+  try {
+    const message = await messageModel.getOneMessageById(id);
+
+    if (!message) {
+      throw new ApiError(StatusCodes.NOT_FOUND, "Message not found");
+    }
+
+    const isConversationParticipant = await conversationModel.isUserInConversation(
+      message.conversation_id,
+      actorId
+    );
+
+    if (!isConversationParticipant) {
+      throw new ApiError(
+        StatusCodes.FORBIDDEN,
+        "Only participants of conversation can access this"
+      );
+    }
+
+    return message;
+  } catch (err) {
+    throw err;
+  }
+};
+
 const updateOneMessageById = async (id, data, actorId) => {
   try {
     const isMessageSender = await messageModel.isUserMessageSender(id, actorId);
@@ -85,7 +111,7 @@ const updateOneMessageById = async (id, data, actorId) => {
 
 const notifyMentionedUsers = async (message, mentionedUserIds) => {
   try {
-    const { conversation_id, sender_id, sender_full_name, content } = message;
+    const { id: message_id, sender_id, sender_full_name, content } = message;
 
     const preview =
       content.length > MENTION_PREVIEW_LENGTH
@@ -98,7 +124,7 @@ const notifyMentionedUsers = async (message, mentionedUserIds) => {
       const notificationId = await notificationModel.createOneNotification({
         user_id: userId,
         reference_type: "message",
-        reference_id: conversation_id,
+        reference_id: message_id,
         title: "New mention",
         content: `<@${sender_full_name}> mentioned you: "${preview}"`
       });
@@ -115,6 +141,7 @@ const notifyMentionedUsers = async (message, mentionedUserIds) => {
 export default {
   createOneMessage,
   getManyMessagesByConversationId,
+  getOneMessageById,
   updateOneMessageById,
   notifyMentionedUsers
 };

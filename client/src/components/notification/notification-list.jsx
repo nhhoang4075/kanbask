@@ -1,6 +1,11 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import { Users, FolderKanban, SquareCheckBig, AtSign } from "lucide-react";
 
 import { useNotification } from "@/hooks/use-notification";
+import { useChat } from "@/hooks/use-chat";
+import { getMessageById } from "@/actions/message-actions";
 import { cn, formatTimestampHour } from "@/lib/utils";
 
 function highlightUser(content) {
@@ -11,7 +16,26 @@ function highlightUser(content) {
 }
 
 export default function NotificationList({ group }) {
-  const { markAsRead } = useNotification();
+  const { markAsRead, setOpen } = useNotification();
+  const { setScrollTargetId } = useChat();
+  const router = useRouter();
+
+  const handleClick = async (notification) => {
+    markAsRead(notification.id);
+
+    if (notification.reference_type === "message") {
+      try {
+        const { message } = await getMessageById(notification.reference_id);
+
+        router.push(`/app/message/${message.conversation_id}`);
+        setScrollTargetId(message.id);
+        setOpen(false);
+      } catch {
+        // The message (or the conversation it was in) may have been
+        // deleted since the notification was created — nothing to jump to.
+      }
+    }
+  };
 
   return (
     <div key={group.date} className="space-y-2 mb-2">
@@ -24,7 +48,7 @@ export default function NotificationList({ group }) {
           <div
             key={notification.id}
             className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 px-4 py-2 hover:bg-prussian-blue/10 transition duration-200 ease-in-out"
-            onClick={() => markAsRead(notification.id)}
+            onClick={() => handleClick(notification)}
             tabIndex={0}
             role="button"
             aria-label={`Mark as read: ${notification.title}`}

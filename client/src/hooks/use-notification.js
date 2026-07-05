@@ -18,6 +18,7 @@ export function useNotification() {
 }
 
 export function NotificationProvider({ children }) {
+  const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [filter, setFilter] = useState("all");
@@ -127,6 +128,8 @@ export function NotificationProvider({ children }) {
   }, [socket, socketConnected]);
 
   const contextValue = {
+    open,
+    setOpen,
     notifications,
     unreadCount,
     filterOptions,

@@ -91,6 +91,14 @@ const countUsers = async (q) => {
   }
 };
 
+const getAllCreatedAtTimestamps = async () => {
+  try {
+    return await db("users").select("created_at");
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const updateOneUserById = async (id, updateData) => {
   try {
     const finalUpdate = {
@@ -133,6 +141,7 @@ export default {
   getAllUsers,
   getManyUsersPaginated,
   countUsers,
+  getAllCreatedAtTimestamps,
   updateOneUserById,
   deleteOneUserById
 };

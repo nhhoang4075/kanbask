@@ -127,6 +127,14 @@ const countProjects = async (q) => {
   }
 };
 
+const getAllCreatedAtTimestamps = async () => {
+  try {
+    return await db("projects").select("created_at");
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const isUserInProject = async (project_id, user_id) => {
   try {
     const [record] = await db("project_members")
@@ -247,6 +255,7 @@ export default {
   getManyProjectsByUserId,
   getManyProjectsPaginated,
   countProjects,
+  getAllCreatedAtTimestamps,
   isUserInProject,
   updateOneProjectById,
   deleteOneProjectById,

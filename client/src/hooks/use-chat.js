@@ -29,6 +29,9 @@ export function ChatProvider({ children }) {
   const [error, setError] = useState(null);
 
   const selectedIdRef = useRef(selectedConversationId);
+  // Tracks which not-yet-cached conversation id we've already retried a fetch
+  // for, so the URL-matching effect below retries once instead of looping.
+  const attemptedFetchIdRef = useRef(null);
 
   // Fetch conversations
   const fetchConversations = useCallback(async () => {
@@ -52,16 +55,28 @@ export function ChatProvider({ children }) {
     if (!m) return;
 
     const cid = parseInt(m[1]);
+
     if (!conversations.some((c) => c.id === cid)) {
+      // A conversation created moments ago (e.g. starting a DM from search)
+      // may not be in our locally-cached list yet — refetch once before
+      // giving up, instead of immediately bouncing the user away.
+      if (attemptedFetchIdRef.current !== cid) {
+        attemptedFetchIdRef.current = cid;
+        fetchConversations();
+        return;
+      }
+
       router.push("/app/message");
       return;
     }
+
+    attemptedFetchIdRef.current = null;
 
     if (cid !== selectedConversationId) {
       setSelectedConversationId(cid);
       setHighlightId(null);
     }
-  }, [pathname, conversations]);
+  }, [pathname, conversations, fetchConversations, router, selectedConversationId]);
 
   // Handle conversation updates
   useEffect(() => {
@@ -106,11 +121,21 @@ export function ChatProvider({ children }) {
     };
   }, [socket, socketConnected, sessionLoading, selectedConversationId]);
 
-  const changeConversation = (conversationId) => {
-    if (conversationId && conversationId !== selectedConversationId) {
+  const changeConversation = useCallback(
+    async (conversationId) => {
+      if (!conversationId || conversationId === selectedConversationId) return;
+
+      // A conversation just created via search (starting a new DM) won't be
+      // in our cached list yet — refresh it before navigating so the
+      // URL-matching effect finds it on the first try.
+      if (!conversations.some((c) => c.id === conversationId)) {
+        await fetchConversations();
+      }
+
       router.push(`/app/message/${conversationId}`);
-    }
-  };
+    },
+    [conversations, selectedConversationId, fetchConversations, router]
+  );
 
   const sendMessage = useCallback(
     (content) => {

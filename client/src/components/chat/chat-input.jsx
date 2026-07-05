@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import { Send, Paperclip } from "lucide-react";
 
 import { Textarea } from "@/components/ui/textarea";
@@ -10,7 +11,23 @@ import { useChat } from "@/hooks/use-chat";
 export default function ChatInput() {
   const [message, setMessage] = useState("");
   const textareaRef = useRef(null);
-  const { sendMessage } = useChat();
+  const { sendMessage, sendTyping, stopTyping } = useChat();
+
+  // Re-announce "typing" at most once every 2s while the user keeps typing
+  // (leading-edge only), and announce "stopped typing" 2s after they pause.
+  const throttledSendTyping = useDebouncedCallback(sendTyping, 2000, {
+    leading: true,
+    trailing: false
+  });
+  const debouncedStopTyping = useDebouncedCallback(stopTyping, 2000);
+
+  useEffect(() => {
+    return () => {
+      throttledSendTyping.cancel();
+      debouncedStopTyping.cancel();
+      stopTyping();
+    };
+  }, []);
 
   const handleChange = (e) => {
     setMessage(e.target.value);
@@ -18,11 +35,23 @@ export default function ChatInput() {
       textareaRef.current.style.height = "auto";
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
     }
+
+    if (e.target.value.trim()) {
+      throttledSendTyping();
+      debouncedStopTyping();
+    } else {
+      throttledSendTyping.cancel();
+      debouncedStopTyping.cancel();
+      stopTyping();
+    }
   };
 
   const submitMessage = () => {
     const text = message.trim();
     if (!text) return;
+    throttledSendTyping.cancel();
+    debouncedStopTyping.cancel();
+    stopTyping();
     sendMessage(text);
     setMessage("");
     if (textareaRef.current) {

@@ -8,17 +8,48 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useChat } from "@/hooks/use-chat";
 import { useSocket } from "@/hooks/use-socket";
+import { useSession } from "@/hooks/use-session";
 import { getInitials, pickAvatarColor } from "@/lib/user-utils";
 import { cn, capitalCase } from "@/lib/utils";
 
+// Group chats don't carry a participants list, so names for anyone other
+// than the current typist are best-effort, resolved from senders seen in
+// the already-loaded message history.
+function useTypingText(currConversation, typingUserIds, messages, currentUserId) {
+  return useMemo(() => {
+    if (!currConversation) return null;
+
+    const typistIds = typingUserIds.filter((id) => id !== currentUserId);
+    if (!typistIds.length) return null;
+
+    if (currConversation.type === "direct") {
+      return typistIds.includes(currConversation.direct_user_id)
+        ? `${currConversation.title} is typing...`
+        : null;
+    }
+
+    const nameById = new Map();
+    messages.forEach((msg) => nameById.set(msg.sender_id, msg.sender_full_name));
+
+    const names = typistIds.map((id) => nameById.get(id) || "Someone");
+
+    if (names.length === 1) return `${names[0]} is typing...`;
+    if (names.length === 2) return `${names[0]} and ${names[1]} are typing...`;
+    return `${names[0]} and ${names.length - 1} others are typing...`;
+  }, [currConversation, typingUserIds, messages, currentUserId]);
+}
+
 export default function ChatHeader() {
-  const { conversations, selectedConversationId } = useChat();
+  const { conversations, selectedConversationId, typingUserIds, messages } = useChat();
   const { onlineUserIds } = useSocket();
+  const { user } = useSession();
 
   const currConversation = useMemo(
     () => conversations.find((c) => c.id === selectedConversationId),
     [conversations, selectedConversationId]
   );
+
+  const typingText = useTypingText(currConversation, typingUserIds, messages, user?.id);
 
   if (!currConversation) {
     return;
@@ -56,33 +87,37 @@ export default function ChatHeader() {
               ? "Team Chat"
               : "Project Chat")}
         </div>
-        <div className="flex items-center gap-2">
-          {currConversation.type !== "direct" && (
-            <Badge
-              className={cn(
-                "flex-none text-[10px] rounded-sm h-4",
-                currConversation.type === "team" ? "bg-red-400" : "bg-blue-400"
-              )}
-            >
-              {capitalCase(currConversation.type)}
-            </Badge>
-          )}
-          {currConversation.type !== "direct" && (
-            <TooltipProvider>
-              <Tooltip delayDuration={500}>
-                <TooltipTrigger asChild>
-                  <div className="flex items-center px-2 py-1 gap-1 text-xs text-gray-500 rounded-sm hover:bg-prussian-blue/10 hover:cursor-pointer transition duration-200 ease-in-out">
-                    <UsersRound className="h-3 w-3" />
-                    <span>{currConversation.participant_count}</span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" className="bg-prussian-blue text-white">
-                  <p>{`${currConversation.participant_count} members`}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-        </div>
+        {typingText ? (
+          <p className="text-xs text-blue-green italic animate-pulse truncate">{typingText}</p>
+        ) : (
+          <div className="flex items-center gap-2">
+            {currConversation.type !== "direct" && (
+              <Badge
+                className={cn(
+                  "flex-none text-[10px] rounded-sm h-4",
+                  currConversation.type === "team" ? "bg-red-400" : "bg-blue-400"
+                )}
+              >
+                {capitalCase(currConversation.type)}
+              </Badge>
+            )}
+            {currConversation.type !== "direct" && (
+              <TooltipProvider>
+                <Tooltip delayDuration={500}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center px-2 py-1 gap-1 text-xs text-gray-500 rounded-sm hover:bg-prussian-blue/10 hover:cursor-pointer transition duration-200 ease-in-out">
+                      <UsersRound className="h-3 w-3" />
+                      <span>{currConversation.participant_count}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="bg-prussian-blue text-white">
+                    <p>{`${currConversation.participant_count} members`}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

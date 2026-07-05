@@ -18,6 +18,20 @@ const getMessagesOfConversation = async (req, res, next) => {
   }
 };
 
+const getOneMessageById = async (req, res, next) => {
+  try {
+    const message = await messageService.getOneMessageById(req.params.id, req.user.id);
+
+    res.status(StatusCodes.OK).json({
+      success: true,
+      data: { message }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
-  getMessagesOfConversation
+  getMessagesOfConversation,
+  getOneMessageById
 };

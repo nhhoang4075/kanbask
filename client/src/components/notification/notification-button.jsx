@@ -13,12 +13,12 @@ import { cn } from "@/lib/utils";
 
 export default function NotificationButton() {
   const buttonRef = useRef(null);
-  const { unreadCount } = useNotification();
+  const { unreadCount, open, setOpen } = useNotification();
   const { open: sidebarOpen } = useSidebar();
 
   return (
     <div className="relative">
-      <Popover>
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <SidebarMenuButton
             ref={buttonRef}

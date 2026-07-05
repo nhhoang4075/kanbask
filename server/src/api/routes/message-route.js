@@ -11,6 +11,8 @@ const messageRoute = (router) => {
       messageValidation.validateConversationIdQuery,
       messageController.getMessagesOfConversation
     );
+
+  router.route("/messages/:id").get(messageController.getOneMessageById);
 };
 
 export default messageRoute;

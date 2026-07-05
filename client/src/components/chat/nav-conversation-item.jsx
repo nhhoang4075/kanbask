@@ -15,9 +15,11 @@ export default function NavConversationItem({ conversation }) {
   const selected = conversation.id === selectedConversationId;
 
   // No message history is loaded for conversations other than the open one,
-  // so group-chat typists can't be resolved to a name here (unlike the chat
+  // so group-chat typists can't be resolved to names here (unlike the chat
   // header) — only direct conversations can, via their already-known title.
-  const isTyping = (typingByConversation[conversation.id] ?? []).some((id) => id !== user?.id);
+  const typistCount = (typingByConversation[conversation.id] ?? []).filter(
+    (id) => id !== user?.id
+  ).length;
 
   return (
     <li
@@ -82,9 +84,13 @@ export default function NavConversationItem({ conversation }) {
             </Badge>
           )}
         </div>
-        {isTyping ? (
+        {typistCount > 0 ? (
           <p className="text-left text-xs text-blue-green italic animate-pulse truncate">
-            {conversation.type === "direct" ? `${conversation.title} is typing...` : "Someone is typing..."}
+            {conversation.type === "direct"
+              ? `${conversation.title} is typing...`
+              : typistCount === 1
+              ? "Someone is typing..."
+              : `${typistCount} people are typing...`}
           </p>
         ) : (
           <p

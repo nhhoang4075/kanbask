@@ -5,7 +5,8 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
-  GetObjectCommand
+  GetObjectCommand,
+  HeadBucketCommand
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { StatusCodes } from "http-status-codes";
@@ -89,9 +90,14 @@ const generatePublicUrl = (storageKey) => {
   return `${r2PublicUrl}/${storageKey}`;
 };
 
+const checkConnection = async () => {
+  await s3.send(new HeadBucketCommand({ Bucket: r2Bucket }));
+};
+
 export default {
   uploadToStorage,
   deleteFromStorage,
   generateSignedUrl,
-  generatePublicUrl
+  generatePublicUrl,
+  checkConnection
 };

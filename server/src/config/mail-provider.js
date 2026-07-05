@@ -38,4 +38,21 @@ const sendMail = async (options) => {
   await transporter.sendMail(mailOptions);
 };
 
-export default { sendMail };
+const checkConnection = async () => {
+  const transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT || "587", 10),
+    secure: process.env.SMTP_SECURE === "true",
+    auth: {
+      user: process.env.SMTP_AUTH_USER,
+      pass: process.env.SMTP_AUTH_PASSWORD
+    },
+    tls: {
+      rejectUnauthorized: process.env.NODE_ENV === "production"
+    }
+  });
+
+  await transporter.verify();
+};
+
+export default { sendMail, checkConnection };

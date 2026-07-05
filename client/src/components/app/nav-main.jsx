@@ -7,7 +7,8 @@ import {
   MessageSquareDot,
   Calendar1,
   SquareCheckBig,
-  UsersIcon
+  UsersIcon,
+  ShieldIcon
 } from "lucide-react";
 
 import {
@@ -16,6 +17,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from "@/components/ui/sidebar";
+import { useSession } from "@/hooks/use-session";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -43,16 +45,25 @@ const items = [
     title: "Team",
     url: "/app/team",
     icon: UsersIcon
+  },
+  {
+    title: "Admin",
+    url: "/app/admin",
+    icon: ShieldIcon,
+    adminOnly: true
   }
 ];
 
 export default function NavMain() {
   const pathname = usePathname();
+  const { user } = useSession();
+
+  const visibleItems = items.filter((item) => !item.adminOnly || user?.role === "admin");
 
   return (
     <SidebarGroup>
       <SidebarMenu>
-        {items.map((item) => {
+        {visibleItems.map((item) => {
           const isActive =
             item.url === "/app" ? pathname === item.url : pathname.includes(item.url);
 

@@ -11,6 +11,7 @@ import taskRoute from "./task-route.js";
 import taskCommentRoute from "./task-comment-route.js";
 import taskActivityLogRoute from "./task-activity-log-route.js";
 import searchRoute from "./search-route.js";
+import adminRoute from "./admin-route.js";
 
 const router = Router();
 
@@ -26,6 +27,7 @@ function apiRouter() {
   taskCommentRoute(router);
   taskActivityLogRoute(router);
   searchRoute(router);
+  adminRoute(router);
 
   taskRoute(router);
   return router;

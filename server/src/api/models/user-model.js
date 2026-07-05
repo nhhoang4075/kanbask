@@ -57,6 +57,40 @@ const getAllUsers = async () => {
   }
 };
 
+const getManyUsersPaginated = async (q, { limit, offset }) => {
+  try {
+    const query = db("users").select("*").orderBy("created_at", "desc").limit(limit).offset(offset);
+
+    if (q) {
+      query.where((builder) => {
+        builder.whereILike("full_name", `%${q}%`).orWhereILike("email", `%${q}%`);
+      });
+    }
+
+    return await query;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const countUsers = async (q) => {
+  try {
+    const query = db("users");
+
+    if (q) {
+      query.where((builder) => {
+        builder.whereILike("full_name", `%${q}%`).orWhereILike("email", `%${q}%`);
+      });
+    }
+
+    const [{ count }] = await query.count("id AS count");
+
+    return parseInt(count, 10);
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
 const updateOneUserById = async (id, updateData) => {
   try {
     const finalUpdate = {
@@ -97,6 +131,8 @@ export default {
   getOneUserByEmail,
   getOneUserByPasswordResetCode,
   getAllUsers,
+  getManyUsersPaginated,
+  countUsers,
   updateOneUserById,
   deleteOneUserById
 };

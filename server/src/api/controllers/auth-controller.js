@@ -33,7 +33,8 @@ const login = async (req, res, next) => {
       id: user.id,
       email: user.email,
       role: user.role,
-      email_verified: user.email_verified
+      email_verified: user.email_verified,
+      token_version: user.token_version
     };
 
     const accessToken = jwtProvider.generateToken(
@@ -106,11 +107,17 @@ const refreshSession = async (req, res, next) => {
       throw new ApiError(StatusCodes.UNAUTHORIZED, "Invalid refresh token");
     }
 
+    const user = await authService.refreshAccessToken(
+      decodedRefreshToken.id,
+      decodedRefreshToken.token_version
+    );
+
     const payload = {
-      id: decodedRefreshToken.id,
-      email: decodedRefreshToken.email,
-      role: decodedRefreshToken.role,
-      email_verified: decodedRefreshToken.email_verified
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      email_verified: user.email_verified,
+      token_version: user.token_version
     };
 
     const accessToken = jwtProvider.generateToken(payload, process.env.ACCESS_TOKEN_SECRET, "1h");

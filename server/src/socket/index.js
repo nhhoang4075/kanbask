@@ -5,6 +5,7 @@ import userModel from "../api/models/user-model.js";
 import registerConversationHandlers from "./conversation-socket.js";
 import registerMessageHandlers from "./message-socket.js";
 import registerTaskCommentHandlers from "./task-comment-socket.js";
+import registerTypingHandlers from "./typing-socket.js";
 
 let ioInstance = null;
 
@@ -75,9 +76,17 @@ const setupSocket = (server) => {
     registerConversationHandlers(io, socket);
     registerMessageHandlers(io, socket);
     registerTaskCommentHandlers(io, socket);
+    registerTypingHandlers(io, socket);
 
     socket.on("disconnect", () => {
       if (!userId) return;
+
+      const currentConversationId = socket.data.conversation_id;
+      if (currentConversationId) {
+        socket
+          .to(`conversation_${currentConversationId}`)
+          .emit("user_stopped_typing", { conversation_id: currentConversationId, user_id: userId });
+      }
 
       const sockets = connectionsByUser.get(userId);
       if (!sockets) return;

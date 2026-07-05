@@ -61,9 +61,9 @@ const login = async (data) => {
       throw new ApiError(StatusCodes.FORBIDDEN, "This account has been disabled");
     }
 
-    await userModel.updateOneUserById(existedUser.id, { is_active: true });
-
-    const user = await userModel.getOneUserById(existedUser.id);
+    // is_active/last_active are now driven by real Socket.IO presence
+    // (server/src/socket/index.js), not by login/logout requests.
+    const user = existedUser;
     return sanitizeUser(user);
   } catch (err) {
     throw err;
@@ -110,10 +110,8 @@ const logout = async (userId) => {
       throw new ApiError(StatusCodes.NOT_FOUND, `User with id '${userId}' not found`);
     }
 
-    await userModel.updateOneUserById(user.id, {
-      is_active: false,
-      last_active: new Date().toISOString()
-    });
+    // is_active/last_active are now driven by real Socket.IO presence
+    // (server/src/socket/index.js), not by login/logout requests.
 
     return userId;
   } catch (err) {

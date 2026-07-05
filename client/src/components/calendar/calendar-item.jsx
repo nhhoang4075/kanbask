@@ -27,7 +27,7 @@ export default function CalendarItem({ info }) {
         <TooltipContent
           side="bottom" // Bạn có thể thay đổi position: top, bottom, left, right...
           sideOffset={0} // Khoảng cách giữa trigger và content
-          className="max-w-[200px] bg-ghost-white shadow-lg rounded-lg border"
+          className="max-w-[200px] bg-ghost-white rounded-lg border"
         >
           <div className="space-y-2">
             <div className="text-sm font-semibold text-black">{title}</div>
